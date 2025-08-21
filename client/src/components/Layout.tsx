@@ -1,0 +1,180 @@
+import React, { useState } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { logout } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
+import { Menu, Home, Book, User, LogOut, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+
+interface LayoutProps {
+  children: React.ReactNode;
+  activeTab: 'home' | 'ebooks' | 'profile';
+  onTabChange: (tab: 'home' | 'ebooks' | 'profile') => void;
+}
+
+export default function Layout({ children, activeTab, onTabChange }: LayoutProps) {
+  const { userProfile } = useAuth();
+  const { toast } = useToast();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been logged out of your account.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error signing out",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    }
+    setIsDrawerOpen(false);
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const navItems = [
+    { id: 'home' as const, label: 'Home', icon: Home },
+    { id: 'ebooks' as const, label: 'eBooks', icon: Book },
+    { id: 'profile' as const, label: 'Profile', icon: User },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-40 border-b border-gray-100">
+        <div className="flex items-center justify-between px-4 h-16">
+          {/* Menu Button */}
+          <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" data-testid="button-menu">
+                <Menu className="h-6 w-6 text-gray-700" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 p-0">
+              <div className="flex flex-col h-full">
+                {/* Drawer Header */}
+                <div className="p-6 border-b border-gray-100">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-lg font-semibold" data-testid="text-user-initials">
+                        {getInitials(userProfile?.name)}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-gray-900" data-testid="text-user-name">
+                        {userProfile?.name || 'User'}
+                      </h3>
+                      <p className="text-sm text-gray-600" data-testid="text-user-email">
+                        {userProfile?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Drawer Menu Items */}
+                <nav className="flex-1 p-4 space-y-2">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start space-x-3 h-12"
+                    onClick={() => {
+                      onTabChange('home');
+                      setIsDrawerOpen(false);
+                    }}
+                    data-testid="link-home"
+                  >
+                    <Home className="h-5 w-5 text-gray-600" />
+                    <span className="text-gray-700">Home</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start space-x-3 h-12"
+                    onClick={() => {
+                      onTabChange('ebooks');
+                      setIsDrawerOpen(false);
+                    }}
+                    data-testid="link-ebooks"
+                  >
+                    <Book className="h-5 w-5 text-gray-600" />
+                    <span className="text-gray-700">My eBooks</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start space-x-3 h-12"
+                    data-testid="link-bookmarks"
+                  >
+                    <Book className="h-5 w-5 text-gray-600" />
+                    <span className="text-gray-700">Bookmarks</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start space-x-3 h-12"
+                    data-testid="link-settings"
+                  >
+                    <User className="h-5 w-5 text-gray-600" />
+                    <span className="text-gray-700">Settings</span>
+                  </Button>
+                </nav>
+
+                {/* Logout Button */}
+                <div className="p-4 border-t border-gray-200">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start space-x-3 h-12 text-red-600 hover:bg-red-50"
+                    onClick={handleLogout}
+                    data-testid="button-logout"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>Sign Out</span>
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* App Title */}
+          <h1 className="text-xl font-bold text-gray-900" data-testid="text-app-title">Teatrinho</h1>
+
+          {/* User Avatar */}
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-semibold" data-testid="text-header-initials">
+                {getInitials(userProfile?.name)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="pt-16 pb-20 min-h-screen">
+        {children}
+      </main>
+
+      {/* Fixed Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
+        <div className="flex items-center justify-around h-18 px-4">
+          {navItems.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              className={`flex flex-col items-center space-y-1 py-2 px-4 transition-colors ${
+                activeTab === id ? 'text-primary-500' : 'text-gray-400'
+              }`}
+              onClick={() => onTabChange(id)}
+              data-testid={`tab-${id}`}
+            >
+              <Icon className="h-6 w-6" />
+              <span className="text-xs font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
+      </nav>
+    </div>
+  );
+}

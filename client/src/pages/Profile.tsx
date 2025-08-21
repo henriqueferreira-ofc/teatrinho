@@ -1,0 +1,306 @@
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/contexts/AuthContext';
+import { updateUserProfile } from '@/lib/firebase';
+import { updateProfileSchema, type UpdateProfileForm } from '@shared/schema';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Eye, EyeOff } from 'lucide-react';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+export default function Profile() {
+  const { userProfile, refreshUserProfile } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<UpdateProfileForm>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {
+      name: userProfile?.name || '',
+      currentPassword: '',
+      newPassword: '',
+    },
+  });
+
+  // Update form when userProfile changes
+  React.useEffect(() => {
+    if (userProfile) {
+      form.reset({
+        name: userProfile.name,
+        currentPassword: '',
+        newPassword: '',
+      });
+    }
+  }, [userProfile, form]);
+
+  const onSubmit = async (data: UpdateProfileForm) => {
+    setIsLoading(true);
+    try {
+      await updateUserProfile({
+        name: data.name,
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
+      
+      await refreshUserProfile();
+      setIsEditing(false);
+      form.reset({
+        name: data.name,
+        currentPassword: '',
+        newPassword: '',
+      });
+      
+      toast({
+        title: "Profile updated successfully",
+        description: "Your changes have been saved.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Update failed",
+        description: error.message || "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    form.reset({
+      name: userProfile?.name || '',
+      currentPassword: '',
+      newPassword: '',
+    });
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Unknown';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+    });
+  };
+
+  return (
+    <div className="p-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Profile Header */}
+        <Card className="mb-6 shadow-material">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4 mb-6">
+              <div className="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-2xl font-bold" data-testid="text-profile-initials">
+                  {getInitials(userProfile?.name)}
+                </span>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-900" data-testid="text-profile-name">
+                  {userProfile?.name || 'User'}
+                </h2>
+                <p className="text-gray-600" data-testid="text-profile-email">
+                  {userProfile?.email}
+                </p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <Badge variant="secondary" className="bg-primary-100 text-primary-700" data-testid="badge-provider">
+                    {userProfile?.provider === 'google' ? 'Google' : 'Email'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <Button
+              className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600"
+              onClick={() => setIsEditing(!isEditing)}
+              data-testid="button-edit-profile"
+            >
+              {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Edit Profile Form */}
+        {isEditing && (
+          <Card className="mb-6 shadow-material">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-6" data-testid="text-edit-title">Edit Profile</h3>
+              
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Name Input */}
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-gray-700">Full name</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            placeholder="Enter your full name"
+                            className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
+                            data-testid="input-edit-name"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Current Password (only for email users) */}
+                  {userProfile?.provider === 'email' && (
+                    <FormField
+                      control={form.control}
+                      name="currentPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700">Current password</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={showCurrentPassword ? 'text' : 'password'}
+                                placeholder="Enter current password to change it"
+                                className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
+                                data-testid="input-current-password"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                data-testid="button-toggle-current-password"
+                              >
+                                {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {/* New Password (only for email users) */}
+                  {userProfile?.provider === 'email' && (
+                    <FormField
+                      control={form.control}
+                      name="newPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-700">New password (optional)</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={showNewPassword ? 'text' : 'password'}
+                                placeholder="Enter new password"
+                                className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
+                                data-testid="input-new-password"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                data-testid="button-toggle-new-password"
+                              >
+                                {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50"
+                      onClick={handleCancelEdit}
+                      data-testid="button-cancel-edit"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      className="flex-1 bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600"
+                      disabled={isLoading}
+                      data-testid="button-save-changes"
+                    >
+                      {isLoading ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Account Information */}
+        <Card className="mb-6 shadow-material">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4" data-testid="text-account-title">Account Information</h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                <span className="text-gray-600">User ID</span>
+                <span className="text-gray-900 font-mono text-sm" data-testid="text-user-id">
+                  {userProfile?.id?.slice(0, 12)}...
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                <span className="text-gray-600">Email</span>
+                <span className="text-gray-900" data-testid="text-account-email">
+                  {userProfile?.email}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-3 border-b border-gray-100">
+                <span className="text-gray-600">Authentication Method</span>
+                <span className="text-gray-900" data-testid="text-auth-method">
+                  {userProfile?.provider === 'google' ? 'Google' : 'Email'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-3">
+                <span className="text-gray-600">Member Since</span>
+                <span className="text-gray-900" data-testid="text-member-since">
+                  {formatDate(userProfile?.createdAt)}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Danger Zone */}
+        <Card className="shadow-material border-l-4 border-red-500">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold text-red-600 mb-4" data-testid="text-danger-title">Danger Zone</h3>
+            <div className="space-y-4">
+              <Button
+                variant="outline"
+                className="w-full border-2 border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50"
+                data-testid="button-delete-account"
+              >
+                Delete Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
