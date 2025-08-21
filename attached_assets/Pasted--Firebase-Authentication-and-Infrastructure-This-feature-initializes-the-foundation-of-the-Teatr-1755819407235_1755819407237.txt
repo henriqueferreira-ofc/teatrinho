@@ -1,0 +1,75 @@
+🧩 Firebase Authentication and Infrastructure
+
+This feature initializes the foundation of the “Teatrinho” application with full Firebase integration. It includes configuring essential services (Authentication, Firestore, and Storage) and implementing the user authentication flow via email/password and Google. Additionally, it allows logout and editing/viewing the logged-in user’s data.
+
+✅ Functional Requirements
+
+Configure Firebase (Auth, Firestore, Storage)
+
+Implement sign-up with email and password
+
+Implement login with email and password
+
+Implement login with Google account – signInWithPopup
+
+Implement logout
+
+Retrieve authenticated user data
+
+Edit the name and password of the logged-in user
+
+Save/update user data in Firestore:
+
+id (same as Firebase Auth uid)
+
+name
+
+email
+
+provider
+
+✅ Base Interface Functional Requirements
+
+Application in light mode only (no dark mode support)
+
+Responsive interface with a unified layout for mobile and desktop
+
+Fixed bottom navigation with three tabs:
+
+Home – Application home page (EMPTY screen – not implemented yet)
+
+eBooks – List of eBooks created by the user (EMPTY screen – not implemented yet)
+
+Profile – User data and settings
+
+Fixed header at the top with:
+
+“Menu” button (hamburger/three-line icon) that opens a side drawer
+
+Drawer will contain only the initial structure (no functional content yet)
+
+Reusable visual template with header + bottom navigation for all pages
+
+Layout with good spacing, clear typography, and a friendly design
+
+Support for scrollable content between header and footer (central area)
+
+🔒 Security Restrictions and Best Practices
+
+Never store passwords directly in Firestore
+
+Always use env variables for Firebase credentials (such as apiKey, projectId)
+
+Do not create collections or documents that are not explicitly described
+
+Protect routes that depend on authentication with token verification
+
+📌 Standard Development Guidelines
+
+Keep a clear separation between authentication logic and UI
+
+Use context (AuthContext) to centralize user state
+
+Implement loading and error handling in the UI
+
+Validate email and password fields on the frontend before submission
