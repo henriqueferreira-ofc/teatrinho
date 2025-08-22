@@ -29,6 +29,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
       name: '',
       email: '',
       password: '',
+      confirmPassword: '',
       terms: false,
     },
   });
@@ -188,6 +189,36 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                                 data-testid="button-toggle-password"
                               >
                                 {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                              </button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {/* Confirm Password Input */}
+                    <FormField
+                      control={form.control}
+                      name="confirmPassword"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="relative">
+                              <Input
+                                type={showConfirmPassword ? 'text' : 'password'}
+                                placeholder="Confirmar senha"
+                                className="h-14 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 text-gray-900 placeholder:text-gray-500 pr-12"
+                                data-testid="input-confirm-password"
+                                {...field}
+                              />
+                              <button
+                                type="button"
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                data-testid="button-toggle-confirm-password"
+                              >
+                                {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                               </button>
                             </div>
                           </FormControl>
