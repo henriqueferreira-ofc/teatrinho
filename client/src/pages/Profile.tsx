@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { updateUserProfile } from '@/lib/firebase';
+import { updateUserProfile, uploadProfileImage, deleteProfileImage } from '@/lib/firebase';
 import { updateProfileSchema, type UpdateProfileForm } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Camera, Upload, Trash2 } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 export default function Profile() {
-  const { userProfile, refreshUserProfile } = useAuth();
+  const { userProfile, refreshUserProfile, user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const form = useForm<UpdateProfileForm>({
@@ -72,6 +74,95 @@ export default function Profile() {
     }
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione uma imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    try {
+      // Delete old photo if exists
+      if (userProfile?.photoURL) {
+        await deleteProfileImage(userProfile.photoURL);
+      }
+
+      // Upload new photo
+      const photoURL = await uploadProfileImage(file);
+      
+      // Update profile with new photo
+      await updateUserProfile({
+        name: userProfile?.name || '',
+        photoURL,
+      });
+
+      await refreshUserProfile();
+      
+      toast({
+        title: "Foto atualizada com sucesso",
+        description: "Sua foto de perfil foi alterada.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Falha no upload",
+        description: error.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeletePhoto = async () => {
+    if (!userProfile?.photoURL) return;
+
+    setIsUploadingPhoto(true);
+    try {
+      await deleteProfileImage(userProfile.photoURL);
+      
+      await updateUserProfile({
+        name: userProfile.name,
+        photoURL: '',
+      });
+
+      await refreshUserProfile();
+      
+      toast({
+        title: "Foto removida",
+        description: "Sua foto de perfil foi removida.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Falha ao remover foto",
+        description: error.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
     form.reset({
@@ -101,10 +192,38 @@ export default function Profile() {
         <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4 mb-6">
-              <div className="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center">
-                <span className="text-white text-2xl font-bold" data-testid="text-profile-initials">
-                  {getInitials(userProfile?.name)}
-                </span>
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-primary-500">
+                  {userProfile?.photoURL || user?.photoURL ? (
+                    <img 
+                      src={userProfile?.photoURL || user?.photoURL || ''} 
+                      alt="Foto de perfil" 
+                      className="w-full h-full object-cover"
+                      data-testid="img-profile-photo"
+                    />
+                  ) : (
+                    <span className="text-white text-2xl font-bold" data-testid="text-profile-initials">
+                      {getInitials(userProfile?.name)}
+                    </span>
+                  )}
+                </div>
+                <Button
+                  size="sm"
+                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 bg-primary-500 hover:bg-primary-600"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
+                  data-testid="button-upload-photo"
+                >
+                  <Camera className="h-4 w-4" />
+                </Button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handlePhotoUpload}
+                  accept="image/*"
+                  className="hidden"
+                  data-testid="input-photo-upload"
+                />
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-900" data-testid="text-profile-name">
@@ -121,13 +240,28 @@ export default function Profile() {
               </div>
             </div>
             
-            <Button
-              className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600"
-              onClick={() => setIsEditing(!isEditing)}
-              data-testid="button-edit-profile"
-            >
-              {isEditing ? 'Cancelar Edição' : 'Editar Perfil'}
-            </Button>
+            <div className="space-y-3">
+              <Button
+                className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600"
+                onClick={() => setIsEditing(!isEditing)}
+                data-testid="button-edit-profile"
+              >
+                {isEditing ? 'Cancelar Edição' : 'Editar Perfil'}
+              </Button>
+              
+              {(userProfile?.photoURL || user?.photoURL) && (
+                <Button
+                  variant="outline"
+                  className="w-full border-2 border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50"
+                  onClick={handleDeletePhoto}
+                  disabled={isUploadingPhoto}
+                  data-testid="button-delete-photo"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  {isUploadingPhoto ? 'Removendo...' : 'Remover Foto'}
+                </Button>
+              )}
+            </div>
           </CardContent>
         </Card>
 

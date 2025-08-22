@@ -21,7 +21,13 @@ import {
   updateDoc,
   serverTimestamp 
 } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { 
+  getStorage, 
+  ref, 
+  uploadBytes, 
+  getDownloadURL, 
+  deleteObject 
+} from "firebase/storage";
 import type { FirestoreUser, CreateUser, UpdateUser } from "@shared/schema";
 
 const firebaseConfig = {
@@ -126,12 +132,45 @@ export const updateUserDocument = async (uid: string, userData: UpdateUser) => {
   return updateData;
 };
 
-export const updateUserProfile = async (userData: { name: string; currentPassword?: string; newPassword?: string }) => {
+export const uploadProfileImage = async (file: File): Promise<string> => {
   const user = auth.currentUser;
   if (!user) throw new Error("Usuário não autenticado");
   
-  // Update display name in Firebase Auth
-  await updateProfile(user, { displayName: userData.name });
+  // Create a reference to the image in Firebase Storage
+  const imageRef = ref(storage, `profile-images/${user.uid}/${Date.now()}-${file.name}`);
+  
+  // Upload the file
+  const snapshot = await uploadBytes(imageRef, file);
+  
+  // Get the download URL
+  const downloadURL = await getDownloadURL(snapshot.ref);
+  
+  return downloadURL;
+};
+
+export const deleteProfileImage = async (imageUrl: string) => {
+  try {
+    const imageRef = ref(storage, imageUrl);
+    await deleteObject(imageRef);
+  } catch (error) {
+    console.warn("Erro ao deletar imagem:", error);
+  }
+};
+
+export const updateUserProfile = async (userData: { 
+  name: string; 
+  currentPassword?: string; 
+  newPassword?: string; 
+  photoURL?: string;
+}) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  // Update display name and photo in Firebase Auth
+  await updateProfile(user, { 
+    displayName: userData.name,
+    ...(userData.photoURL && { photoURL: userData.photoURL })
+  });
   
   // Update password if provided
   if (userData.currentPassword && userData.newPassword) {
@@ -139,7 +178,11 @@ export const updateUserProfile = async (userData: { name: string; currentPasswor
   }
   
   // Update user document in Firestore (garante que apenas o próprio usuário possa atualizar)
-  await updateUserDocument(user.uid, { name: userData.name });
+  const updateData: any = { name: userData.name };
+  if (userData.photoURL) {
+    updateData.photoURL = userData.photoURL;
+  }
+  await updateUserDocument(user.uid, updateData);
   
   return await getUserDocument(user.uid);
 };
