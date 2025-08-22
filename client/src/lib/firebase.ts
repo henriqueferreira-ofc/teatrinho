@@ -190,21 +190,31 @@ export const updateUserProfile = async (userData: {
 // Subscription functions
 export const isSubscriptionActive = async (email: string): Promise<boolean> => {
   try {
+    console.log("🔍 Verificando assinatura para email:", email);
     const subscriptionRef = doc(db, "assinaturas", email);
     const subscriptionSnap = await getDoc(subscriptionRef);
     
+    console.log("📄 Documento existe?", subscriptionSnap.exists());
+    
     if (!subscriptionSnap.exists()) {
+      console.log("❌ Não encontrou documento de assinatura para:", email);
       return false; // Não tem assinatura
     }
     
     const subscriptionData = subscriptionSnap.data() as Subscription;
+    console.log("📋 Dados da assinatura:", subscriptionData);
+    
     const subscriptionDate = new Date(subscriptionData.data);
     const now = new Date();
+    
+    console.log("📅 Data da assinatura:", subscriptionDate);
+    console.log("📅 Data atual:", now);
+    console.log("✅ Assinatura válida?", subscriptionDate < now);
     
     // Verifica se a data da assinatura é anterior à data atual (assinatura válida)
     return subscriptionDate < now;
   } catch (error) {
-    console.error("Erro ao verificar assinatura:", error);
+    console.error("❌ Erro ao verificar assinatura:", error);
     return false;
   }
 };
