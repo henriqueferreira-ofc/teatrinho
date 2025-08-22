@@ -9,11 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Eye, EyeOff, Camera, Upload, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, Camera, Upload, Trash2, Crown, ExternalLink } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 export default function Profile() {
-  const { userProfile, refreshUserProfile, user } = useAuth();
+  const { userProfile, refreshUserProfile, user, isSubscriber } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -249,9 +249,31 @@ export default function Profile() {
                 <p className="text-gray-600 mb-3" data-testid="text-profile-email">
                   {userProfile?.email}
                 </p>
-                <Badge variant="secondary" className="bg-primary-100 text-primary-700" data-testid="badge-provider">
-                  {userProfile?.provider === 'google' ? 'Google' : 'Email'}
-                </Badge>
+                <div className="flex flex-col sm:flex-row items-center gap-2 mb-2">
+                  <Badge variant="secondary" className="bg-primary-100 text-primary-700" data-testid="badge-provider">
+                    {userProfile?.provider === 'google' ? 'Google' : 'Email'}
+                  </Badge>
+                  
+                  {/* Subscription Status Badge */}
+                  {isSubscriber ? (
+                    <Badge 
+                      variant="default" 
+                      className="bg-green-100 text-green-800 border-green-200"
+                      data-testid="badge-subscriber-active"
+                    >
+                      <Crown className="h-3 w-3 mr-1" />
+                      Assinante Ativo
+                    </Badge>
+                  ) : (
+                    <Badge 
+                      variant="outline" 
+                      className="bg-gray-100 text-gray-600 border-gray-300"
+                      data-testid="badge-non-subscriber"
+                    >
+                      Não Assinante
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
             
@@ -275,6 +297,21 @@ export default function Profile() {
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   {isUploadingPhoto ? 'Removendo...' : 'Remover Foto'}
+                </Button>
+              )}
+              
+              {/* Subscribe Button for Non-Subscribers */}
+              {!isSubscriber && (
+                <Button
+                  asChild
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-xl font-semibold shadow-lg border-0"
+                  data-testid="button-subscribe-now"
+                >
+                  <a href="https://google.com.br" target="_blank" rel="noopener noreferrer">
+                    <Crown className="h-4 w-4 mr-2" />
+                    Assinar Agora
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </a>
                 </Button>
               )}
             </div>

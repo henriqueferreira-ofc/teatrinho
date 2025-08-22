@@ -62,3 +62,12 @@ export const updateProfileSchema = z.object({
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
 export type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
+
+// Schema para assinaturas
+export const subscriptionSchema = z.object({
+  email: z.string().email("Endereço de email inválido"),
+  data: z.string(), // Data da assinatura em formato ISO string
+  status: z.enum(["active", "inactive", "expired"]).optional(),
+});
+
+export type Subscription = z.infer<typeof subscriptionSchema>;

@@ -28,7 +28,7 @@ import {
   getDownloadURL, 
   deleteObject 
 } from "firebase/storage";
-import type { FirestoreUser, CreateUser, UpdateUser } from "@shared/schema";
+import type { FirestoreUser, CreateUser, UpdateUser, Subscription } from "@shared/schema";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
@@ -185,6 +185,28 @@ export const updateUserProfile = async (userData: {
   await updateUserDocument(user.uid, updateData);
   
   return await getUserDocument(user.uid);
+};
+
+// Subscription functions
+export const isSubscriptionActive = async (email: string): Promise<boolean> => {
+  try {
+    const subscriptionRef = doc(db, "assinaturas", email);
+    const subscriptionSnap = await getDoc(subscriptionRef);
+    
+    if (!subscriptionSnap.exists()) {
+      return false; // Não tem assinatura
+    }
+    
+    const subscriptionData = subscriptionSnap.data() as Subscription;
+    const subscriptionDate = new Date(subscriptionData.data);
+    const now = new Date();
+    
+    // Verifica se a data da assinatura é anterior à data atual (assinatura válida)
+    return subscriptionDate < now;
+  } catch (error) {
+    console.error("Erro ao verificar assinatura:", error);
+    return false;
+  }
 };
 
 // Auth state observer
