@@ -9,7 +9,9 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Home from '@/pages/Home';
+import Categories from '@/pages/Categories';
 import EBooks from '@/pages/EBooks';
+import Videos from '@/pages/Videos';
 import Profile from '@/pages/Profile';
 
 type AuthScreen = 'login' | 'register';
@@ -41,11 +43,11 @@ function MainApp() {
       case 'home':
         return <Home />;
       case 'categories':
-        return <div className="p-4"><div className="text-center py-8"><h2 className="text-xl font-semibold">Categorias</h2><p className="text-gray-600 mt-2">Em desenvolvimento...</p></div></div>;
+        return <Categories />;
       case 'ebooks':
         return <EBooks />;
       case 'videos':
-        return <div className="p-4"><div className="text-center py-8"><h2 className="text-xl font-semibold">Vídeos</h2><p className="text-gray-600 mt-2">Em desenvolvimento...</p></div></div>;
+        return <Videos />;
       case 'profile':
         return <Profile />;
       default:
