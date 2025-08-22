@@ -199,7 +199,7 @@ export default function Profile() {
             <div className="flex flex-col items-center space-y-4 mb-6">
               <div className="relative">
                 {/* Sempre mostra o círculo azul como base */}
-                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 border-white" style={{backgroundColor: '#2563eb'}}>
+                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 border-white" style={{backgroundColor: '#5b21b6'}}>
                   {userProfile?.photoURL || user?.photoURL ? (
                     <img 
                       src={userProfile?.photoURL || user?.photoURL || ''} 
@@ -226,7 +226,7 @@ export default function Profile() {
                 <Button
                   size="sm"
                   className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full p-0 shadow-lg border-2 border-white"
-                  style={{backgroundColor: '#2563eb', color: 'white'}}
+                  style={{backgroundColor: '#5b21b6', color: 'white'}}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingPhoto}
                   data-testid="button-upload-photo"
@@ -258,7 +258,7 @@ export default function Profile() {
             <div className="space-y-3">
               <Button
                 className="w-full text-white py-3 rounded-xl font-semibold shadow-lg border-0"
-                style={{backgroundColor: '#2563eb', color: 'white'}}
+                style={{backgroundColor: '#5b21b6', color: 'white'}}
                 onClick={() => setIsEditing(!isEditing)}
                 data-testid="button-edit-profile"
               >
@@ -390,7 +390,7 @@ export default function Profile() {
                     <Button
                       type="submit"
                       className="flex-1 text-white py-3 rounded-xl font-semibold shadow-lg border-0"
-                      style={{backgroundColor: '#2563eb', color: 'white'}}
+                      style={{backgroundColor: '#5b21b6', color: 'white'}}
                       disabled={isLoading}
                       data-testid="button-save-changes"
                     >
