@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-// User schema for Firestore
+// Schema do usuário para Firestore
 export const firestoreUserSchema = z.object({
   id: z.string(),
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
+  name: z.string().min(1, "Nome é obrigatório"),
+  email: z.string().email("Endereço de email inválido"),
   provider: z.enum(["email", "google"]),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
@@ -26,30 +26,30 @@ export type FirestoreUser = z.infer<typeof firestoreUserSchema>;
 export type CreateUser = z.infer<typeof createUserSchema>;
 export type UpdateUser = z.infer<typeof updateUserSchema>;
 
-// Authentication schemas
+// Schemas de autenticação
 export const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().email("Endereço de email inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
 export const registerSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  terms: z.boolean().refine(val => val === true, "You must agree to the terms"),
+  name: z.string().min(1, "Nome é obrigatório"),
+  email: z.string().email("Endereço de email inválido"),
+  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+  terms: z.boolean().refine(val => val === true, "Você deve concordar com os termos"),
 });
 
 export const updateProfileSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Nome é obrigatório"),
   currentPassword: z.string().optional(),
-  newPassword: z.string().min(6, "Password must be at least 6 characters").optional(),
+  newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
 }).refine(data => {
   if (data.newPassword && !data.currentPassword) {
     return false;
   }
   return true;
 }, {
-  message: "Current password is required to change password",
+  message: "A senha atual é obrigatória para alterar a senha",
   path: ["currentPassword"],
 });
 

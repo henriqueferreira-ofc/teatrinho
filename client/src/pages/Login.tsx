@@ -34,13 +34,13 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
     try {
       await loginWithEmail(data.email, data.password);
       toast({
-        title: "Welcome back!",
-        description: "You have been signed in successfully.",
+        title: "Bem-vindo de volta!",
+        description: "Você foi conectado com sucesso.",
       });
     } catch (error: any) {
       toast({
-        title: "Sign in failed",
-        description: error.message || "Please check your credentials and try again.",
+        title: "Falha no login",
+        description: error.message || "Verifique suas credenciais e tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -53,13 +53,13 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
     try {
       await loginWithGoogle();
       toast({
-        title: "Welcome!",
-        description: "You have been signed in with Google successfully.",
+        title: "Bem-vindo!",
+        description: "Você foi conectado com Google com sucesso.",
       });
     } catch (error: any) {
       toast({
-        title: "Google sign in failed",
-        description: error.message || "Please try again.",
+        title: "Falha no login com Google",
+        description: error.message || "Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -72,11 +72,12 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
       <div className="w-full max-w-md">
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-primary-500 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-            <Book className="text-white text-2xl" />
+          {/* Logo acima do título */}
+          <div className="w-20 h-20 bg-primary-500 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <Book className="text-white" size={40} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-app-name">Teatrinho</h1>
-          <p className="text-gray-600">Welcome back! Please sign in to continue.</p>
+          <p className="text-gray-600">Bem-vindo de volta! Faça login para continuar.</p>
         </div>
 
         {/* Login Form Card */}
@@ -90,11 +91,11 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Email address</FormLabel>
+                      <FormLabel className="text-gray-700">Endereço de email</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder="Digite seu email"
                           className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
                           data-testid="input-email"
                           {...field}
@@ -111,12 +112,12 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Password</FormLabel>
+                      <FormLabel className="text-gray-700">Senha</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
                             type={showPassword ? 'text' : 'password'}
-                            placeholder="Enter your password"
+                            placeholder="Digite sua senha"
                             className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
                             data-testid="input-password"
                             {...field}
@@ -139,7 +140,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                 {/* Forgot Password */}
                 <div className="text-right">
                   <Button variant="link" className="text-primary-500 text-sm font-medium hover:text-primary-600 p-0" data-testid="link-forgot-password">
-                    Forgot password?
+                    Esqueceu a senha?
                   </Button>
                 </div>
 
@@ -150,13 +151,13 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                   disabled={isLoading}
                   data-testid="button-submit"
                 >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
+                  {isLoading ? 'Entrando...' : 'Entrar'}
                 </Button>
 
                 {/* Divider */}
                 <div className="relative flex items-center justify-center my-6">
                   <div className="border-t border-gray-200 w-full"></div>
-                  <span className="bg-white px-4 text-gray-500 text-sm">or</span>
+                  <span className="bg-white px-4 text-gray-500 text-sm">ou</span>
                 </div>
 
                 {/* Google Sign In */}
@@ -174,7 +175,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  {isGoogleLoading ? 'Signing in...' : 'Continue with Google'}
+                  {isGoogleLoading ? 'Entrando...' : 'Continuar com Google'}
                 </Button>
               </form>
             </Form>
@@ -184,14 +185,14 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
         {/* Sign Up Link */}
         <div className="text-center">
           <p className="text-gray-600">
-            Don't have an account?{' '}
+            Não tem uma conta?{' '}
             <Button
               variant="link"
               className="text-primary-500 font-semibold hover:text-primary-600 p-0"
               onClick={onSwitchToRegister}
               data-testid="link-register"
             >
-              Sign up
+              Criar conta
             </Button>
           </p>
         </div>

@@ -21,13 +21,13 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
     try {
       await logout();
       toast({
-        title: "Signed out successfully",
-        description: "You have been logged out of your account.",
+        title: "Logout realizado com sucesso",
+        description: "Você foi desconectado da sua conta.",
       });
     } catch (error) {
       toast({
-        title: "Error signing out",
-        description: "Please try again.",
+        title: "Erro ao fazer logout",
+        description: "Tente novamente.",
         variant: "destructive",
       });
     }
@@ -40,9 +40,9 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
   };
 
   const navItems = [
-    { id: 'home' as const, label: 'Home', icon: Home },
+    { id: 'home' as const, label: 'Início', icon: Home },
     { id: 'ebooks' as const, label: 'eBooks', icon: Book },
-    { id: 'profile' as const, label: 'Profile', icon: User },
+    { id: 'profile' as const, label: 'Perfil', icon: User },
   ];
 
   return (
@@ -90,7 +90,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                     data-testid="link-home"
                   >
                     <Home className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Home</span>
+                    <span className="text-gray-700">Início</span>
                   </Button>
                   <Button
                     variant="ghost"
@@ -102,7 +102,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                     data-testid="link-ebooks"
                   >
                     <Book className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">My eBooks</span>
+                    <span className="text-gray-700">Meus eBooks</span>
                   </Button>
                   <Button
                     variant="ghost"
@@ -110,7 +110,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                     data-testid="link-bookmarks"
                   >
                     <Book className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Bookmarks</span>
+                    <span className="text-gray-700">Favoritos</span>
                   </Button>
                   <Button
                     variant="ghost"
@@ -118,7 +118,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                     data-testid="link-settings"
                   >
                     <User className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Settings</span>
+                    <span className="text-gray-700">Configurações</span>
                   </Button>
                 </nav>
 
@@ -131,7 +131,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                     data-testid="button-logout"
                   >
                     <LogOut className="h-5 w-5" />
-                    <span>Sign Out</span>
+                    <span>Sair</span>
                   </Button>
                 </div>
               </div>

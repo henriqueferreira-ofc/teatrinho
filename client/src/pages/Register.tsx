@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Book } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 interface RegisterProps {
@@ -37,13 +37,13 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     try {
       await registerWithEmail(data.email, data.password, data.name);
       toast({
-        title: "Account created successfully!",
-        description: "Welcome to Teatrinho. You can now start creating your eBooks.",
+        title: "Conta criada com sucesso!",
+        description: "Bem-vindo ao Teatrinho. Agora você pode começar a criar seus eBooks.",
       });
     } catch (error: any) {
       toast({
-        title: "Registration failed",
-        description: error.message || "Please try again.",
+        title: "Falha no registro",
+        description: error.message || "Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -56,13 +56,13 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
     try {
       await loginWithGoogle();
       toast({
-        title: "Welcome to Teatrinho!",
-        description: "Your account has been created with Google successfully.",
+        title: "Bem-vindo ao Teatrinho!",
+        description: "Sua conta foi criada com Google com sucesso.",
       });
     } catch (error: any) {
       toast({
-        title: "Google sign up failed",
-        description: error.message || "Please try again.",
+        title: "Falha no registro com Google",
+        description: error.message || "Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -81,13 +81,17 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
           data-testid="button-back"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to sign in
+          Voltar ao login
         </Button>
 
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-register-title">Create Account</h1>
-          <p className="text-gray-600">Join Teatrinho and start your reading journey.</p>
+          {/* Logo acima do título */}
+          <div className="w-20 h-20 bg-primary-500 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <Book className="text-white" size={40} />
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-register-title">Criar Conta</h1>
+          <p className="text-gray-600">Junte-se ao Teatrinho e comece sua jornada de leitura.</p>
         </div>
 
         {/* Register Form Card */}
@@ -101,11 +105,11 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Full name</FormLabel>
+                      <FormLabel className="text-gray-700">Nome completo</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
-                          placeholder="Enter your full name"
+                          placeholder="Digite seu nome completo"
                           className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
                           data-testid="input-name"
                           {...field}
@@ -122,11 +126,11 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Email address</FormLabel>
+                      <FormLabel className="text-gray-700">Endereço de email</FormLabel>
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder="Digite seu email"
                           className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
                           data-testid="input-email"
                           {...field}
@@ -143,12 +147,12 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-gray-700">Password (min. 6 characters)</FormLabel>
+                      <FormLabel className="text-gray-700">Senha (mín. 6 caracteres)</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
                             type={showPassword ? 'text' : 'password'}
-                            placeholder="Enter your password"
+                            placeholder="Digite sua senha"
                             className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
                             data-testid="input-password"
                             {...field}
@@ -183,13 +187,13 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel className="text-sm text-gray-600">
-                          I agree to the{' '}
+                          Eu concordo com os{' '}
                           <Button variant="link" className="text-primary-500 hover:text-primary-600 p-0 h-auto text-sm" data-testid="link-terms">
-                            Terms of Service
+                            Termos de Serviço
                           </Button>{' '}
-                          and{' '}
+                          e{' '}
                           <Button variant="link" className="text-primary-500 hover:text-primary-600 p-0 h-auto text-sm" data-testid="link-privacy">
-                            Privacy Policy
+                            Política de Privacidade
                           </Button>
                         </FormLabel>
                         <FormMessage />
@@ -205,13 +209,13 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                   disabled={isLoading}
                   data-testid="button-submit"
                 >
-                  {isLoading ? 'Creating account...' : 'Create Account'}
+                  {isLoading ? 'Criando conta...' : 'Criar Conta'}
                 </Button>
 
                 {/* Divider */}
                 <div className="relative flex items-center justify-center my-6">
                   <div className="border-t border-gray-200 w-full"></div>
-                  <span className="bg-white px-4 text-gray-500 text-sm">or</span>
+                  <span className="bg-white px-4 text-gray-500 text-sm">ou</span>
                 </div>
 
                 {/* Google Sign Up */}
@@ -229,7 +233,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                     <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                   </svg>
-                  {isGoogleLoading ? 'Signing up...' : 'Sign up with Google'}
+                  {isGoogleLoading ? 'Criando conta...' : 'Criar conta com Google'}
                 </Button>
               </form>
             </Form>

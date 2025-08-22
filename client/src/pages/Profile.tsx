@@ -58,13 +58,13 @@ export default function Profile() {
       });
       
       toast({
-        title: "Profile updated successfully",
-        description: "Your changes have been saved.",
+        title: "Perfil atualizado com sucesso",
+        description: "Suas alterações foram salvas.",
       });
     } catch (error: any) {
       toast({
-        title: "Update failed",
-        description: error.message || "Please try again.",
+        title: "Falha na atualização",
+        description: error.message || "Tente novamente.",
         variant: "destructive",
       });
     } finally {
@@ -88,7 +88,7 @@ export default function Profile() {
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Unknown';
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
       year: 'numeric',
       month: 'long',
     });
@@ -126,7 +126,7 @@ export default function Profile() {
               onClick={() => setIsEditing(!isEditing)}
               data-testid="button-edit-profile"
             >
-              {isEditing ? 'Cancel Edit' : 'Edit Profile'}
+              {isEditing ? 'Cancelar Edição' : 'Editar Perfil'}
             </Button>
           </CardContent>
         </Card>
@@ -135,7 +135,7 @@ export default function Profile() {
         {isEditing && (
           <Card className="mb-6 shadow-material">
             <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6" data-testid="text-edit-title">Edit Profile</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-6" data-testid="text-edit-title">Editar Perfil</h3>
               
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -145,11 +145,11 @@ export default function Profile() {
                     name="name"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-gray-700">Full name</FormLabel>
+                        <FormLabel className="text-gray-700">Nome completo</FormLabel>
                         <FormControl>
                           <Input
                             type="text"
-                            placeholder="Enter your full name"
+                            placeholder="Digite seu nome completo"
                             className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
                             data-testid="input-edit-name"
                             {...field}
@@ -167,12 +167,12 @@ export default function Profile() {
                       name="currentPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700">Current password</FormLabel>
+                          <FormLabel className="text-gray-700">Senha atual</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Input
                                 type={showCurrentPassword ? 'text' : 'password'}
-                                placeholder="Enter current password to change it"
+                                placeholder="Digite a senha atual para alterá-la"
                                 className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
                                 data-testid="input-current-password"
                                 {...field}
@@ -200,12 +200,12 @@ export default function Profile() {
                       name="newPassword"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-gray-700">New password (optional)</FormLabel>
+                          <FormLabel className="text-gray-700">Nova senha (opcional)</FormLabel>
                           <FormControl>
                             <div className="relative">
                               <Input
                                 type={showNewPassword ? 'text' : 'password'}
-                                placeholder="Enter new password"
+                                placeholder="Digite a nova senha"
                                 className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
                                 data-testid="input-new-password"
                                 {...field}
@@ -235,7 +235,7 @@ export default function Profile() {
                       onClick={handleCancelEdit}
                       data-testid="button-cancel-edit"
                     >
-                      Cancel
+                      Cancelar
                     </Button>
                     <Button
                       type="submit"
@@ -243,7 +243,7 @@ export default function Profile() {
                       disabled={isLoading}
                       data-testid="button-save-changes"
                     >
-                      {isLoading ? 'Saving...' : 'Save Changes'}
+                      {isLoading ? 'Salvando...' : 'Salvar Alterações'}
                     </Button>
                   </div>
                 </form>
@@ -255,10 +255,10 @@ export default function Profile() {
         {/* Account Information */}
         <Card className="mb-6 shadow-material">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4" data-testid="text-account-title">Account Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4" data-testid="text-account-title">Informações da Conta</h3>
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <span className="text-gray-600">User ID</span>
+                <span className="text-gray-600">ID do Usuário</span>
                 <span className="text-gray-900 font-mono text-sm" data-testid="text-user-id">
                   {userProfile?.id?.slice(0, 12)}...
                 </span>
@@ -270,13 +270,13 @@ export default function Profile() {
                 </span>
               </div>
               <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <span className="text-gray-600">Authentication Method</span>
+                <span className="text-gray-600">Método de Autenticação</span>
                 <span className="text-gray-900" data-testid="text-auth-method">
                   {userProfile?.provider === 'google' ? 'Google' : 'Email'}
                 </span>
               </div>
               <div className="flex justify-between items-center py-3">
-                <span className="text-gray-600">Member Since</span>
+                <span className="text-gray-600">Membro desde</span>
                 <span className="text-gray-900" data-testid="text-member-since">
                   {formatDate(userProfile?.createdAt)}
                 </span>
@@ -288,14 +288,14 @@ export default function Profile() {
         {/* Danger Zone */}
         <Card className="shadow-material border-l-4 border-red-500">
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-red-600 mb-4" data-testid="text-danger-title">Danger Zone</h3>
+            <h3 className="text-lg font-semibold text-red-600 mb-4" data-testid="text-danger-title">Zona de Perigo</h3>
             <div className="space-y-4">
               <Button
                 variant="outline"
                 className="w-full border-2 border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50"
                 data-testid="button-delete-account"
               >
-                Delete Account
+                Excluir Conta
               </Button>
             </div>
           </CardContent>
