@@ -12,10 +12,11 @@ import Home from '@/pages/Home';
 import Categories from '@/pages/Categories';
 import EBooks from '@/pages/EBooks';
 import Videos from '@/pages/Videos';
+import Partnerships from '@/pages/Partnerships';
 import Profile from '@/pages/Profile';
 
 type AuthScreen = 'login' | 'register';
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'profile';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile';
 
 function AuthFlow() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>('login');
@@ -48,6 +49,8 @@ function MainApp() {
         return <EBooks />;
       case 'videos':
         return <Videos />;
+      case 'partnerships':
+        return <Partnerships />;
       case 'profile':
         return <Profile />;
       default:

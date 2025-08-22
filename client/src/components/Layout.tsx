@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { logout } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play } from 'lucide-react';
+import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play, Handshake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: 'home' | 'categories' | 'ebooks' | 'videos' | 'profile';
-  onTabChange: (tab: 'home' | 'categories' | 'ebooks' | 'videos' | 'profile') => void;
+  activeTab: 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile';
+  onTabChange: (tab: 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile') => void;
 }
 
 export default function Layout({ children, activeTab, onTabChange }: LayoutProps) {
@@ -44,6 +44,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
     { id: 'categories' as const, label: 'Categorias', icon: Grid3X3 },
     { id: 'ebooks' as const, label: 'eBooks', icon: Book },
     { id: 'videos' as const, label: 'Vídeos', icon: Play },
+    { id: 'partnerships' as const, label: 'Parceria', icon: Handshake },
     { id: 'profile' as const, label: 'Perfil', icon: User },
   ];
 
