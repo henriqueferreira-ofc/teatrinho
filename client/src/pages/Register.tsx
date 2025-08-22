@@ -87,7 +87,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
         {/* Header */}
         <div className="text-center mb-8">
           {/* Logo acima do título */}
-          <div className="w-20 h-20 bg-primary-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+          <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg" style={{backgroundColor: '#2563eb'}}>
             <Book className="text-white" size={40} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-register-title">Criar Conta</h1>
@@ -205,7 +205,8 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
                 {/* Register Button */}
                 <Button
                   type="submit"
-                  className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600 h-12 shadow-lg border-0"
+                  className="w-full text-white py-3 rounded-xl font-semibold h-12 shadow-lg border-0"
+                  style={{backgroundColor: '#2563eb', color: 'white'}}
                   disabled={isLoading}
                   data-testid="button-submit"
                 >
