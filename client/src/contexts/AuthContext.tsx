@@ -41,12 +41,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         
         // Verificar assinatura se o perfil existe
         if (profile?.email) {
-          console.log("🔄 Refresh: Verificando assinatura para usuário:", profile.email);
           const subscriptionStatus = await isSubscriptionActive(profile.email);
-          console.log("🔄 Refresh: Status da assinatura:", subscriptionStatus);
           setIsSubscriber(subscriptionStatus);
-        } else {
-          console.log("🔄 Refresh: Perfil sem email, não é possível verificar assinatura");
         }
       } catch (err) {
         console.error('Error fetching user profile:', err);
@@ -71,12 +67,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           
           // Verificar assinatura se o perfil existe
           if (profile?.email) {
-            console.log("🔐 Verificando assinatura para usuário:", profile.email);
             const subscriptionStatus = await isSubscriptionActive(profile.email);
-            console.log("🎯 Status da assinatura:", subscriptionStatus);
             setIsSubscriber(subscriptionStatus);
-          } else {
-            console.log("❌ Perfil sem email, não é possível verificar assinatura");
           }
         } catch (err) {
           console.error('Error fetching user profile:', err);

@@ -68,7 +68,9 @@ export default function Profile() {
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     ● Ativo
                   </span>
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    isSubscriber ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'
+                  }`}>
                     {isSubscriber ? 'Assinante' : 'Não Assinante'}
                   </span>
                 </div>
