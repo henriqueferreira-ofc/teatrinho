@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { logout } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { Menu, Home, Book, User, LogOut, X } from 'lucide-react';
+import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: 'home' | 'ebooks' | 'profile';
-  onTabChange: (tab: 'home' | 'ebooks' | 'profile') => void;
+  activeTab: 'home' | 'categories' | 'ebooks' | 'videos' | 'profile';
+  onTabChange: (tab: 'home' | 'categories' | 'ebooks' | 'videos' | 'profile') => void;
 }
 
 export default function Layout({ children, activeTab, onTabChange }: LayoutProps) {
@@ -41,7 +41,9 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
 
   const navItems = [
     { id: 'home' as const, label: 'Início', icon: Home },
+    { id: 'categories' as const, label: 'Categorias', icon: Grid3X3 },
     { id: 'ebooks' as const, label: 'eBooks', icon: Book },
+    { id: 'videos' as const, label: 'Vídeos', icon: Play },
     { id: 'profile' as const, label: 'Perfil', icon: User },
   ];
 
@@ -159,17 +161,17 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
 
       {/* Fixed Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
-        <div className="flex items-center justify-around h-18 px-4">
+        <div className="flex items-center justify-around h-16 px-2">
           {navItems.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              className={`flex flex-col items-center space-y-1 py-2 px-4 transition-colors ${
-                activeTab === id ? 'text-primary-500' : 'text-gray-400'
+              className={`flex flex-col items-center space-y-1 py-2 px-2 transition-colors ${
+                activeTab === id ? 'text-blue-500' : 'text-gray-400'
               }`}
               onClick={() => onTabChange(id)}
               data-testid={`tab-${id}`}
             >
-              <Icon className="h-6 w-6" />
+              <Icon className="h-5 w-5" />
               <span className="text-xs font-medium">{label}</span>
             </button>
           ))}

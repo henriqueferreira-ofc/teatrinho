@@ -13,7 +13,7 @@ import EBooks from '@/pages/EBooks';
 import Profile from '@/pages/Profile';
 
 type AuthScreen = 'login' | 'register';
-type AppTab = 'home' | 'ebooks' | 'profile';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'profile';
 
 function AuthFlow() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>('login');
@@ -40,8 +40,12 @@ function MainApp() {
     switch (activeTab) {
       case 'home':
         return <Home />;
+      case 'categories':
+        return <div className="p-4"><div className="text-center py-8"><h2 className="text-xl font-semibold">Categorias</h2><p className="text-gray-600 mt-2">Em desenvolvimento...</p></div></div>;
       case 'ebooks':
         return <EBooks />;
+      case 'videos':
+        return <div className="p-4"><div className="text-center py-8"><h2 className="text-xl font-semibold">Vídeos</h2><p className="text-gray-600 mt-2">Em desenvolvimento...</p></div></div>;
       case 'profile':
         return <Profile />;
       default:
