@@ -54,7 +54,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
           <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" data-testid="button-menu">
-                <Menu className="h-6 w-6 text-gray-700" />
+                <Menu className="h-7 w-7 text-gray-700" />
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 p-0">
