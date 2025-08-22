@@ -209,7 +209,8 @@ export default function Profile() {
                 </div>
                 <Button
                   size="sm"
-                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 bg-primary-500 hover:bg-primary-600"
+                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 shadow-lg border-0"
+                  style={{backgroundColor: '#2563eb', color: 'white'}}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingPhoto}
                   data-testid="button-upload-photo"
@@ -242,7 +243,8 @@ export default function Profile() {
             
             <div className="space-y-3">
               <Button
-                className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600"
+                className="w-full text-white py-3 rounded-xl font-semibold shadow-lg border-0"
+                style={{backgroundColor: '#2563eb', color: 'white'}}
                 onClick={() => setIsEditing(!isEditing)}
                 data-testid="button-edit-profile"
               >
