@@ -196,16 +196,25 @@ export default function Profile() {
         {/* Profile Header */}
         <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
           <CardContent className="p-6">
-            <div className="flex items-start space-x-4 mb-6">
-              <div className="relative flex-shrink-0">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg" style={{backgroundColor: '#2563eb'}}>
-                  <span className="text-white text-xl font-bold" data-testid="text-profile-initials">
-                    {getInitials(userProfile?.name)}
-                  </span>
+            <div className="flex flex-col items-center space-y-4 mb-6">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg" style={{backgroundColor: '#2563eb'}}>
+                  {userProfile?.photoURL || user?.photoURL ? (
+                    <img 
+                      src={userProfile?.photoURL || user?.photoURL || ''} 
+                      alt="Foto de perfil" 
+                      className="w-full h-full object-cover rounded-full"
+                      data-testid="img-profile-photo"
+                    />
+                  ) : (
+                    <span className="text-white text-2xl font-bold" data-testid="text-profile-initials">
+                      {getInitials(userProfile?.name)}
+                    </span>
+                  )}
                 </div>
                 <Button
                   size="sm"
-                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full p-0 shadow-lg border-2 border-white"
+                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full p-0 shadow-lg border-2 border-white"
                   style={{backgroundColor: '#2563eb', color: 'white'}}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingPhoto}
@@ -222,14 +231,14 @@ export default function Profile() {
                   data-testid="input-photo-upload"
                 />
               </div>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-bold text-gray-900 mb-1 leading-tight" data-testid="text-profile-name">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-1" data-testid="text-profile-name">
                   {userProfile?.name || 'User'}
                 </h2>
-                <p className="text-gray-600 mb-2 text-sm leading-tight" data-testid="text-profile-email">
+                <p className="text-gray-600 mb-3" data-testid="text-profile-email">
                   {userProfile?.email}
                 </p>
-                <Badge variant="secondary" className="bg-primary-100 text-primary-700 text-xs" data-testid="badge-provider">
+                <Badge variant="secondary" className="bg-primary-100 text-primary-700" data-testid="badge-provider">
                   {userProfile?.provider === 'google' ? 'Google' : 'Email'}
                 </Badge>
               </div>
