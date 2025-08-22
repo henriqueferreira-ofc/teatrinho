@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Eye, EyeOff, Mail } from 'lucide-react';
+import { Eye, EyeOff, Mail, Book } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
 interface LoginProps {
@@ -72,6 +72,10 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
         <div className="w-full max-w-md">
           {/* Header */}
           <div className="text-center mb-8">
+            {/* Logo */}
+            <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg" style={{backgroundColor: '#2563eb'}}>
+              <Book className="text-white" size={40} />
+            </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-app-title">
               Teatrinho
             </h1>
