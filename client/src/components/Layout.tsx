@@ -65,14 +65,23 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                 {/* Drawer Header */}
                 <div className="p-6 border-b border-gray-100">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-primary-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-lg font-semibold" data-testid="text-user-initials">
-                        {getInitials(userProfile?.name)}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900" data-testid="text-user-name">
-                        {userProfile?.name || 'User'}
+                    {userProfile?.photoURL ? (
+                      <img 
+                        src={userProfile.photoURL} 
+                        alt="Foto do usuário"
+                        className="w-16 h-16 rounded-full object-cover border-2 border-primary-200"
+                        data-testid="img-user-photo"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center border-2 border-primary-200">
+                        <span className="text-white text-xl font-semibold" data-testid="text-user-initials">
+                          {getInitials(userProfile?.name)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-gray-900 text-lg" data-testid="text-user-name">
+                        {userProfile?.name || 'Usuário'}
                       </h3>
                       <p className="text-sm text-gray-600" data-testid="text-user-email">
                         {userProfile?.email}
@@ -99,6 +108,18 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                     variant="ghost"
                     className="w-full justify-start space-x-3 h-12"
                     onClick={() => {
+                      onTabChange('categories');
+                      setIsDrawerOpen(false);
+                    }}
+                    data-testid="link-categories"
+                  >
+                    <Grid3X3 className="h-5 w-5 text-gray-600" />
+                    <span className="text-gray-700">Categorias</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start space-x-3 h-12"
+                    onClick={() => {
                       onTabChange('ebooks');
                       setIsDrawerOpen(false);
                     }}
@@ -110,18 +131,38 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                   <Button
                     variant="ghost"
                     className="w-full justify-start space-x-3 h-12"
-                    data-testid="link-bookmarks"
+                    onClick={() => {
+                      onTabChange('videos');
+                      setIsDrawerOpen(false);
+                    }}
+                    data-testid="link-videos"
                   >
-                    <Book className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Favoritos</span>
+                    <Play className="h-5 w-5 text-gray-600" />
+                    <span className="text-gray-700">Vídeos</span>
                   </Button>
                   <Button
                     variant="ghost"
                     className="w-full justify-start space-x-3 h-12"
-                    data-testid="link-settings"
+                    onClick={() => {
+                      onTabChange('partnerships');
+                      setIsDrawerOpen(false);
+                    }}
+                    data-testid="link-partnerships"
+                  >
+                    <Handshake className="h-5 w-5 text-gray-600" />
+                    <span className="text-gray-700">Parceria</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start space-x-3 h-12"
+                    onClick={() => {
+                      onTabChange('profile');
+                      setIsDrawerOpen(false);
+                    }}
+                    data-testid="link-profile"
                   >
                     <User className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Configurações</span>
+                    <span className="text-gray-700">Perfil</span>
                   </Button>
                 </nav>
 
