@@ -45,7 +45,8 @@ export const updateProfileSchema = z.object({
   currentPassword: z.string().optional(),
   newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
 }).refine(data => {
-  if (data.newPassword && !data.currentPassword) {
+  // Só valida senha se o usuário preencheu a nova senha
+  if (data.newPassword && data.newPassword.length > 0 && !data.currentPassword) {
     return false;
   }
   return true;
