@@ -54,9 +54,20 @@ export default function Profile() {
         <Card className="shadow-lg bg-white border border-gray-200 mb-4">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold">
-                {getInitials(userProfile?.name)}
-              </div>
+              {userProfile?.photoURL ? (
+                <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                  <img 
+                    src={userProfile.photoURL} 
+                    alt="Foto do usuário"
+                    className="w-full h-full object-cover"
+                    data-testid="img-profile-photo"
+                  />
+                </div>
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold flex-shrink-0">
+                  {getInitials(userProfile?.name)}
+                </div>
+              )}
               <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-900" data-testid="text-profile-name">
                   {userProfile?.name || 'Usuário'}
