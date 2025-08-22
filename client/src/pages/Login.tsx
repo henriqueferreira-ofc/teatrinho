@@ -96,7 +96,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                         <Input
                           type="email"
                           placeholder="seu@email.com"
-                          className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
+                          className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 placeholder:text-gray-400 placeholder:opacity-60"
                           data-testid="input-email"
                           {...field}
                         />
@@ -117,8 +117,8 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                         <div className="relative">
                           <Input
                             type={showPassword ? 'text' : 'password'}
-                            placeholder="........"
-                            className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
+                            placeholder="••••••••"
+                            className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12 placeholder:text-gray-400 placeholder:opacity-50 placeholder:text-lg placeholder:tracking-widest"
                             data-testid="input-password"
                             {...field}
                           />
