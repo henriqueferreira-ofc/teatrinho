@@ -95,7 +95,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="Digite seu email"
+                          placeholder="seu@email.com"
                           className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
                           data-testid="input-email"
                           {...field}
@@ -117,7 +117,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                         <div className="relative">
                           <Input
                             type={showPassword ? 'text' : 'password'}
-                            placeholder="Digite sua senha"
+                            placeholder="........"
                             className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
                             data-testid="input-password"
                             {...field}
