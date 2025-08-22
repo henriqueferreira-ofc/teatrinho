@@ -14,7 +14,7 @@ export default function Home() {
           <h2 className="text-2xl font-bold mb-2" data-testid="text-welcome">
             Bem-vindo de volta, {userProfile?.name?.split(' ')[0] || 'Usuário'}!
           </h2>
-          <p className="text-white/90">Continue sua jornada de leitura com o Teatrinho.</p>
+          <p className="text-black">Continue sua jornada de leitura com o Teatrinho.</p>
         </div>
 
         {/* Empty State */}
