@@ -93,7 +93,7 @@ export default function Profile() {
                   Torne-se um Assinante
                 </h3>
                 <p className="text-center text-sm text-gray-600 mb-4">
-                  Acesse recursos exclusivos disponíveis em nosso Painel
+                  Acesse recursos exclusivos e conteúdo premium da Diversão em Papel
                 </p>
                 <Button
                   asChild
