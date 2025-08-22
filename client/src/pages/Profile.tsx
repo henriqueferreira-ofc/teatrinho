@@ -1,491 +1,135 @@
-import React, { useState, useRef } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { updateUserProfile, uploadProfileImage, deleteProfileImage } from '@/lib/firebase';
-import { updateProfileSchema, type UpdateProfileForm } from '@shared/schema';
+import { logout } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Eye, EyeOff, Camera, Upload, Trash2, Crown, ExternalLink } from 'lucide-react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { User, Lock, Crown, LogOut, ChevronRight } from 'lucide-react';
 
 export default function Profile() {
-  const { userProfile, refreshUserProfile, user, isSubscriber } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { userProfile, isSubscriber } = useAuth();
   const { toast } = useToast();
 
-  const form = useForm<UpdateProfileForm>({
-    resolver: zodResolver(updateProfileSchema),
-    defaultValues: {
-      name: userProfile?.name || '',
-      currentPassword: '',
-      newPassword: '',
-    },
-  });
-
-  // Update form when userProfile changes
-  React.useEffect(() => {
-    if (userProfile) {
-      form.reset({
-        name: userProfile.name,
-        currentPassword: '',
-        newPassword: '',
-      });
-    }
-  }, [userProfile, form]);
-
-  const onSubmit = async (data: UpdateProfileForm) => {
-    setIsLoading(true);
+  const handleLogout = async () => {
     try {
-      // Se tem nova senha, precisa da senha atual. Se não tem nova senha, só atualiza o nome
-      const updateData: any = { name: data.name };
-      
-      if (data.newPassword && data.newPassword.length > 0) {
-        updateData.currentPassword = data.currentPassword;
-        updateData.newPassword = data.newPassword;
-      }
-      
-      await updateUserProfile(updateData);
-      
-      await refreshUserProfile();
-      setIsEditing(false);
-      form.reset({
-        name: data.name,
-        currentPassword: '',
-        newPassword: '',
-      });
-      
+      await logout();
       toast({
-        title: "Perfil atualizado com sucesso",
-        description: "Suas alterações foram salvas.",
+        title: "Logout realizado com sucesso",
+        description: "Você foi desconectado da sua conta.",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
-        title: "Falha na atualização",
-        description: error.message || "Tente novamente.",
+        title: "Erro ao fazer logout",
+        description: "Tente novamente.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Arquivo inválido",
-        description: "Por favor, selecione uma imagem.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "Arquivo muito grande",
-        description: "A imagem deve ter no máximo 5MB.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsUploadingPhoto(true);
-    try {
-      // Delete old photo if exists
-      if (userProfile?.photoURL) {
-        await deleteProfileImage(userProfile.photoURL);
-      }
-
-      // Upload new photo
-      const photoURL = await uploadProfileImage(file);
-      
-      // Update profile with new photo
-      await updateUserProfile({
-        name: userProfile?.name || '',
-        photoURL,
-      });
-
-      await refreshUserProfile();
-      
-      toast({
-        title: "Foto atualizada com sucesso",
-        description: "Sua foto de perfil foi alterada.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Falha no upload",
-        description: error.message || "Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploadingPhoto(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleDeletePhoto = async () => {
-    if (!userProfile?.photoURL) return;
-
-    setIsUploadingPhoto(true);
-    try {
-      await deleteProfileImage(userProfile.photoURL);
-      
-      await updateUserProfile({
-        name: userProfile.name,
-        photoURL: '',
-      });
-
-      await refreshUserProfile();
-      
-      toast({
-        title: "Foto removida",
-        description: "Sua foto de perfil foi removida.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Falha ao remover foto",
-        description: error.message || "Tente novamente.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsUploadingPhoto(false);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setIsEditing(false);
-    form.reset({
-      name: userProfile?.name || '',
-      currentPassword: '',
-      newPassword: '',
+  const handleEditProfile = () => {
+    // TODO: Implementar navegação para tela de editar perfil
+    toast({
+      title: "Em desenvolvimento",
+      description: "Funcionalidade será implementada em breve.",
     });
   };
 
-  const getInitials = (name?: string) => {
-    if (!name) return 'U';
-    // Pega apenas a primeira letra do primeiro nome
-    return name.charAt(0).toUpperCase();
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return 'Unknown';
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      year: 'numeric',
-      month: 'long',
+  const handleChangePassword = () => {
+    // TODO: Implementar navegação para tela de alterar senha
+    toast({
+      title: "Em desenvolvimento", 
+      description: "Funcionalidade será implementada em breve.",
     });
   };
 
   return (
     <div className="p-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Profile Header */}
-        <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center space-y-4 mb-6">
-              <div className="relative">
-                {/* Sempre mostra o círculo azul como base */}
-                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 border-white" style={{backgroundColor: '#1800ad'}}>
-                  {userProfile?.photoURL || user?.photoURL ? (
-                    <img 
-                      src={userProfile?.photoURL || user?.photoURL || ''} 
-                      alt="Foto de perfil" 
-                      className="w-full h-full object-cover rounded-full"
-                      data-testid="img-profile-photo"
-                      onError={(e) => {
-                        console.log('Erro ao carregar foto:', e);
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <span className="text-white text-2xl font-bold" data-testid="text-profile-initials">
-                      {getInitials(userProfile?.name)}
-                    </span>
-                  )}
-                  {/* Se não tem foto, sempre mostra as iniciais */}
-                  {!(userProfile?.photoURL || user?.photoURL) && (
-                    <span className="text-white text-2xl font-bold absolute" data-testid="text-profile-initials">
-                      {getInitials(userProfile?.name)}
-                    </span>
-                  )}
-                </div>
-                <Button
-                  size="sm"
-                  className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full p-0 shadow-lg border-2 border-white"
-                  style={{backgroundColor: '#1800ad', color: 'white'}}
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploadingPhoto}
-                  data-testid="button-upload-photo"
-                >
-                  <Camera className="h-4 w-4" />
-                </Button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handlePhotoUpload}
-                  accept="image/*"
-                  className="hidden"
-                  data-testid="input-photo-upload"
-                />
+      <div className="max-w-lg mx-auto">
+        <Card className="shadow-lg bg-white border border-gray-200">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-medium text-gray-900">
+              Configurações da Conta
+            </CardTitle>
+          </CardHeader>
+          
+          <CardContent className="space-y-4">
+            {/* Editar Perfil */}
+            <Button
+              variant="ghost"
+              className="w-full justify-between p-4 h-auto hover:bg-gray-50"
+              onClick={handleEditProfile}
+              data-testid="button-edit-profile"
+            >
+              <div className="flex items-center space-x-3">
+                <User className="h-5 w-5 text-gray-600" />
+                <span className="text-gray-900 font-medium">Editar Perfil</span>
               </div>
-              <div className="text-center">
-                <h2 className="text-2xl font-bold text-gray-900 mb-1" data-testid="text-profile-name">
-                  {userProfile?.name || 'User'}
-                </h2>
-                <p className="text-gray-600 mb-3" data-testid="text-profile-email">
-                  {userProfile?.email}
-                </p>
-                <div className="flex flex-col sm:flex-row items-center gap-2 mb-2">
-                  <Badge variant="secondary" className="bg-primary-100 text-primary-700" data-testid="badge-provider">
-                    {userProfile?.provider === 'google' ? 'Google' : 'Email'}
-                  </Badge>
-                  
-                  {/* Subscription Status Badge */}
-                  {isSubscriber ? (
-                    <Badge 
-                      variant="default" 
-                      className="bg-green-100 text-green-800 border-green-200"
-                      data-testid="badge-subscriber-active"
-                    >
-                      <Crown className="h-3 w-3 mr-1" />
-                      Assinante Ativo
-                    </Badge>
-                  ) : (
-                    <Badge 
-                      variant="outline" 
-                      className="bg-gray-100 text-gray-600 border-gray-300"
-                      data-testid="badge-non-subscriber"
-                    >
-                      Não Assinante
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
+              <ChevronRight className="h-5 w-5 text-gray-400" />
+            </Button>
+
+            {/* Alterar Senha - só mostra para usuários de email */}
+            {userProfile?.provider === 'email' && (
               <Button
-                className="w-full text-white py-3 rounded-xl font-semibold shadow-lg border-0"
-                style={{backgroundColor: '#1800ad', color: 'white'}}
-                onClick={() => setIsEditing(!isEditing)}
-                data-testid="button-edit-profile"
+                variant="ghost"
+                className="w-full justify-between p-4 h-auto hover:bg-gray-50"
+                onClick={handleChangePassword}
+                data-testid="button-change-password"
               >
-                {isEditing ? 'Cancelar Edição' : 'Editar Perfil'}
+                <div className="flex items-center space-x-3">
+                  <Lock className="h-5 w-5 text-gray-600" />
+                  <span className="text-gray-900 font-medium">Alterar Senha</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400" />
               </Button>
-              
-              {(userProfile?.photoURL || user?.photoURL) && (
-                <Button
-                  variant="outline"
-                  className="w-full border-2 border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50"
-                  onClick={handleDeletePhoto}
-                  disabled={isUploadingPhoto}
-                  data-testid="button-delete-photo"
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  {isUploadingPhoto ? 'Removendo...' : 'Remover Foto'}
-                </Button>
-              )}
-              
-              {/* Subscribe Button for Non-Subscribers */}
-              {!isSubscriber && (
+            )}
+
+            {/* Seção de Assinatura */}
+            {!isSubscriber && (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 my-4">
+                <div className="flex items-center justify-center mb-3">
+                  <Crown className="h-8 w-8 text-yellow-600" />
+                </div>
+                <h3 className="text-center font-semibold text-gray-900 mb-2">
+                  Torne-se um Assinante
+                </h3>
+                <p className="text-center text-sm text-gray-600 mb-4">
+                  Acesse recursos exclusivos disponíveis em nosso Painel
+                </p>
                 <Button
                   asChild
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white py-3 rounded-xl font-semibold shadow-lg border-0"
-                  data-testid="button-subscribe-now"
+                  className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg font-semibold mb-2"
+                  data-testid="button-activate-now"
                 >
                   <a href="https://google.com.br" target="_blank" rel="noopener noreferrer">
-                    <Crown className="h-4 w-4 mr-2" />
-                    Assinar Agora
-                    <ExternalLink className="h-4 w-4 ml-2" />
+                    Ativar Agora
                   </a>
                 </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Edit Profile Form */}
-        {isEditing && (
-          <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-6" data-testid="text-edit-title">Editar Perfil</h3>
-              
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                  {/* Name Input */}
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-700">Nome completo</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="Digite seu nome completo"
-                            className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12"
-                            data-testid="input-edit-name"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  {/* Current Password (only for email users) */}
-                  {userProfile?.provider === 'email' && (
-                    <FormField
-                      control={form.control}
-                      name="currentPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">Senha atual</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Input
-                                type={showCurrentPassword ? 'text' : 'password'}
-                                placeholder="Digite a senha atual para alterá-la"
-                                className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
-                                data-testid="input-current-password"
-                                {...field}
-                              />
-                              <button
-                                type="button"
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                                data-testid="button-toggle-current-password"
-                              >
-                                {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                              </button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {/* New Password (only for email users) */}
-                  {userProfile?.provider === 'email' && (
-                    <FormField
-                      control={form.control}
-                      name="newPassword"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="text-gray-700">Nova senha (opcional)</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <Input
-                                type={showNewPassword ? 'text' : 'password'}
-                                placeholder="Digite a nova senha"
-                                className="border-2 border-gray-200 rounded-xl focus:border-primary-500 h-12 pr-12"
-                                data-testid="input-new-password"
-                                {...field}
-                              />
-                              <button
-                                type="button"
-                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                onClick={() => setShowNewPassword(!showNewPassword)}
-                                data-testid="button-toggle-new-password"
-                              >
-                                {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                              </button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="flex-1 border-2 border-gray-200 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-50"
-                      onClick={handleCancelEdit}
-                      data-testid="button-cancel-edit"
-                    >
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="submit"
-                      className="flex-1 text-white py-3 rounded-xl font-semibold shadow-lg border-0"
-                      style={{backgroundColor: '#1800ad', color: 'white'}}
-                      disabled={isLoading}
-                      data-testid="button-save-changes"
-                    >
-                      {isLoading ? 'Salvando...' : 'Salvar Alterações'}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Account Information */}
-        <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4" data-testid="text-account-title">Informações da Conta</h3>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <span className="text-gray-600">ID do Usuário</span>
-                <span className="text-gray-900 font-mono text-sm" data-testid="text-user-id">
-                  {userProfile?.id?.slice(0, 12)}...
-                </span>
               </div>
-              <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <span className="text-gray-600">Email</span>
-                <span className="text-gray-900" data-testid="text-account-email">
-                  {userProfile?.email}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-3 border-b border-gray-100">
-                <span className="text-gray-600">Método de Autenticação</span>
-                <span className="text-gray-900" data-testid="text-auth-method">
-                  {userProfile?.provider === 'google' ? 'Google' : 'Email'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center py-3">
-                <span className="text-gray-600">Membro desde</span>
-                <span className="text-gray-900" data-testid="text-member-since">
-                  {formatDate(userProfile?.createdAt)}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            )}
 
-        {/* Danger Zone */}
-        <Card className="shadow-material bg-white/80 backdrop-blur-sm border border-white/50 border-l-4 border-red-500">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold text-red-600 mb-4" data-testid="text-danger-title">Zona de Perigo</h3>
-            <div className="space-y-4">
-              <Button
-                variant="outline"
-                className="w-full border-2 border-red-200 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50"
-                data-testid="button-delete-account"
-              >
-                Excluir Conta
-              </Button>
-            </div>
+            {/* Mostrar status de assinante ativo */}
+            {isSubscriber && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 my-4">
+                <div className="flex items-center justify-center mb-2">
+                  <Crown className="h-6 w-6 text-green-600 mr-2" />
+                  <span className="text-green-800 font-semibold">Assinante Ativo</span>
+                </div>
+                <p className="text-center text-sm text-green-600">
+                  Você tem acesso a todos os recursos exclusivos
+                </p>
+              </div>
+            )}
+
+            {/* Sair da Conta */}
+            <Button
+              variant="destructive"
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold"
+              onClick={handleLogout}
+              data-testid="button-logout"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sair da Conta
+            </Button>
           </CardContent>
         </Card>
       </div>
