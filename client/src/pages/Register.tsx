@@ -77,7 +77,7 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-app-title">
-              Divertindo com a Diversão
+              Teatrinho
             </h1>
             <p className="text-gray-600">Faça login ou crie sua conta para continuar</p>
           </div>
