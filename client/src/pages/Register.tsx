@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, EyeOff, Mail, Book } from 'lucide-react';
+import { Eye, EyeOff, Mail } from 'lucide-react';
+import logoUrl from '@assets/LOGO DE APLICATIVOSs_1755877873488.png';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
 interface RegisterProps {
@@ -77,8 +78,13 @@ export default function Register({ onSwitchToLogin }: RegisterProps) {
           {/* Header */}
           <div className="text-center mb-8">
             {/* Logo */}
-            <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg" style={{backgroundColor: '#2563eb'}}>
-              <Book className="text-white" size={40} />
+            <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+              <img 
+                src={logoUrl} 
+                alt="Teatrinho Logo" 
+                className="w-full h-full object-contain rounded-2xl shadow-lg"
+                data-testid="app-logo"
+              />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-app-title">
               Teatrinho
