@@ -73,8 +73,8 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           {/* Logo acima do título */}
-          <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
-            <Book className="text-primary-500" size={48} />
+          <div className="w-20 h-20 bg-primary-500 rounded-full mx-auto mb-4 flex items-center justify-center shadow-lg">
+            <Book className="text-white" size={40} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-app-name">Teatrinho</h1>
           <p className="text-gray-600">Bem-vindo de volta! Faça login para continuar.</p>
