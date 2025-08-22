@@ -1,0 +1,37 @@
+📄 Autenticação com Verificação de Assinatura**
+
+#### 🧩 **Descrição da Funcionalidade**
+
+Após o login, a aplicação deve consultar a coleção `assinaturas`, onde cada documento é identificado pelo e-mail do usuário autenticado, e verificar se a data da assinatura (`data`) é válida (ou seja, uma data passada).
+
+Caso a assinatura esteja ativa, a interface do perfil do usuário deverá exibir uma **badge** indicando que ele é assinante. Caso contrário, deverá exibir uma **badge de “Não Assinante”** e um botão de **CTA** (call-to-action) para um link externo (por enquanto: `https://google.com.br`).
+
+---
+
+#### ✅ **Requisitos Funcionais**
+
+- Após o login, consultar a coleção `assinaturas` com a chave igual ao e-mail do usuário logado.
+- Verificar se o campo `data` no documento de assinatura é anterior à data atual (`timestamp < now()`).
+- Adicionar ao usuário logado uma flag para informar se a assinatura está ou não ativa
+- Exibir na tela de perfil:
+    - Se for assinante: badge “Assinante Ativo”
+    - Se **não for assinante**:
+        - badge “Não Assinante”
+        - botão com texto “Assinar Agora” com link para `https://google.com.br`
+            
+
+#### 🔒 **Restrições de Segurança e Boas Práticas**
+- Não crie nem modifique tabelas de banco de dados sem solicitação explícita.
+- Não apague ou sobrescreva dados sem instrução clara.
+- Toda variável sensível (como chaves de API, tokens ou URLs protegidas) deve ser armazenada em arquivos `.env` ou equivalente.
+- Sempre perguntar antes de instalar bibliotecas externas ou adicionar dependências.
+- Todas as operações que envolvam escrita ou leitura em banco de dados devem ser explicitamente solicitadas no prompt principal.
+- Evitar comandos destrutivos ou irreversíveis, como `DELETE`, exceto sob instrução explícita.
+- Assegure-se de não expor dados sensíveis no frontend.
+
+#### 📌 **Orientações de Desenvolvimento Padrão**
+- Usar nomes claros e semânticos para variáveis e funções.
+- Dividir responsabilidades entre componentes (ex: lógica de autenticação separada da UI).
+- Priorizar código limpo, reutilizável e organizado.
+- Preferir funções puras e evitar efeitos colaterais não controlados.
+- Priorizar acessibilidade e compatibilidade responsiva na interface.
