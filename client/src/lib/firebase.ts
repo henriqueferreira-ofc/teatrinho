@@ -81,7 +81,7 @@ export const logout = async () => {
 
 export const updateUserPassword = async (currentPassword: string, newPassword: string) => {
   const user = auth.currentUser;
-  if (!user || !user.email) throw new Error("No authenticated user");
+  if (!user || !user.email) throw new Error("Usuário não autenticado");
   
   // Reauthenticate user
   const credential = EmailAuthProvider.credential(user.email, currentPassword);
@@ -93,7 +93,7 @@ export const updateUserPassword = async (currentPassword: string, newPassword: s
 
 // Firestore functions
 export const createUserDocument = async (user: User, userData: CreateUser) => {
-  const userRef = doc(db, "users", user.uid);
+  const userRef = doc(db, "usuarios", user.uid);
   const docData: Omit<FirestoreUser, "id"> = {
     ...userData,
     createdAt: new Date().toISOString(),
@@ -105,7 +105,7 @@ export const createUserDocument = async (user: User, userData: CreateUser) => {
 };
 
 export const getUserDocument = async (uid: string): Promise<FirestoreUser | null> => {
-  const userRef = doc(db, "users", uid);
+  const userRef = doc(db, "usuarios", uid);
   const userSnap = await getDoc(userRef);
   
   if (userSnap.exists()) {
@@ -116,7 +116,7 @@ export const getUserDocument = async (uid: string): Promise<FirestoreUser | null
 };
 
 export const updateUserDocument = async (uid: string, userData: UpdateUser) => {
-  const userRef = doc(db, "users", uid);
+  const userRef = doc(db, "usuarios", uid);
   const updateData = {
     ...userData,
     updatedAt: new Date().toISOString(),
@@ -128,7 +128,7 @@ export const updateUserDocument = async (uid: string, userData: UpdateUser) => {
 
 export const updateUserProfile = async (userData: { name: string; currentPassword?: string; newPassword?: string }) => {
   const user = auth.currentUser;
-  if (!user) throw new Error("No authenticated user");
+  if (!user) throw new Error("Usuário não autenticado");
   
   // Update display name in Firebase Auth
   await updateProfile(user, { displayName: userData.name });
@@ -138,7 +138,7 @@ export const updateUserProfile = async (userData: { name: string; currentPasswor
     await updateUserPassword(userData.currentPassword, userData.newPassword);
   }
   
-  // Update user document in Firestore
+  // Update user document in Firestore (garante que apenas o próprio usuário possa atualizar)
   await updateUserDocument(user.uid, { name: userData.name });
   
   return await getUserDocument(user.uid);
