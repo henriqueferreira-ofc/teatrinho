@@ -143,7 +143,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
 
           {/* User Avatar */}
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-white text-sm font-semibold" data-testid="text-header-initials">
                 {getInitials(userProfile?.name)}
               </span>

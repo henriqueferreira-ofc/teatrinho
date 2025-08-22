@@ -48,24 +48,10 @@ export default function Profile() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="flex items-center justify-between px-4 py-3">
-          <button className="p-2">
-            <Menu className="h-6 w-6 text-gray-600" />
-          </button>
-          <h1 className="text-lg font-medium text-gray-900">Teatrinho</h1>
-          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-semibold">
-            {getInitials(userProfile?.name)}
-          </div>
-        </div>
-      </div>
-
-      <div className="p-4">
-        <div className="max-w-lg mx-auto">
-          {/* User Profile Section */}
-          <Card className="shadow-lg bg-white border border-gray-200 mb-4">
+    <div className="p-4">
+      <div className="max-w-lg mx-auto">
+        {/* User Profile Section */}
+        <Card className="shadow-lg bg-white border border-gray-200 mb-4">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4 mb-4">
               <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold">
@@ -91,10 +77,10 @@ export default function Profile() {
               </div>
             </div>
           </CardContent>
-          </Card>
+        </Card>
 
-          {/* Account Settings */}
-          <Card className="shadow-lg bg-white border border-gray-200">
+        {/* Account Settings */}
+        <Card className="shadow-lg bg-white border border-gray-200">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-medium text-gray-900">
               Configurações da Conta
@@ -180,8 +166,7 @@ export default function Profile() {
               Sair da Conta
             </Button>
           </CardContent>
-          </Card>
-        </div>
+        </Card>
       </div>
     </div>
   );
