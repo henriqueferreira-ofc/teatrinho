@@ -98,7 +98,7 @@ export default function Profile() {
     <div className="p-4">
       <div className="max-w-2xl mx-auto">
         {/* Profile Header */}
-        <Card className="mb-6 shadow-material">
+        <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4 mb-6">
               <div className="w-20 h-20 bg-primary-500 rounded-full flex items-center justify-center">
@@ -133,7 +133,7 @@ export default function Profile() {
 
         {/* Edit Profile Form */}
         {isEditing && (
-          <Card className="mb-6 shadow-material">
+          <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
             <CardContent className="p-6">
               <h3 className="text-xl font-bold text-gray-900 mb-6" data-testid="text-edit-title">Editar Perfil</h3>
               
@@ -253,7 +253,7 @@ export default function Profile() {
         )}
 
         {/* Account Information */}
-        <Card className="mb-6 shadow-material">
+        <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4" data-testid="text-account-title">Informações da Conta</h3>
             <div className="space-y-4">
@@ -286,7 +286,7 @@ export default function Profile() {
         </Card>
 
         {/* Danger Zone */}
-        <Card className="shadow-material border-l-4 border-red-500">
+        <Card className="shadow-material bg-white/80 backdrop-blur-sm border border-white/50 border-l-4 border-red-500">
           <CardContent className="p-6">
             <h3 className="text-lg font-semibold text-red-600 mb-4" data-testid="text-danger-title">Zona de Perigo</h3>
             <div className="space-y-4">

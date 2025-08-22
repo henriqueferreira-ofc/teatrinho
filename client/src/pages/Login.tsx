@@ -73,15 +73,15 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
         {/* Logo/Brand Section */}
         <div className="text-center mb-8">
           {/* Logo acima do título */}
-          <div className="w-20 h-20 bg-primary-500 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-lg">
-            <Book className="text-white" size={40} />
+          <div className="w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+            <Book className="text-primary-500" size={48} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-app-name">Teatrinho</h1>
           <p className="text-gray-600">Bem-vindo de volta! Faça login para continuar.</p>
         </div>
 
         {/* Login Form Card */}
-        <Card className="mb-6 shadow-material">
+        <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
           <CardContent className="p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -147,7 +147,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                 {/* Login Button */}
                 <Button
                   type="submit"
-                  className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600 h-12"
+                  className="w-full bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600 h-12 shadow-lg border-0"
                   disabled={isLoading}
                   data-testid="button-submit"
                 >

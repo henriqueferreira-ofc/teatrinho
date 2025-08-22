@@ -18,7 +18,7 @@ export default function Home() {
         </div>
 
         {/* Empty State */}
-        <Card className="shadow-material">
+        <Card className="shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
           <CardContent className="p-8 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
               <HomeIcon className="text-gray-400 text-2xl" size={32} />
