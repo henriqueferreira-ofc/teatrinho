@@ -191,9 +191,9 @@ export default function Profile() {
         {/* Profile Header */}
         <Card className="mb-6 shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
           <CardContent className="p-6">
-            <div className="flex items-center space-x-4 mb-6">
+            <div className="flex flex-col items-center space-y-4 mb-6">
               <div className="relative">
-                <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-primary-500">
+                <div className="w-24 h-24 rounded-full overflow-hidden flex items-center justify-center bg-primary-500 shadow-lg">
                   {userProfile?.photoURL || user?.photoURL ? (
                     <img 
                       src={userProfile?.photoURL || user?.photoURL || ''} 
@@ -202,14 +202,14 @@ export default function Profile() {
                       data-testid="img-profile-photo"
                     />
                   ) : (
-                    <span className="text-white text-2xl font-bold" data-testid="text-profile-initials">
+                    <span className="text-white text-3xl font-bold" data-testid="text-profile-initials">
                       {getInitials(userProfile?.name)}
                     </span>
                   )}
                 </div>
                 <Button
                   size="sm"
-                  className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full p-0 shadow-lg border-0"
+                  className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full p-0 shadow-lg border-2 border-white"
                   style={{backgroundColor: '#2563eb', color: 'white'}}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingPhoto}
@@ -226,14 +226,14 @@ export default function Profile() {
                   data-testid="input-photo-upload"
                 />
               </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-gray-900" data-testid="text-profile-name">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold text-gray-900 mb-1" data-testid="text-profile-name">
                   {userProfile?.name || 'User'}
                 </h2>
-                <p className="text-gray-600" data-testid="text-profile-email">
+                <p className="text-gray-600 mb-3" data-testid="text-profile-email">
                   {userProfile?.email}
                 </p>
-                <div className="flex items-center space-x-2 mt-2">
+                <div className="flex justify-center">
                   <Badge variant="secondary" className="bg-primary-100 text-primary-700" data-testid="badge-provider">
                     {userProfile?.provider === 'google' ? 'Google' : 'Email'}
                   </Badge>
@@ -375,7 +375,8 @@ export default function Profile() {
                     </Button>
                     <Button
                       type="submit"
-                      className="flex-1 bg-primary-500 text-white py-3 rounded-xl font-semibold hover:bg-primary-600"
+                      className="flex-1 text-white py-3 rounded-xl font-semibold shadow-lg border-0"
+                      style={{backgroundColor: '#2563eb', color: 'white'}}
                       disabled={isLoading}
                       data-testid="button-save-changes"
                     >
