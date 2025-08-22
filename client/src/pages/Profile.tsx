@@ -126,7 +126,7 @@ export default function Profile() {
                   Torne-se um Assinante
                 </h3>
                 <p className="text-center text-sm text-gray-600 mb-4">
-                  Acesse recursos exclusivos e conteúdo premium da Diversão em Papel
+                  Acesse recursos exclusivos e conteúdo premium da Teatrinho
                 </p>
                 <Button
                   asChild
@@ -134,7 +134,7 @@ export default function Profile() {
                   data-testid="button-activate-now"
                 >
                   <a href="https://google.com.br" target="_blank" rel="noopener noreferrer">
-                    Ativar Agora
+                    Assinar Agora
                   </a>
                 </Button>
               </div>
