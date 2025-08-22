@@ -50,11 +50,6 @@ export default function Profile() {
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
       <div className="max-w-lg mx-auto">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h1 className="text-xl font-medium text-gray-900 mb-6">Diversão em Papel</h1>
-        </div>
-
         {/* User Profile Section */}
         <Card className="shadow-lg bg-white border border-gray-200 mb-4">
           <CardContent className="p-6">
