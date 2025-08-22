@@ -69,12 +69,12 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                       <img 
                         src={userProfile.photoURL} 
                         alt="Foto do usuário"
-                        className="w-16 h-16 rounded-full object-cover border-2 border-primary-200"
+                        className="w-16 h-16 rounded-full object-cover"
                         data-testid="img-user-photo"
                       />
                     ) : (
-                      <div className="w-16 h-16 bg-primary-500 rounded-full flex items-center justify-center border-2 border-primary-200">
-                        <span className="text-white text-xl font-semibold" data-testid="text-user-initials">
+                      <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold">
+                        <span data-testid="text-user-initials">
                           {getInitials(userProfile?.name)}
                         </span>
                       </div>
