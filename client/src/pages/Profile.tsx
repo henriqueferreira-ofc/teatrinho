@@ -42,9 +42,47 @@ export default function Profile() {
     });
   };
 
+  const getInitials = (name?: string) => {
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
-    <div className="p-4">
+    <div className="p-4 bg-gray-50 min-h-screen">
       <div className="max-w-lg mx-auto">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-xl font-medium text-gray-900 mb-6">Diversão em Papel</h1>
+        </div>
+
+        {/* User Profile Section */}
+        <Card className="shadow-lg bg-white border border-gray-200 mb-4">
+          <CardContent className="p-6">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold">
+                {getInitials(userProfile?.name)}
+              </div>
+              <div className="flex-1">
+                <h2 className="text-xl font-semibold text-gray-900" data-testid="text-profile-name">
+                  {userProfile?.name || 'Usuário'}
+                </h2>
+                <p className="text-gray-600 text-sm" data-testid="text-profile-email">
+                  {userProfile?.email}
+                </p>
+                <div className="flex items-center space-x-2 mt-2">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    ● Ativo
+                  </span>
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                    {isSubscriber ? 'Assinante' : 'Não Assinante'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account Settings */}
         <Card className="shadow-lg bg-white border border-gray-200">
           <CardHeader className="pb-4">
             <CardTitle className="text-lg font-medium text-gray-900">
