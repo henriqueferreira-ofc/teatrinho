@@ -11,7 +11,7 @@ export default function Home() {
       <div className="max-w-4xl mx-auto">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 text-white mb-6">
-          <h2 className="text-2xl font-bold mb-2" data-testid="text-welcome">
+          <h2 className="text-2xl font-bold mb-2 text-black" data-testid="text-welcome">
             Bem-vindo de volta, {userProfile?.name?.split(' ')[0] || 'Usuário'}!
           </h2>
           <p className="text-black">Continue sua jornada de leitura com o Teatrinho.</p>
