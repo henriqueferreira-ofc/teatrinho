@@ -69,9 +69,9 @@ export default function Profile() {
                     ● Ativo
                   </span>
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                    isSubscriber ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'
+                    isSubscriber ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
                   }`}>
-                    {isSubscriber ? '● Assinante' : 'Não Assinante'}
+                    {isSubscriber ? '● Assinante' : '● Não Assinante'}
                   </span>
                 </div>
               </div>
