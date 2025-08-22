@@ -198,29 +198,40 @@ export default function Profile() {
           <CardContent className="p-6">
             <div className="flex flex-col items-center space-y-4 mb-6">
               <div className="relative">
-                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg" style={{backgroundColor: '#2563eb'}}>
+                {/* Sempre mostra o círculo azul como base */}
+                <div className="w-20 h-20 rounded-full flex items-center justify-center shadow-lg border-4 border-white" style={{backgroundColor: '#2563eb'}}>
                   {userProfile?.photoURL || user?.photoURL ? (
                     <img 
                       src={userProfile?.photoURL || user?.photoURL || ''} 
                       alt="Foto de perfil" 
                       className="w-full h-full object-cover rounded-full"
                       data-testid="img-profile-photo"
+                      onError={(e) => {
+                        console.log('Erro ao carregar foto:', e);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   ) : (
                     <span className="text-white text-2xl font-bold" data-testid="text-profile-initials">
                       {getInitials(userProfile?.name)}
                     </span>
                   )}
+                  {/* Se não tem foto, sempre mostra as iniciais */}
+                  {!(userProfile?.photoURL || user?.photoURL) && (
+                    <span className="text-white text-2xl font-bold absolute" data-testid="text-profile-initials">
+                      {getInitials(userProfile?.name)}
+                    </span>
+                  )}
                 </div>
                 <Button
                   size="sm"
-                  className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full p-0 shadow-lg border-2 border-white"
+                  className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full p-0 shadow-lg border-2 border-white"
                   style={{backgroundColor: '#2563eb', color: 'white'}}
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingPhoto}
                   data-testid="button-upload-photo"
                 >
-                  <Camera className="h-3 w-3" />
+                  <Camera className="h-4 w-4" />
                 </Button>
                 <input
                   type="file"
