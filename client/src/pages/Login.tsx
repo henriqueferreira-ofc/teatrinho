@@ -177,7 +177,7 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                       <Button
                         type="submit"
                         className="w-full h-14 text-white font-semibold rounded-xl shadow-lg border-0"
-                        style={{backgroundColor: '#5b21b6'}}
+                        style={{backgroundColor: '#1800ad'}}
                         disabled={isLoading}
                         data-testid="button-submit"
                       >
