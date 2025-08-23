@@ -121,41 +121,23 @@ async function initializeFirebase() {
       `gs://${admin.app().options.projectId}.firebasestorage.app`
     ];
     
-    console.log('🪣 Testando buckets disponíveis...');
+    console.log('🪣 Conectando ao Firebase Storage...');
     
     for (const bucketName of possibleBuckets) {
       try {
-        console.log(`🔍 Testando bucket: ${bucketName}`);
         const bucket = admin.storage().bucket(bucketName);
         await bucket.getMetadata();
-        console.log(`✅ Bucket encontrado: ${bucketName}`);
+        console.log(`✅ Conectado com sucesso ao bucket: ${bucketName}`);
         return bucket;
       } catch (error) {
-        console.log(`❌ Bucket ${bucketName} não acessível: ${error.message}`);
+        // Continua tentando outros buckets sem mostrar erro
+        continue;
       }
     }
     
     // Se nenhum bucket funcionou, cria arquivo de exemplo
-    console.log('⚠️  Nenhum bucket de Storage encontrado.');
-    console.log('📋 Para usar este script você precisa:');
-    console.log('   1. Ativar o Firebase Storage no Console');
-    console.log('   2. Criar uma pasta "atividades/" no Storage');
-    console.log('   3. Organizar as imagens em subpastas por categoria');
-    console.log('   4. Fazer upload dos arquivos .jpg');
-    console.log('');
-    console.log('🔧 Estrutura esperada no Storage:');
-    console.log('   atividades/');
-    console.log('   ├── pre-escrita-tracado/');
-    console.log('   │   ├── 1.jpg');
-    console.log('   │   ├── 2.jpg');
-    console.log('   │   └── ...');
-    console.log('   ├── coordenacao-motora/');
-    console.log('   │   ├── 1.jpg');
-    console.log('   │   └── ...');
-    console.log('   └── matematica-basica/');
-    console.log('       └── ...');
-    console.log('');
-    console.log('📄 Criando arquivo de exemplo com dados fictícios...');
+    console.log('⚠️  Não foi possível conectar ao Firebase Storage.');
+    console.log('📄 Gerando arquivo com dados de exemplo...');
     
     // Gera dados de exemplo
     const atividadesExemplo = criarDadosExemplo();
