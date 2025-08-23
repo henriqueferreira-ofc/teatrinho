@@ -1,0 +1,58 @@
+### 📄 Categorias e Atividades
+
+#### 🧩 **Descrição da Funcionalidade**
+
+A funcionalidade de navegação permite que o usuário explore facilmente as atividades disponíveis na aplicação, organizadas por categorias pedagógicas. Na tela Home, são exibidos cards de categorias em uma grade de duas colunas por linha, cada um com imagem ilustrativa e nome da categoria. Ao selecionar uma categoria, o usuário é direcionado para uma nova tela que exibe as atividades pertencentes àquela categoria, também dispostas em duas colunas, com imagens no formato A4, garantindo a visualização completa e clara de cada atividade. Esta etapa é focada exclusivamente na navegação e exibição do conteúdo.
+
+#### ✅ **Requisitos Funcionais**
+
+- **Listagem Responsiva de Categorias na Tela Home**
+    - Exibir categorias em formato de grid:
+        - **2 por linha** em dispositivos pequenos (mobile).
+        - **3 por linha** em dispositivos médios.
+        - **4 a 6 por linha** em dispositivos grandes.
+    - Cada card de categoria exibe:
+        - Imagem representativa da categoria.
+        - Nome da categoria.
+- **Navegação para Tela de Atividades por Categoria**
+    - Ao clicar em uma categoria, navegar para a tela de atividades correspondente.
+    - Exibir no topo da tela:
+        - **Nome da categoria selecionada**.
+        - **Total de atividades** da categoria.
+        - **Quantidade de atividades carregadas** até o momento.
+- **Consulta de Atividades Paginada**
+    - Buscar atividades da categoria selecionada a partir do JSON de atividades.
+    - Exibir atividades em duas colunas por linha, com imagens em formato A4 visíveis por completo.
+    - Carregar **20 atividades por vez**.
+    - Exibir botão "**Carregar mais**" no final da lista para buscar o próximo lote de 20 atividades.
+    
+#### 📁 **Pastas e Arquivos Permitidos**
+
+```
+client/src/pages/HomePage.tsx (Alterar e substituir o conteúdo atual)
+client/src/pages/AtividadesPorCategoriaPage.tsx (Criar essa página)
+client/src/components/atividades (pasta dos componentes de atividade)
+client/src/components/categorias (pasta dos componentes de categorias)
+```
+
+Observação: Caso seja necessário criar novos arquivos em pastas diferentes, manter o mesmo padrão de pasta, ou seja, tudo relacionado a entidade Atividade deve ser colocado na pasta atividade e a mesma lógica se aplica para Categoria.
+#### 🔒 **Restrições de Segurança e Boas Práticas**
+
+- **Não modificar arquivos fora dos listados** para a interface de categorias e atividades.
+- **Não realizar escrita ou alteração de dados** em banco de dados ou arquivos JSON — esta funcionalidade é exclusivamente de leitura.
+- Toda **consulta de atividades deve ser feita de forma segura e paginada**, evitando sobrecarga de memória.
+- **Evitar expor estruturas internas** ou dados sensíveis no frontend (como caminhos absolutos, tokens ou URLs protegidas).
+- **Não adicionar bibliotecas externas** sem necessidade clara e aprovação explícita.
+- Dados como URLs de imagens ou categorias devem ser carregados **somente via fontes controladas** (ex: JSON seguro, Firebase Storage).
+- **Evitar hardcode de credenciais ou caminhos** — utilizar `.env` ou arquivos de configuração quando necessário.
+- A responsividade deve ser **implementada com CSS responsivo** (ex: Tailwind ou media queries), sem lógica condicional exposta no frontend com dados do dispositivo.
+
+#### 📌 **Orientações de Desenvolvimento Padrão**
+
+- Usar nomes claros e semânticos para variáveis e funções.
+- Dividir responsabilidades entre componentes (ex: lógica de autenticação separada da UI).
+- Comentar trechos de lógica complexa.
+- Priorizar código limpo, reutilizável e organizado.
+- Validar entradas do usuário sempre que aplicável.
+- Preferir funções puras e evitar efeitos colaterais não controlados.
+- Priorizar acessibilidade e compatibilidade responsiva na interface.
