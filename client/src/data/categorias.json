@@ -1,0 +1,74 @@
+{
+  "id": "cores-e-formas",
+  "nome": "Cores e Formas",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FCores%20%26%20Formas.jpg?alt=media&token=db233aaf-9ab6-4fd3-8872-c1ec2e682230",
+  "ordem": 1
+},
+{
+  "id": "pareamento-e-associacao",
+  "nome": "Pareamento e Associação",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FPareamento%20%26%20Associac%CC%A7a%CC%83o.jpg?alt=media&token=95b26973-6516-4ddd-a24a-d6b6d7575c91",
+  "ordem": 2
+},
+{
+  "id": "pre-escrita-e-tracado",
+  "nome": "Pré-escrita e Traçado",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FPre%CC%81-escrita%20%26%20Trac%CC%A7ado.jpg?alt=media&token=954dcaf9-a207-4da5-8791-6ee6b78cb9c1",
+  "ordem": 3
+},
+{
+  "id": "tesoura-e-colagem",
+  "nome": "Tesoura e Colagem",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FTesoura%20e%20Colagem.jpg?alt=media&token=709d72be-5b4d-4384-9846-6da29e5a3a80",
+  "ordem": 4
+},
+{
+  "id": "logica-e-raciocinio",
+  "nome": "Lógica e Raciocínio",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FLo%CC%81gica%20%26%20Racioci%CC%81nio.jpg?alt=media&token=036afc72-d035-4e5e-84dd-4c81031f20e2",
+  "ordem": 5
+},
+{
+  "id": "criatividade-e-expressao",
+  "nome": "Criatividade e Expressão",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FCriatividade%20%26%20Expressa%CC%83o.jpg?alt=media&token=561056ab-349e-4f5f-aee7-8a093c10b7b2",
+  "ordem": 6
+},
+{
+  "id": "letras-e-numeros",
+  "nome": "Letras e Números",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FLetras%20%26%20Nu%CC%81meros.jpg?alt=media&token=63bb7cec-7bb4-491e-adff-d2bbeae93561",
+  "ordem": 7
+},
+{
+  "id": "arte-e-cultura",
+  "nome": "Arte e Cultura",
+  "descricao": "...",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FArte%20%26%20Cultura.jpg?alt=media&token=396013aa-96a4-4def-8100-2e01015fc4b8",
+  "ordem": 8
+},
+{
+  "id": "jogos-e-desafios",
+  "nome": "Jogos e Desafios",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FJogos%20%26%20Desafios.jpg?alt=media&token=a1127ebd-52ad-4508-8bb0-936a2ac93e0e",
+  "ordem": 9
+},
+{
+  "id": "historias-biblicas",
+  "nome": "Histórias Bíblicas para Crianças",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FHisto%CC%81rias%20Bi%CC%81blicas.jpg?alt=media&token=226e543c-50be-45d1-8343-9c4db56072c0",
+  "ordem": 10
+},
+{
+  "id": "contos-e-fabulas",
+  "nome": "Contos e Fábulas Infantis",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FContos%20e%20Fa%CC%81bulas%20Infantis.jpg?alt=media&token=c7074252-4a40-44d3-a875-f5498d695b31",
+  "ordem": 11
+},
+{
+  "id": "todas-as-atividades",
+  "nome": "Todas as Atividades",
+  "imagemUrl": "https://firebasestorage.googleapis.com/v0/b/app-diversao-em-papel.firebasestorage.app/o/categorias%2FTodas%20Atividades.jpg?alt=media&token=a62ffbea-562a-4efb-ae00-5d3625d153ab",
+  "ordem": 12,
+  "todas": true
+}

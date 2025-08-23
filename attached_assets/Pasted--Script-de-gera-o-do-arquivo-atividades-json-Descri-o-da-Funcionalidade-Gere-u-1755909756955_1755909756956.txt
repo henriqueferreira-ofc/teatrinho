@@ -1,0 +1,66 @@
+### 📄 Script de geração do arquivo atividades.json
+
+#### 🧩 **Descrição da Funcionalidade**
+
+Gere um arquivo `client/src/data/atividades.json` contendo a base de dados de atividades disponíveis no Firebase Storage. Dentro da pasta `atividades`, cada subpasta representa uma categoria e contém arquivos `.jpg` que representam atividades educativas. O script deve percorrer todas as subpastas, identificar os arquivos de imagem e gerar, para cada um, um objeto JSON contendo informações da atividade. O objetivo é consolidar todos esses dados em um único arquivo JSON estruturado.
+
+#### ✅ **Requisitos Funcionais**
+
+- **Conectar ao Firebase Storage**
+    - Utilizar o Firebase Admin SDK.
+    - Permitir a leitura de arquivos dentro da pasta `atividades/`.
+    - Solicitar credenciais do tipo `serviceAccountKey.json` no momento da execução, se ainda não fornecidas.
+- **Percorrer Estrutura de Pastas**
+    - Acessar a pasta principal `atividades/` no Storage.
+    - Identificar todas as subpastas (cada uma representa uma categoria).
+    - O nome da subpasta é o ID da categoria
+- **Identificar Arquivos de Imagem**
+    - Para cada subpasta, listar todos os arquivos com extensão `.jpg`.
+    - Ignorar outros formatos (como `.pdf`, `.png`, etc.).
+- **Gerar Objetos de Atividade**
+    - Para cada arquivo `.jpg`, gerar um objeto JSON contendo:
+    ```json
+    {
+		"id": "UUID v4",
+		"ordem": 1, // Mesmo nome do arquivo sem a extensão
+		"data": "2025-12-23T22:30:00", // ISO date
+		"categoria": "pre-escrita-tracado", // mesmo nome da pasta
+		"pasta": "atividades/pre-escrita-tracado",
+		"arquivo": "1.jpg",
+		"imagemUrl": "https://storage..." // Gerar via API uma URL pública
+	}
+	```
+- **Consolidar no Arquivo `client/src/data/atividades.json`**
+    - Todos os objetos devem ser salvos em um array JSON.
+    - O arquivo `atividades.json` será salvo localmente no diretório do script.
+- **Exibir Resumo no Console**
+    - Imprimir no terminal a quantidade total de categorias e atividades processadas.
+    - Indicar o local onde o `atividades.json` foi salvo.
+#### 📁 **Pastas e Arquivos Permitidos**
+
+```
+client/src/data/atividades.json (arquivo criado ou alterado)
+extras/gerar-atividades.js (script principal)
+```
+
+
+#### 🔒 **Restrições de Segurança e Boas Práticas**
+
+- Não modifique arquivos fora dos listados acima.
+- Não crie nem modifique tabelas de banco de dados sem solicitação explícita.
+- Não apague ou sobrescreva dados sem instrução clara.
+- Toda variável sensível (como chaves de API, tokens ou URLs protegidas) deve ser armazenada em arquivos `.env` ou equivalente.
+- Sempre perguntar antes de instalar bibliotecas externas ou adicionar dependências.
+- Todas as operações que envolvam escrita ou leitura em banco de dados devem ser explicitamente solicitadas no prompt principal.
+- Evitar comandos destrutivos ou irreversíveis, como `DELETE`, exceto sob instrução explícita.
+- Assegure-se de não expor dados sensíveis no frontend.
+
+#### 📌 **Orientações de Desenvolvimento Padrão**
+
+- Usar nomes claros e semânticos para variáveis e funções.
+- Dividir responsabilidades entre componentes (ex: lógica de autenticação separada da UI).
+- Comentar trechos de lógica complexa.
+- Priorizar código limpo, reutilizável e organizado.
+- Validar entradas do usuário sempre que aplicável.
+- Preferir funções puras e evitar efeitos colaterais não controlados.
+- Priorizar acessibilidade e compatibilidade responsiva na interface.
