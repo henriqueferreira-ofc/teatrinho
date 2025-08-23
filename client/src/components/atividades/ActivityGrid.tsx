@@ -33,9 +33,9 @@ export function ActivityGrid({
         </p>
       </div>
 
-      {/* Grid de atividades - sempre 2 colunas */}
+      {/* Grid de atividades - 2 colunas em mobile, 4 em telas grandes */}
       <div 
-        className="grid grid-cols-2 gap-4"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         data-testid="grid-atividades"
       >
         {atividades.map((atividade) => (
