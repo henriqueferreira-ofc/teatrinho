@@ -10,7 +10,7 @@ interface CategoryGridProps {
 export function CategoryGrid({ categorias, onCategoryClick }: CategoryGridProps) {
   return (
     <div 
-      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4"
+      className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
       data-testid="grid-categorias"
     >
       {categorias.map((categoria) => (
