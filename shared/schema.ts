@@ -71,3 +71,34 @@ export const subscriptionSchema = z.object({
 });
 
 export type Subscription = z.infer<typeof subscriptionSchema>;
+
+// Schemas para categorias e atividades
+export const categoriaSchema = z.object({
+  id: z.string(),
+  nome: z.string(),
+  imagemUrl: z.string().url(),
+  ordem: z.number(),
+  descricao: z.string().optional(),
+  todas: z.boolean().optional(),
+});
+
+export const atividadeSchema = z.object({
+  id: z.string(),
+  ordem: z.number(),
+  data: z.string(),
+  categoria: z.string(),
+  pasta: z.string(),
+  arquivo: z.string(),
+  imagemUrl: z.string().url(),
+});
+
+export type Categoria = z.infer<typeof categoriaSchema>;
+export type Atividade = z.infer<typeof atividadeSchema>;
+
+// Tipos para paginação de atividades
+export type AtividadesPaginadas = {
+  atividades: Atividade[];
+  total: number;
+  carregadas: number;
+  temMais: boolean;
+};

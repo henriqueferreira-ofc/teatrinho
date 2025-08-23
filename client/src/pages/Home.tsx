@@ -1,43 +1,63 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent } from '@/components/ui/card';
-import { Home as HomeIcon } from 'lucide-react';
+import { CategoryGrid } from '@/components/categorias/CategoryGrid';
+import { Categoria } from '@shared/schema';
+import categoriesData from '@/data/categorias.json';
 
-export default function Home() {
+// Tipo para navegação entre telas
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria';
+
+interface HomeProps {
+  onNavigate?: (tab: AppTab, data?: any) => void;
+}
+
+export default function Home({ onNavigate }: HomeProps = {}) {
   const { userProfile } = useAuth();
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+
+  useEffect(() => {
+    // Carregar categorias dos dados JSON
+    try {
+      const categoriasOrdenadas = (categoriesData as Categoria[]).sort((a, b) => a.ordem - b.ordem);
+      setCategorias(categoriasOrdenadas);
+    } catch (error) {
+      console.error('Erro ao carregar categorias:', error);
+    }
+  }, []);
+
+  const handleCategoryClick = (categoria: Categoria) => {
+    // Navegar para a página de atividades da categoria
+    onNavigate?.('atividades-categoria', categoria);
+  };
 
   return (
     <div className="p-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 text-white mb-6">
           <h2 className="text-2xl font-bold mb-2 text-black" data-testid="text-welcome">
             Bem-vindo de volta, {userProfile?.name?.split(' ')[0] || 'Usuário'}!
           </h2>
-          <p className="text-black">Continue sua jornada de leitura com o Teatrinho.</p>
+          <p className="text-black">Explore nossas atividades organizadas por categorias.</p>
         </div>
 
-        {/* Empty State */}
-        <Card className="shadow-material bg-white/80 backdrop-blur-sm border border-white/50">
-          <CardContent className="p-8 text-center">
-            <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <HomeIcon className="text-gray-400 text-2xl" size={32} />
+        {/* Categories Section */}
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4" data-testid="text-categorias-titulo">
+            Categorias de Atividades
+          </h3>
+          
+          {categorias.length > 0 ? (
+            <CategoryGrid 
+              categorias={categorias} 
+              onCategoryClick={handleCategoryClick} 
+            />
+          ) : (
+            <div className="text-center py-8" data-testid="loading-categorias">
+              <p className="text-gray-600">Carregando categorias...</p>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2" data-testid="text-home-title">Tela Inicial</h3>
-            <p className="text-gray-600 mb-6" data-testid="text-home-description">
-              Esta tela ainda não está implementada. Recursos futuros incluirão recomendações de leitura, livros recentes e estatísticas de leitura.
-            </p>
-            <div className="bg-gray-50 rounded-lg p-4 text-left">
-              <h4 className="font-semibold text-gray-900 mb-2">Em breve:</h4>
-              <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Recomendações de leitura</li>
-                <li>• eBooks abertos recentemente</li>
-                <li>• Acompanhamento do progresso de leitura</li>
-                <li>• Metas diárias de leitura</li>
-              </ul>
-            </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       </div>
     </div>
   );

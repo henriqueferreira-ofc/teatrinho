@@ -14,9 +14,11 @@ import EBooks from '@/pages/EBooks';
 import Videos from '@/pages/Videos';
 import Partnerships from '@/pages/Partnerships';
 import Profile from '@/pages/Profile';
+import AtividadesPorCategoriaPage from '@/pages/AtividadesPorCategoriaPage';
+import { Categoria } from '@shared/schema';
 
 type AuthScreen = 'login' | 'register';
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria';
 
 function AuthFlow() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>('login');
@@ -38,11 +40,29 @@ function AuthFlow() {
 
 function MainApp() {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
+  const [selectedCategory, setSelectedCategory] = useState<Categoria | null>(null);
+
+  const handleNavigate = (tab: AppTab, data?: any) => {
+    if (tab === 'atividades-categoria' && data) {
+      setSelectedCategory(data);
+      setActiveTab(tab);
+    } else {
+      setSelectedCategory(null);
+      setActiveTab(tab);
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
-        return <Home />;
+        return <Home onNavigate={handleNavigate} />;
+      case 'atividades-categoria':
+        return selectedCategory ? (
+          <AtividadesPorCategoriaPage 
+            categoria={selectedCategory} 
+            onNavigate={handleNavigate}
+          />
+        ) : <Home onNavigate={handleNavigate} />;
       case 'categories':
         return <Categories />;
       case 'ebooks':
@@ -54,13 +74,13 @@ function MainApp() {
       case 'profile':
         return <Profile />;
       default:
-        return <Home />;
+        return <Home onNavigate={handleNavigate} />;
     }
   };
 
   return (
     <ProtectedRoute>
-      <Layout activeTab={activeTab} onTabChange={setActiveTab}>
+      <Layout activeTab={activeTab === 'atividades-categoria' ? 'home' : activeTab} onTabChange={handleNavigate}>
         {renderTabContent()}
       </Layout>
     </ProtectedRoute>
