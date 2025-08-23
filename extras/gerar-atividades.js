@@ -1,8 +1,12 @@
-const admin = require('firebase-admin');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-const readline = require('readline');
+import admin from 'firebase-admin';
+import fs from 'fs';
+import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import readline from 'readline';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Interface para input do usuário
 const rl = readline.createInterface({
@@ -30,41 +34,127 @@ async function initializeFirebase() {
     if (admin.apps.length === 0) {
       console.log('🔧 Inicializando Firebase Admin SDK...');
       
-      // Verifica se existe o arquivo de credenciais
-      const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
+      // Tenta usar variáveis de ambiente primeiro
+      const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
       
-      if (!fs.existsSync(serviceAccountPath)) {
-        console.log('❌ Arquivo serviceAccountKey.json não encontrado.');
-        console.log('📁 Por favor, coloque o arquivo serviceAccountKey.json na pasta extras/');
+      if (serviceAccountJson) {
+        console.log('🔑 Usando credenciais das variáveis de ambiente...');
         
-        const continuar = await askQuestion('Deseja continuar mesmo assim? (s/n): ');
-        if (continuar.toLowerCase() !== 's') {
+        try {
+          // Remove possíveis caracteres de quebra de linha ou espaços extras
+          let cleanServiceAccountKey = serviceAccountJson.trim();
+          
+          // Se começar com aspas, remove elas (pode acontecer quando o JSON é colado como string)
+          if (cleanServiceAccountKey.startsWith('"') && cleanServiceAccountKey.endsWith('"')) {
+            cleanServiceAccountKey = cleanServiceAccountKey.slice(1, -1);
+          }
+          
+          // Substitui escape de aspas por aspas normais
+          cleanServiceAccountKey = cleanServiceAccountKey.replace(/\\"/g, '"');
+          
+          // Substitui escape de quebras de linha e outros caracteres especiais
+          cleanServiceAccountKey = cleanServiceAccountKey.replace(/\\n/g, '\\n');
+          cleanServiceAccountKey = cleanServiceAccountKey.replace(/\\r/g, '');
+          cleanServiceAccountKey = cleanServiceAccountKey.replace(/\\t/g, '');
+          
+          // Remove caracteres de controle problemáticos
+          cleanServiceAccountKey = cleanServiceAccountKey.replace(/[\x00-\x1F\x7F]/g, '');
+          
+          console.log('🔍 Verificando formato das credenciais...');
+          
+          const serviceAccount = JSON.parse(cleanServiceAccountKey);
+          
+          if (!serviceAccount.project_id) {
+            throw new Error('project_id não encontrado nas credenciais');
+          }
+          
+          if (!serviceAccount.type || serviceAccount.type !== 'service_account') {
+            throw new Error('Tipo de credencial inválido. Deve ser "service_account"');
+          }
+          
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            storageBucket: `${serviceAccount.project_id}.appspot.com`
+          });
+          
+          console.log('✅ Firebase Admin SDK inicializado com credenciais de ambiente!');
+          console.log(`📁 Projeto: ${serviceAccount.project_id}`);
+        } catch (parseError) {
+          console.error('❌ Erro ao fazer parse das credenciais de ambiente:', parseError.message);
+          console.error('🔍 Verifique se o JSON das credenciais está válido e completo.');
+          console.error('📋 Dica: O JSON deve começar com { e terminar com }');
+          console.error('🔧 As credenciais devem ser o conteúdo completo do arquivo serviceAccountKey.json');
           process.exit(1);
         }
-        
-        // Tenta usar variáveis de ambiente como fallback
-        if (!process.env.FIREBASE_PROJECT_ID) {
-          console.log('❌ Nenhuma credencial Firebase encontrada.');
-          process.exit(1);
-        }
-        
-        admin.initializeApp({
-          credential: admin.credential.applicationDefault(),
-          storageBucket: `${process.env.FIREBASE_PROJECT_ID}.appspot.com`
-        });
       } else {
-        const serviceAccount = require(serviceAccountPath);
+        // Fallback para arquivo local
+        const serviceAccountPath = path.join(__dirname, 'serviceAccountKey.json');
+        
+        if (!fs.existsSync(serviceAccountPath)) {
+          console.log('❌ Nenhuma credencial Firebase encontrada.');
+          console.log('📁 Variável FIREBASE_SERVICE_ACCOUNT_KEY não definida e arquivo serviceAccountKey.json não encontrado.');
+          console.log('🔧 Configure a variável de ambiente FIREBASE_SERVICE_ACCOUNT_KEY com o conteúdo do arquivo JSON.');
+          process.exit(1);
+        }
+        
+        console.log('📁 Usando arquivo serviceAccountKey.json local...');
+        const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
         
         admin.initializeApp({
           credential: admin.credential.cert(serviceAccount),
           storageBucket: `${serviceAccount.project_id}.appspot.com`
         });
+        
+        console.log('✅ Firebase Admin SDK inicializado com arquivo local!');
       }
-      
-      console.log('✅ Firebase Admin SDK inicializado com sucesso!');
     }
     
-    return admin.storage().bucket();
+    // Tenta diferentes variações do bucket
+    const possibleBuckets = [
+      `${admin.app().options.storageBucket}`,
+      `${admin.app().options.projectId}.appspot.com`,
+      `gs://${admin.app().options.projectId}.appspot.com`
+    ];
+    
+    console.log('🪣 Testando buckets disponíveis...');
+    
+    for (const bucketName of possibleBuckets) {
+      try {
+        console.log(`🔍 Testando bucket: ${bucketName}`);
+        const bucket = admin.storage().bucket(bucketName);
+        await bucket.getMetadata();
+        console.log(`✅ Bucket encontrado: ${bucketName}`);
+        return bucket;
+      } catch (error) {
+        console.log(`❌ Bucket ${bucketName} não acessível: ${error.message}`);
+      }
+    }
+    
+    // Se nenhum bucket funcionou, cria arquivo de exemplo
+    console.log('⚠️  Nenhum bucket de Storage encontrado.');
+    console.log('📋 Para usar este script você precisa:');
+    console.log('   1. Ativar o Firebase Storage no Console');
+    console.log('   2. Criar uma pasta "atividades/" no Storage');
+    console.log('   3. Organizar as imagens em subpastas por categoria');
+    console.log('   4. Fazer upload dos arquivos .jpg');
+    console.log('');
+    console.log('🔧 Estrutura esperada no Storage:');
+    console.log('   atividades/');
+    console.log('   ├── pre-escrita-tracado/');
+    console.log('   │   ├── 1.jpg');
+    console.log('   │   ├── 2.jpg');
+    console.log('   │   └── ...');
+    console.log('   ├── coordenacao-motora/');
+    console.log('   │   ├── 1.jpg');
+    console.log('   │   └── ...');
+    console.log('   └── matematica-basica/');
+    console.log('       └── ...');
+    console.log('');
+    console.log('📄 Criando arquivo de exemplo com dados fictícios...');
+    
+    // Gera dados de exemplo
+    const atividadesExemplo = criarDadosExemplo();
+    return { isExample: true, atividades: atividadesExemplo };
   } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error.message);
     process.exit(1);
@@ -72,9 +162,38 @@ async function initializeFirebase() {
 }
 
 /**
+ * Cria dados de exemplo para demonstração
+ */
+function criarDadosExemplo() {
+  const categorias = ['pre-escrita-tracado', 'coordenacao-motora', 'matematica-basica', 'formas-geometricas', 'alfabetizacao'];
+  const atividades = [];
+  
+  categorias.forEach(categoria => {
+    for (let i = 1; i <= 3; i++) {
+      atividades.push({
+        id: uuidv4(),
+        ordem: i,
+        data: new Date().toISOString(),
+        categoria: categoria,
+        pasta: `atividades/${categoria}`,
+        arquivo: `${i}.jpg`,
+        imagemUrl: `https://firebasestorage.googleapis.com/exemplo/atividades/${categoria}/${i}.jpg`
+      });
+    }
+  });
+  
+  return atividades;
+}
+
+/**
  * Percorre as pastas no Storage e identifica arquivos .jpg
  */
 async function percorrerAtividades(bucket) {
+  // Se for um bucket de exemplo, retorna os dados de exemplo
+  if (bucket.isExample) {
+    return bucket;
+  }
+  
   console.log('📁 Percorrendo estrutura de pastas no Firebase Storage...');
   
   try {
@@ -185,14 +304,40 @@ async function main() {
     // Percorre atividades no Storage
     const resultado = await percorrerAtividades(bucket);
     
-    // Salva arquivo JSON
-    const outputPath = salvarArquivoJSON(resultado.atividades);
+    let outputPath, resumo;
+    
+    if (resultado.isExample) {
+      // Salva arquivo de exemplo
+      outputPath = salvarArquivoJSON(resultado.atividades);
+      const categorias = new Set(resultado.atividades.map(a => a.categoria));
+      
+      resumo = {
+        totalCategorias: categorias.size,
+        totalAtividades: resultado.atividades.length,
+        isExample: true
+      };
+    } else {
+      // Salva dados reais do Storage
+      outputPath = salvarArquivoJSON(resultado.atividades);
+      resumo = resultado;
+    }
     
     // Exibe resumo
     console.log('\n📊 RESUMO DA EXECUÇÃO:');
-    console.log(`📁 Total de categorias: ${resultado.totalCategorias}`);
-    console.log(`📄 Total de atividades: ${resultado.totalAtividades}`);
+    if (resumo.isExample) {
+      console.log('⚠️  Dados de exemplo gerados (Storage não configurado)');
+    }
+    console.log(`📁 Total de categorias: ${resumo.totalCategorias}`);
+    console.log(`📄 Total de atividades: ${resumo.totalAtividades}`);
     console.log(`💾 Arquivo salvo em: ${outputPath}`);
+    
+    if (resumo.isExample) {
+      console.log('\n🔧 Para usar dados reais do Firebase Storage:');
+      console.log('   1. Configure o Firebase Storage no projeto');
+      console.log('   2. Faça upload das atividades na estrutura de pastas');
+      console.log('   3. Execute o script novamente');
+    }
+    
     console.log('\n✅ Processo concluído com sucesso!');
     
   } catch (error) {
@@ -204,8 +349,6 @@ async function main() {
 }
 
 // Executa o script
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
-
-module.exports = { main };
