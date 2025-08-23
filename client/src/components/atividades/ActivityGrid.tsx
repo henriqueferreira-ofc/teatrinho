@@ -33,7 +33,7 @@ export function ActivityGrid({
         </p>
       </div>
 
-      {/* Grid de atividades */}
+      {/* Grid de atividades - sempre 2 colunas */}
       <div 
         className="grid grid-cols-2 gap-4"
         data-testid="grid-atividades"
