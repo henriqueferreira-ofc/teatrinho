@@ -180,12 +180,26 @@ function carregarAtividadesExistentes() {
 }
 
 /**
- * Gera URL pública no formato Firebase Storage padrão
+ * Torna um arquivo público e gera URL pública real
  */
-function gerarUrlPublica(categoria, arquivo, bucketName) {
-  const token = uuidv4();
-  const caminhoEncodificado = encodeURIComponent(`atividades/${categoria}/${arquivo}`);
-  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${caminhoEncodificado}?alt=media&token=${token}`;
+async function tornarArquivoPublicoEGerarUrl(file, categoria, arquivo, bucketName) {
+  try {
+    // Torna o arquivo público
+    await file.makePublic();
+    
+    // Gera URL pública real (sem token)
+    const caminhoEncodificado = encodeURIComponent(`atividades/${categoria}/${arquivo}`);
+    return `https://storage.googleapis.com/${bucketName}/atividades/${categoria}/${arquivo}`;
+    
+  } catch (error) {
+    // Se falhar ao tornar público, usa URL assinada de longa duração
+    console.log(`⚠️  Não foi possível tornar público ${categoria}/${arquivo}, usando URL assinada`);
+    const [signedUrl] = await file.getSignedUrl({
+      action: 'read',
+      expires: '01-01-2050' // URL válida por muito tempo
+    });
+    return signedUrl;
+  }
 }
 
 /**
@@ -209,7 +223,7 @@ function criarDadosExemplo() {
         categoria: categoria,
         pasta: `atividades/${categoria}`,
         arquivo: arquivo,
-        imagemUrl: gerarUrlPublica(categoria, arquivo, 'app-teatrinho.firebasestorage.app')
+        imagemUrl: `https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/${categoria}/${arquivo}`
       });
     }
   });
@@ -271,8 +285,8 @@ async function percorrerAtividades(bucket) {
         console.log(`🔄 Preservando ID existente para ${categoria}/${nomeArquivo}`);
       }
       
-      // Gera URL pública permanente no formato Firebase Storage
-      const imagemUrl = gerarUrlPublica(categoria, nomeArquivo, bucketName);
+      // Torna o arquivo público e gera URL pública real
+      const imagemUrl = await tornarArquivoPublicoEGerarUrl(file, categoria, nomeArquivo, bucketName);
       
       // Cria objeto da atividade
       const atividade = {
