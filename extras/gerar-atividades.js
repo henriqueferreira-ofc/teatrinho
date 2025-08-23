@@ -149,22 +149,67 @@ async function initializeFirebase() {
 }
 
 /**
+ * Carrega atividades existentes do arquivo JSON para preservar IDs
+ */
+function carregarAtividadesExistentes() {
+  try {
+    const outputPath = path.join(__dirname, '../client/src/data/atividades.json');
+    if (fs.existsSync(outputPath)) {
+      console.log('🔍 Carregando IDs existentes para preservação...');
+      const conteudo = fs.readFileSync(outputPath, 'utf8');
+      const atividades = JSON.parse(conteudo);
+      
+      // Cria mapa chave -> id
+      const mapaIds = new Map();
+      atividades.forEach(atividade => {
+        const chave = `${atividade.categoria}/${atividade.arquivo}`;
+        mapaIds.set(chave, {
+          id: atividade.id,
+          data: atividade.data
+        });
+      });
+      
+      console.log(`📋 ${mapaIds.size} IDs existentes carregados para preservação`);
+      return mapaIds;
+    }
+  } catch (error) {
+    console.log('⚠️  Erro ao carregar IDs existentes:', error.message);
+  }
+  
+  return new Map();
+}
+
+/**
+ * Gera URL pública no formato Firebase Storage padrão
+ */
+function gerarUrlPublica(categoria, arquivo, bucketName) {
+  const token = uuidv4();
+  const caminhoEncodificado = encodeURIComponent(`atividades/${categoria}/${arquivo}`);
+  return `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${caminhoEncodificado}?alt=media&token=${token}`;
+}
+
+/**
  * Cria dados de exemplo para demonstração
  */
 function criarDadosExemplo() {
   const categorias = ['pre-escrita-tracado', 'coordenacao-motora', 'matematica-basica', 'formas-geometricas', 'alfabetizacao'];
   const atividades = [];
+  const idsExistentes = carregarAtividadesExistentes();
   
   categorias.forEach(categoria => {
     for (let i = 1; i <= 3; i++) {
+      const arquivo = `${i}.jpg`;
+      const chave = `${categoria}/${arquivo}`;
+      const dadosExistentes = idsExistentes.get(chave);
+      
       atividades.push({
-        id: uuidv4(),
+        id: dadosExistentes?.id || uuidv4(),
         ordem: i,
-        data: new Date().toISOString(),
+        data: dadosExistentes?.data || new Date().toISOString(),
         categoria: categoria,
         pasta: `atividades/${categoria}`,
-        arquivo: `${i}.jpg`,
-        imagemUrl: `https://firebasestorage.googleapis.com/exemplo/atividades/${categoria}/${i}.jpg`
+        arquivo: arquivo,
+        imagemUrl: gerarUrlPublica(categoria, arquivo, 'app-teatrinho.firebasestorage.app')
       });
     }
   });
@@ -184,11 +229,15 @@ async function percorrerAtividades(bucket) {
   console.log('📁 Percorrendo estrutura de pastas no Firebase Storage...');
   
   try {
+    // Carrega IDs existentes para preservação
+    const idsExistentes = carregarAtividadesExistentes();
+    
     // Lista todos os arquivos na pasta atividades/
     const [files] = await bucket.getFiles({ prefix: 'atividades/' });
     
     const atividades = [];
     const categorias = new Set();
+    const bucketName = bucket.name;
     
     for (const file of files) {
       const filePath = file.name;
@@ -209,24 +258,31 @@ async function percorrerAtividades(bucket) {
       const categoria = pathParts[1];
       const nomeArquivo = pathParts[2];
       const ordem = parseInt(path.basename(nomeArquivo, '.jpg')) || 1;
+      const chave = `${categoria}/${nomeArquivo}`;
       
       categorias.add(categoria);
       
-      // Gera URL pública para a imagem
-      const [url] = await file.getSignedUrl({
-        action: 'read',
-        expires: '03-01-2030' // URL válida por muito tempo
-      });
+      // Verifica se já existe ID para esta atividade
+      const dadosExistentes = idsExistentes.get(chave);
+      const atividadeId = dadosExistentes?.id || uuidv4();
+      const dataAtividade = dadosExistentes?.data || new Date().toISOString();
+      
+      if (dadosExistentes) {
+        console.log(`🔄 Preservando ID existente para ${categoria}/${nomeArquivo}`);
+      }
+      
+      // Gera URL pública permanente no formato Firebase Storage
+      const imagemUrl = gerarUrlPublica(categoria, nomeArquivo, bucketName);
       
       // Cria objeto da atividade
       const atividade = {
-        id: uuidv4(),
+        id: atividadeId,
         ordem: ordem,
-        data: new Date().toISOString(),
+        data: dataAtividade,
         categoria: categoria,
         pasta: `atividades/${categoria}`,
         arquivo: nomeArquivo,
-        imagemUrl: url
+        imagemUrl: imagemUrl
       };
       
       atividades.push(atividade);
