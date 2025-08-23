@@ -112,8 +112,13 @@ async function initializeFirebase() {
     // Tenta diferentes variações do bucket
     const possibleBuckets = [
       `${admin.app().options.storageBucket}`,
+      'app-teatrinho.firebasestorage.app',
+      'app-teatrinho.appspot.com',
       `${admin.app().options.projectId}.appspot.com`,
-      `gs://${admin.app().options.projectId}.appspot.com`
+      `${admin.app().options.projectId}.firebasestorage.app`,
+      `gs://app-teatrinho.firebasestorage.app`,
+      `gs://${admin.app().options.projectId}.appspot.com`,
+      `gs://${admin.app().options.projectId}.firebasestorage.app`
     ];
     
     console.log('🪣 Testando buckets disponíveis...');
