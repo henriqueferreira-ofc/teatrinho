@@ -33,10 +33,6 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
     setIsLoading(true);
     try {
       await loginWithEmail(data.email, data.password);
-      toast({
-        title: "Bem-vindo de volta!",
-        description: "Você foi conectado com sucesso.",
-      });
     } catch (error: any) {
       toast({
         title: "Falha no login",
@@ -52,10 +48,6 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
     setIsGoogleLoading(true);
     try {
       await loginWithGoogle();
-      toast({
-        title: "Bem-vindo!",
-        description: "Você foi conectado com Google com sucesso.",
-      });
     } catch (error: any) {
       toast({
         title: "Falha no login com Google",
