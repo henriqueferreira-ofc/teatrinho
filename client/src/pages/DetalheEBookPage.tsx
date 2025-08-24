@@ -311,7 +311,7 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                       data-testid="button-add-activities"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      <span className="truncate">Adicionar</span>
+                      <span className="truncate">Adicionar Atividade</span>
                     </Button>
                   </div>
                 )}
