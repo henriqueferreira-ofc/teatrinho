@@ -40,111 +40,100 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
 
-  // Load image as base64 with multiple fallback methods
-  const loadImageAsBase64 = async (url: string): Promise<string> => {
-    // Method 1: Try fetch first (often works better with Firebase Storage)
-    try {
-      console.log('Trying fetch method for:', url);
-      const response = await fetch(url, {
-        mode: 'cors',
-        credentials: 'omit'
-      });
+  // Load image as base64 using proxy fallback for CORS issues
+  const loadImageAsBase64 = (url: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      console.log('Loading image directly:', url);
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      const img = new Image();
       
-      const blob = await response.blob();
-      
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            if (!ctx) {
-              reject(new Error('Failed to get canvas context'));
-              return;
-            }
-            
-            canvas.width = img.naturalWidth || img.width;
-            canvas.height = img.naturalHeight || img.height;
-            
-            ctx.drawImage(img, 0, 0);
-            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-            resolve(dataURL);
-          } catch (error) {
-            reject(error);
-          }
-        };
-        
-        img.onerror = reject;
-        img.src = URL.createObjectURL(blob);
-      });
-      
-    } catch (fetchError) {
-      console.log('Fetch failed, trying direct image load:', fetchError);
-      
-      // Method 2: Direct image loading with CORS
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            if (!ctx) {
-              reject(new Error('Failed to get canvas context'));
-              return;
-            }
-            
-            canvas.width = img.naturalWidth || img.width;
-            canvas.height = img.naturalHeight || img.height;
-            
-            ctx.drawImage(img, 0, 0);
-            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-            resolve(dataURL);
-          } catch (error) {
-            reject(error);
-          }
-        };
-        
-        img.onerror = () => {
-          // Method 3: Try without CORS as final fallback
-          const fallbackImg = new Image();
+      // Try without crossOrigin first (more permissive)
+      img.onload = () => {
+        try {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
           
-          fallbackImg.onload = () => {
+          if (!ctx) {
+            reject(new Error('Failed to get canvas context'));
+            return;
+          }
+          
+          canvas.width = img.naturalWidth || img.width;
+          canvas.height = img.naturalHeight || img.height;
+          
+          ctx.drawImage(img, 0, 0);
+          const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+          console.log('Successfully loaded image directly:', url);
+          resolve(dataURL);
+        } catch (canvasError) {
+          console.log('Canvas tainted, trying proxy method:', canvasError);
+          
+          // Use proxy when canvas is tainted
+          const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
+          const proxyImg = new Image();
+          
+          proxyImg.onload = () => {
             try {
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
+              const proxyCanvas = document.createElement('canvas');
+              const proxyCtx = proxyCanvas.getContext('2d');
               
-              if (!ctx) {
+              if (!proxyCtx) {
                 reject(new Error('Failed to get canvas context'));
                 return;
               }
               
-              canvas.width = fallbackImg.naturalWidth || fallbackImg.width;
-              canvas.height = fallbackImg.naturalHeight || fallbackImg.height;
+              proxyCanvas.width = proxyImg.naturalWidth || proxyImg.width;
+              proxyCanvas.height = proxyImg.naturalHeight || proxyImg.height;
               
-              ctx.drawImage(fallbackImg, 0, 0);
-              const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-              resolve(dataURL);
-            } catch (fallbackError) {
-              reject(fallbackError);
+              proxyCtx.drawImage(proxyImg, 0, 0);
+              const proxyDataURL = proxyCanvas.toDataURL('image/jpeg', 0.9);
+              console.log('Successfully loaded image via proxy:', url);
+              resolve(proxyDataURL);
+            } catch (proxyError) {
+              reject(proxyError);
             }
           };
           
-          fallbackImg.onerror = () => reject(new Error('All image loading methods failed'));
-          fallbackImg.src = url;
+          proxyImg.onerror = () => reject(new Error('Failed to load image via proxy'));
+          proxyImg.src = proxyUrl;
+        }
+      };
+      
+      img.onerror = () => {
+        console.log('Direct load failed, trying via proxy:', url);
+        
+        // Fallback: Use backend proxy
+        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
+        const proxyImg = new Image();
+        
+        proxyImg.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+              reject(new Error('Failed to get canvas context'));
+              return;
+            }
+            
+            canvas.width = proxyImg.naturalWidth || proxyImg.width;
+            canvas.height = proxyImg.naturalHeight || proxyImg.height;
+            
+            ctx.drawImage(proxyImg, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+            console.log('Successfully loaded image via proxy fallback:', url);
+            resolve(dataURL);
+          } catch (error) {
+            reject(error);
+          }
         };
         
-        img.src = url;
-      });
-    }
+        proxyImg.onerror = () => reject(new Error('All methods failed to load image'));
+        proxyImg.src = proxyUrl;
+      };
+      
+      img.src = url;
+    });
   };
 
   // Generate PDF with activity images
