@@ -17,7 +17,7 @@ interface EBooksPageProps {
 
 export default function EBooksPage({ onNavigateToDetails }: EBooksPageProps = {}) {
   const { user, isSubscriber } = useAuth();
-  const { ebooks, loading } = useEBooks();
+  const { ebooks, loading, setSelectedEbook } = useEBooks();
   
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -36,7 +36,9 @@ export default function EBooksPage({ onNavigateToDetails }: EBooksPageProps = {}
   };
 
   const handleSelectEbook = (ebook: Ebook) => {
-    // Navigate to details page when eBook is selected
+    // First select the eBook in the context
+    setSelectedEbook(ebook);
+    // Then navigate to details page when eBook is selected
     onNavigateToDetails?.();
   };
 
