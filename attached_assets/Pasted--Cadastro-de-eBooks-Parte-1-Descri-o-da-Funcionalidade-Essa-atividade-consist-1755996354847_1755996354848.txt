@@ -1,0 +1,132 @@
+### 📄 Cadastro de eBooks - Parte 1
+
+#### 🧩 **Descrição da Funcionalidade**
+
+Essa atividade consiste na implementação do **CRUD (Create, Read, Update, Delete)** para eBooks personalizados dentro da aplicação. O objetivo inicial é permitir que usuários autenticados e com assinatura válida possam **criar e gerenciar seus próprios eBooks**, dando-lhes um nome personalizado. Cada eBook será salvo automaticamente sempre que uma alteração ocorrer (como renomear ou editar), sem necessidade de botão de salvar. Além disso, os eBooks podem ser **clonados ou excluídos** de forma prática.
+
+Neste primeiro momento, o foco está exclusivamente na estrutura de **cadastro e gerenciamento dos eBooks**, sem ainda incluir a lógica de adicionar ou remover atividades dentro dos mesmos — essa parte será desenvolvida em uma etapa posterior.
+#### ✅ **Requisitos Funcionais**
+
+#### 🔐 Autenticação e Acesso
+
+- O usuário deve estar **logado** para acessar qualquer funcionalidade de eBooks.
+- A tela de eBooks pode ser acessada mesmo por usuários **sem assinatura válida**.
+- Caso o usuário **não possua uma assinatura ativa**, a interface deve:
+    - **Ocultar ou desabilitar** todas as ações de criação, edição, exclusão ou clonagem de eBooks.
+    - Exibir uma **mensagem clara** informando que a funcionalidade está disponível apenas para usuários com assinatura ativa.
+    - Apresentar um **botão de CTA (Call to Action)** com o texto como por exemplo “Ativar Assinatura para Criar eBooks”, apontando temporariamente para `https://google.com` (link que será atualizado futuramente).
+
+#### 📘 Cadastro (Create)
+
+- Usuários logados e com assinatura válida podem **criar um novo eBook**, informando um nome personalizado.
+- O nome é **obrigatório** e deve ser único por usuário.
+    
+#### 📖 Consulta (Read)
+
+- O usuário pode **visualizar a lista de eBooks criados por ele**, com informações como nome, data de criação e quantidade de atividades.
+- A listagem deve estar ordenada de forma alfabética ou por data, com layout responsivo.
+- No componente (widget) de eBook deve ter os botões se selecionar, clonar e excluir.
+
+#### ✏️ Atualização (Update)
+
+- O nome do eBook pode ser **editado diretamente**.
+- O sistema deve **salvar automaticamente** qualquer alteração feita.
+
+#### ❌ Exclusão (Delete)
+
+- O usuário pode **excluir um eBook existente**, com confirmação prévia obrigatória.
+
+#### 📑 Clonagem
+
+- O usuário pode **clonar qualquer eBook de sua autoria**.
+- Ao acionar a opção de clonagem, o sistema deve:
+    - Exibir um **modal de confirmação** com um campo de texto preenchido automaticamente com o nome do eBook atual seguido do sufixo `" - Cópia"`.
+    - Permitir que o usuário **edite o nome** antes de confirmar a clonagem.
+- Após a confirmação, será criada uma **nova instância independente do eBook**, com o nome definido no modal.
+- O novo eBook clonado deve ser imediatamente adicionado à lista e tratado como um item distinto.
+#### 📌 Indicação Visual do eBook Selecionado no Cabeçalho
+
+- O cabeçalho da aplicação deve exibir **visualmente o eBook atualmente selecionado pelo usuário**.
+- Esse componente visual deve conter:
+    - O **nome do eBook** selecionado.
+    - Um **ícone circular** com a **quantidade de atividades** atualmente adicionadas ao eBook.
+- Ao **clicar no componente**, o usuário deve ser **redirecionado para a tela de detalhes** do eBook selecionado.
+- Esse componente só deve ser exibido se um eBook estiver atualmente selecionado.
+- Remover o nome da aplicação no cabeçalho para melhorar a responsividade 
+    
+#### 📁 **Pastas e Arquivos Permitidos**
+
+```
+client/src/components/ebooks (pasta para os componentes)
+client/src/pages/EBooksPage.tsx (alterar)
+client/src/pages/DetalheEBookPage.tsx (criar)
+client/src/contexts (criar um contexto para ebooks)
+client/src/hooks (criar hooks se necessário)
+```
+
+Observação: as informações de ebooks devem ser acessíveis e compartilhadas em todas as telas da aplicação
+
+#### 🔒 **Restrições de Segurança e Boas Práticas**
+
+- Não modifique arquivos fora dos listados acima.
+- Não crie nem modifique tabelas de banco de dados sem solicitação explícita.
+- Não apague ou sobrescreva dados sem instrução clara.
+- Toda variável sensível (como chaves de API, tokens ou URLs protegidas) deve ser armazenada em arquivos `.env` ou equivalente.
+- Sempre perguntar antes de instalar bibliotecas externas ou adicionar dependências.
+- Todas as operações que envolvam escrita ou leitura em banco de dados devem ser explicitamente solicitadas no prompt principal.
+- Evitar comandos destrutivos ou irreversíveis, como `DELETE`, exceto sob instrução explícita.
+- Assegure-se de não expor dados sensíveis no frontend.
+
+#### 📌 **Orientações de Desenvolvimento Padrão**
+
+- Usar nomes claros e semânticos para variáveis e funções.
+- Dividir responsabilidades entre componentes (ex: lógica de autenticação separada da UI).
+- Comentar trechos de lógica complexa.
+- Priorizar código limpo, reutilizável e organizado.
+- Validar entradas do usuário sempre que aplicável.
+- Preferir funções puras e evitar efeitos colaterais não controlados.
+- Priorizar acessibilidade e compatibilidade responsiva na interface.
+
+#### Informações sobre o Banco de dados
+
+Os dados de eBooks são armazenados na coleção `/usuarios/{userId}/ebooks/{ebookId}`
+
+- Regras atuais do Firestore
+
+```
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /usuarios/{userId} {      
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    
+    	match /ebooks/{ebookId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+		match /assinaturas/{email} {
+      allow read: if request.auth != null && request.auth.token.email == email;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+```
+
+
+#### Modelo para eBook
+
+```json
+{
+	"id": "3956fdee-4ef7-403a-bd35-d1d155dca974",
+	"nome": "Atividades de Férias do João",
+	"data": "2025-12-23T22:30:00",
+	"atividades": [
+		"f0eed885-7112-4b4d-b124-054821a54e44"
+	]
+}
+```
