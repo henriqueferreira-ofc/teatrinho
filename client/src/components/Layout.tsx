@@ -235,12 +235,7 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
               </div>
             </Button>
           ) : (
-            <h1 
-              className="text-xl font-bold text-gray-900 dark:text-gray-100 hidden sm:block" 
-              data-testid="text-app-title"
-            >
-              Teatrinho
-            </h1>
+            <div className="flex-1" />
           )}
 
           {/* User Avatar */}
