@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { getUserEbooks, createEbook, updateEbook, deleteEbook, cloneEbook } from '@/lib/firebase';
 import type { Ebook, CreateEbook, UpdateEbook } from '@shared/schema';
-import { useToast } from '@/hooks/use-toast';
 
 interface EBookContextType {
   ebooks: Ebook[];
@@ -38,7 +37,6 @@ export function EBookProvider({ children }: EBookProviderProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const refreshEbooks = async () => {
     if (!user) {
@@ -61,11 +59,6 @@ export function EBookProvider({ children }: EBookProviderProps) {
     } catch (err) {
       console.error('Error fetching eBooks:', err);
       setError('Erro ao carregar eBooks');
-      toast({
-        title: "Erro",
-        description: "Não foi possível carregar seus eBooks.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -84,31 +77,16 @@ export function EBookProvider({ children }: EBookProviderProps) {
       
       // Check if name already exists
       if (checkEbookNameExists(data.nome)) {
-        toast({
-          title: "Nome já existe",
-          description: "Já existe um eBook com esse nome. Escolha um nome diferente.",
-          variant: "destructive",
-        });
         return null;
       }
 
       const newEbook = await createEbook(data);
       setEbooks(prev => [...prev, newEbook].sort((a, b) => a.nome.localeCompare(b.nome)));
       
-      toast({
-        title: "eBook criado",
-        description: `O eBook "${newEbook.nome}" foi criado com sucesso.`,
-      });
-      
       return newEbook;
     } catch (err) {
       console.error('Error creating eBook:', err);
       setError('Erro ao criar eBook');
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar o eBook. Tente novamente.",
-        variant: "destructive",
-      });
       return null;
     }
   };
@@ -119,11 +97,6 @@ export function EBookProvider({ children }: EBookProviderProps) {
       
       // Check if name already exists (excluding current eBook)
       if (data.nome && checkEbookNameExists(data.nome, id)) {
-        toast({
-          title: "Nome já existe",
-          description: "Já existe um eBook com esse nome. Escolha um nome diferente.",
-          variant: "destructive",
-        });
         return null;
       }
 
@@ -141,11 +114,6 @@ export function EBookProvider({ children }: EBookProviderProps) {
     } catch (err) {
       console.error('Error updating eBook:', err);
       setError('Erro ao atualizar eBook');
-      toast({
-        title: "Erro",
-        description: "Não foi possível atualizar o eBook. Tente novamente.",
-        variant: "destructive",
-      });
       return null;
     }
   };
@@ -153,7 +121,6 @@ export function EBookProvider({ children }: EBookProviderProps) {
   const deleteEbookData = async (id: string): Promise<boolean> => {
     try {
       setError(null);
-      const ebookToDelete = ebooks.find(ebook => ebook.id === id);
       
       await deleteEbook(id);
       setEbooks(prev => prev.filter(ebook => ebook.id !== id));
@@ -163,20 +130,10 @@ export function EBookProvider({ children }: EBookProviderProps) {
         setSelectedEbook(null);
       }
       
-      toast({
-        title: "eBook excluído",
-        description: `O eBook "${ebookToDelete?.nome}" foi excluído com sucesso.`,
-      });
-      
       return true;
     } catch (err) {
       console.error('Error deleting eBook:', err);
       setError('Erro ao excluir eBook');
-      toast({
-        title: "Erro",
-        description: "Não foi possível excluir o eBook. Tente novamente.",
-        variant: "destructive",
-      });
       return false;
     }
   };
@@ -187,31 +144,16 @@ export function EBookProvider({ children }: EBookProviderProps) {
       
       // Check if name already exists
       if (checkEbookNameExists(newName)) {
-        toast({
-          title: "Nome já existe",
-          description: "Já existe um eBook com esse nome. Escolha um nome diferente.",
-          variant: "destructive",
-        });
         return null;
       }
 
       const clonedEbook = await cloneEbook(id, newName);
       setEbooks(prev => [...prev, clonedEbook].sort((a, b) => a.nome.localeCompare(b.nome)));
       
-      toast({
-        title: "eBook clonado",
-        description: `O eBook "${clonedEbook.nome}" foi criado com sucesso.`,
-      });
-      
       return clonedEbook;
     } catch (err) {
       console.error('Error cloning eBook:', err);
       setError('Erro ao clonar eBook');
-      toast({
-        title: "Erro",
-        description: "Não foi possível clonar o eBook. Tente novamente.",
-        variant: "destructive",
-      });
       return null;
     }
   };
