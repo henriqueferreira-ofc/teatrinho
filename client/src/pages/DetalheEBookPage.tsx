@@ -22,6 +22,9 @@ import { CloneEBookDialog } from '@/components/ebooks/CloneEBookDialog';
 import { DeleteEBookDialog } from '@/components/ebooks/DeleteEBookDialog';
 import { AddActivityDialog } from '@/components/ebooks/AddActivityDialog';
 import { format } from 'date-fns';
+import { ActivityList } from '@/components/ebooks/ActivityList';
+import { BookViewer } from '@/components/ebooks/BookViewer';
+import { EBookExporter } from '@/components/ebooks/EBookExporter';
 import { ptBR } from 'date-fns/locale';
 import type { Ebook } from '@shared/schema';
 
@@ -30,7 +33,7 @@ interface DetalheEBookPageProps {
 }
 
 export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
-  const { selectedEbook, removeActivityFromEbook, updateEbookData } = useEBooks();
+  const { selectedEbook, removeActivityFromEbook, updateEbookData, reorderActivities } = useEBooks();
   const { isSubscriber } = useAuth();
   const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -202,6 +205,8 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                     <Edit2 className="h-4 w-4 mr-2" />
                     <span className="sm:inline">Editar</span>
                   </Button>
+                  <BookViewer ebook={selectedEbook} />
+                  <EBookExporter ebook={selectedEbook} />
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -253,45 +258,20 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
               </div>
 
               {selectedEbook.atividades.length > 0 ? (
-                <div className="space-y-3">
-                  {selectedEbook.atividades.map((atividadeId, index) => (
-                    <Card 
-                      key={atividadeId} 
-                      className="border border-gray-200 dark:border-gray-700"
-                      data-testid={`activity-item-${index}`}
-                    >
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
-                              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                {index + 1}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-900 dark:text-gray-100">
-                                ID: {atividadeId}
-                              </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Atividade personalizada
-                              </p>
-                            </div>
-                          </div>
-                          {isSubscriber && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => removeActivityFromEbook(selectedEbook.id, atividadeId)}
-                              className="text-red-600 hover:text-red-700"
-                              data-testid={`button-remove-activity-${index}`}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                <div>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                    Arraste as atividades para reordenar
+                  </p>
+                  <ActivityList
+                    activities={selectedEbook.atividades}
+                    onReorder={async (newOrder) => {
+                      await reorderActivities(selectedEbook.id, newOrder);
+                    }}
+                    onDelete={async (activityId) => {
+                      await removeActivityFromEbook(selectedEbook.id, activityId);
+                    }}
+                    canEdit={isSubscriber}
+                  />
                 </div>
               ) : (
                 <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700">

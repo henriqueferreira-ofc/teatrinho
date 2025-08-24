@@ -103,12 +103,32 @@ export type AtividadesPaginadas = {
   temMais: boolean;
 };
 
+// Schema para atividades de eBook
+export const ebookAtividadeSchema = z.object({
+  id: z.string(),
+  titulo: z.string().min(1, "Título é obrigatório").max(100, "Título muito longo"),
+  descricao: z.string().optional(),
+  tipo: z.enum(['texto', 'exercicio', 'quiz', 'video']).default('texto'),
+  conteudo: z.string().optional(),
+  ordem: z.number(),
+  dataCriacao: z.string(), // Data de criação em formato ISO string
+});
+
+export const createEbookAtividadeSchema = ebookAtividadeSchema.omit({
+  id: true,
+  ordem: true,
+  dataCriacao: true,
+});
+
+export type EbookAtividade = z.infer<typeof ebookAtividadeSchema>;
+export type CreateEbookAtividade = z.infer<typeof createEbookAtividadeSchema>;
+
 // Schema para eBooks
 export const ebookSchema = z.object({
   id: z.string(),
   nome: z.string().min(1, "Nome do eBook é obrigatório"),
   data: z.string(), // Data de criação em formato ISO string
-  atividades: z.array(z.string()).default([]), // Array de IDs das atividades
+  atividades: z.array(ebookAtividadeSchema).default([]), // Array de atividades completas
 });
 
 export const createEbookSchema = ebookSchema.omit({

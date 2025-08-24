@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -22,6 +23,7 @@ const addActivitySchema = z.object({
   titulo: z.string().min(1, 'O título é obrigatório').max(100, 'Título muito longo'),
   descricao: z.string().optional(),
   tipo: z.enum(['texto', 'exercicio', 'quiz', 'video']).default('texto'),
+  conteudo: z.string().optional(),
 });
 
 type AddActivityFormData = z.infer<typeof addActivitySchema>;
@@ -42,6 +44,7 @@ export function AddActivityDialog({ open, onOpenChange, ebook }: AddActivityDial
       titulo: '',
       descricao: '',
       tipo: 'texto',
+      conteudo: '',
     },
   });
 
@@ -51,10 +54,7 @@ export function AddActivityDialog({ open, onOpenChange, ebook }: AddActivityDial
     setIsSubmitting(true);
     
     try {
-      // Generate a simple activity ID (in a real app, this would come from a database)
-      const activityId = `atividade_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      await addActivityToEbook(ebook.id, activityId);
+      await addActivityToEbook(ebook.id, data);
       
       // Reset form and close dialog
       form.reset();
@@ -114,17 +114,31 @@ export function AddActivityDialog({ open, onOpenChange, ebook }: AddActivityDial
 
           <div className="space-y-2">
             <Label htmlFor="tipo">Tipo de Atividade</Label>
-            <select
-              id="tipo"
-              {...form.register('tipo')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              data-testid="select-activity-type"
+            <Select
+              value={form.watch('tipo')}
+              onValueChange={(value) => form.setValue('tipo', value as 'texto' | 'exercicio' | 'quiz' | 'video')}
             >
-              <option value="texto">Leitura de Texto</option>
-              <option value="exercicio">Exercício Prático</option>
-              <option value="quiz">Quiz/Questionário</option>
-              <option value="video">Vídeo Educativo</option>
-            </select>
+              <SelectTrigger data-testid="select-activity-type">
+                <SelectValue placeholder="Selecione o tipo de atividade" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="texto">Leitura de Texto</SelectItem>
+                <SelectItem value="exercicio">Exercício Prático</SelectItem>
+                <SelectItem value="quiz">Quiz/Questionário</SelectItem>
+                <SelectItem value="video">Vídeo Educativo</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="conteudo">Conteúdo (opcional)</Label>
+            <Textarea
+              id="conteudo"
+              placeholder="Adicione o conteúdo detalhado da atividade..."
+              rows={4}
+              {...form.register('conteudo')}
+              data-testid="input-activity-content"
+            />
           </div>
 
           <DialogFooter className="gap-2">
