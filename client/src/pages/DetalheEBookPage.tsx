@@ -130,58 +130,58 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
 
         {/* eBook details card */}
         <Card className="shadow-lg">
-          <CardHeader>
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
+          <CardHeader className="pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1 min-w-0">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg flex-shrink-0">
                   <Book className="h-6 w-6 text-blue-600 dark:text-blue-300" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   {isEditingName ? (
                     <div className="flex items-center gap-2 mb-2">
                       <Input
                         value={editedName}
                         onChange={(e) => setEditedName(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        className="text-2xl font-bold h-12"
+                        className="text-lg sm:text-2xl font-bold h-10 sm:h-12 flex-1"
                         autoFocus
                         data-testid="input-edit-ebook-name"
                       />
                       <Button 
                         size="sm" 
                         variant="ghost" 
-                        className="p-2 text-green-600 hover:text-green-700"
+                        className="p-2 text-green-600 hover:text-green-700 flex-shrink-0"
                         onClick={handleSaveEditName}
                         data-testid="button-save-edit-name"
                       >
-                        <Check className="h-5 w-5" />
+                        <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                       </Button>
                       <Button 
                         size="sm" 
                         variant="ghost" 
-                        className="p-2 text-red-600 hover:text-red-700"
+                        className="p-2 text-red-600 hover:text-red-700 flex-shrink-0"
                         onClick={handleCancelEditName}
                         data-testid="button-cancel-edit-name"
                       >
-                        <X className="h-5 w-5" />
+                        <X className="h-4 w-4 sm:h-5 sm:w-5" />
                       </Button>
                     </div>
                   ) : (
                     <CardTitle 
-                      className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2"
+                      className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2"
                       data-testid="text-ebook-title"
                     >
                       {selectedEbook.nome}
                     </CardTitle>
                   )}
-                  <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
                       <span data-testid="text-ebook-creation-date">
                         Criado em {formatDate(selectedEbook.data)}
                       </span>
                     </div>
-                    <Badge variant="outline" data-testid="badge-activities-count">
+                    <Badge variant="outline" className="w-fit" data-testid="badge-activities-count">
                       <FileText className="h-3 w-3 mr-1" />
                       {selectedEbook.atividades.length} atividade{selectedEbook.atividades.length !== 1 ? 's' : ''}
                     </Badge>
@@ -191,34 +191,36 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
 
               {/* Action buttons */}
               {isSubscriber && !isEditingName && (
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={handleEditName}
+                    className="w-full sm:w-auto"
                     data-testid="button-edit-ebook"
                   >
                     <Edit2 className="h-4 w-4 mr-2" />
-                    Editar
+                    <span className="sm:inline">Editar</span>
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setShowCloneDialog(true)}
+                    className="w-full sm:w-auto"
                     data-testid="button-clone-ebook"
                   >
                     <Copy className="h-4 w-4 mr-2" />
-                    Clonar
+                    <span className="sm:inline">Clonar</span>
                   </Button>
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setShowDeleteDialog(true)}
-                    className="text-red-600 hover:text-red-700 hover:border-red-300"
+                    className="w-full sm:w-auto text-red-600 hover:text-red-700 hover:border-red-300"
                     data-testid="button-delete-ebook"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Excluir
+                    <span className="sm:inline">Excluir</span>
                   </Button>
                 </div>
               )}
