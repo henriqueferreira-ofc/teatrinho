@@ -167,25 +167,12 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-3 mb-2">
-                      <CardTitle 
-                        className="text-2xl font-bold text-gray-900 dark:text-gray-100"
-                        data-testid="text-ebook-title"
-                      >
-                        {selectedEbook.nome}
-                      </CardTitle>
-                      {isSubscriber && (
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          onClick={handleEditName}
-                          className="p-2 text-gray-600 hover:text-gray-700"
-                          data-testid="button-edit-ebook-name"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
+                    <CardTitle 
+                      className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2"
+                      data-testid="text-ebook-title"
+                    >
+                      {selectedEbook.nome}
+                    </CardTitle>
                   )}
                   <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
@@ -203,8 +190,17 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
               </div>
 
               {/* Action buttons */}
-              {isSubscriber && (
+              {isSubscriber && !isEditingName && (
                 <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleEditName}
+                    data-testid="button-edit-ebook"
+                  >
+                    <Edit2 className="h-4 w-4 mr-2" />
+                    Editar
+                  </Button>
                   <Button 
                     variant="outline" 
                     size="sm"
