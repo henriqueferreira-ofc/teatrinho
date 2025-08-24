@@ -40,31 +40,111 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
 
-  // Load image as base64
-  const loadImageAsBase64 = (url: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
+  // Load image as base64 with multiple fallback methods
+  const loadImageAsBase64 = async (url: string): Promise<string> => {
+    // Method 1: Try fetch first (often works better with Firebase Storage)
+    try {
+      console.log('Trying fetch method for:', url);
+      const response = await fetch(url, {
+        mode: 'cors',
+        credentials: 'omit'
+      });
       
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        
-        canvas.width = img.width;
-        canvas.height = img.height;
-        
-        if (ctx) {
-          ctx.drawImage(img, 0, 0);
-          const dataURL = canvas.toDataURL('image/jpeg', 0.8);
-          resolve(dataURL);
-        } else {
-          reject(new Error('Failed to get canvas context'));
-        }
-      };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      img.onerror = () => reject(new Error('Failed to load image'));
-      img.src = url;
-    });
+      const blob = await response.blob();
+      
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+              reject(new Error('Failed to get canvas context'));
+              return;
+            }
+            
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+            resolve(dataURL);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        
+        img.onerror = reject;
+        img.src = URL.createObjectURL(blob);
+      });
+      
+    } catch (fetchError) {
+      console.log('Fetch failed, trying direct image load:', fetchError);
+      
+      // Method 2: Direct image loading with CORS
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            if (!ctx) {
+              reject(new Error('Failed to get canvas context'));
+              return;
+            }
+            
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+            resolve(dataURL);
+          } catch (error) {
+            reject(error);
+          }
+        };
+        
+        img.onerror = () => {
+          // Method 3: Try without CORS as final fallback
+          const fallbackImg = new Image();
+          
+          fallbackImg.onload = () => {
+            try {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              
+              if (!ctx) {
+                reject(new Error('Failed to get canvas context'));
+                return;
+              }
+              
+              canvas.width = fallbackImg.naturalWidth || fallbackImg.width;
+              canvas.height = fallbackImg.naturalHeight || fallbackImg.height;
+              
+              ctx.drawImage(fallbackImg, 0, 0);
+              const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+              resolve(dataURL);
+            } catch (fallbackError) {
+              reject(fallbackError);
+            }
+          };
+          
+          fallbackImg.onerror = () => reject(new Error('All image loading methods failed'));
+          fallbackImg.src = url;
+        };
+        
+        img.src = url;
+      });
+    }
   };
 
   // Generate PDF with activity images
@@ -99,22 +179,30 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       for (let i = 0; i < ebookActivities.length; i++) {
         const activity = ebookActivities[i];
         
+        // Add new page for each activity
+        pdf.addPage();
+        
         try {
-          // Add new page for each activity
-          pdf.addPage();
+          console.log(`Loading image ${i + 1}/${ebookActivities.length}:`, activity.imagemUrl);
           
           // Load and add image
           const imageBase64 = await loadImageAsBase64(activity.imagemUrl);
           
-          // Calculate image dimensions to fit A4 while maintaining aspect ratio
-          const img = new Image();
-          img.src = imageBase64;
+          // Validate that we got valid base64 data
+          if (!imageBase64 || !imageBase64.startsWith('data:image')) {
+            throw new Error('Invalid image data received');
+          }
           
-          await new Promise((resolve) => {
-            img.onload = resolve;
+          // Create temporary image element to get dimensions
+          const tempImg = new Image();
+          
+          await new Promise((resolve, reject) => {
+            tempImg.onload = resolve;
+            tempImg.onerror = reject;
+            tempImg.src = imageBase64;
           });
           
-          const imgAspectRatio = img.width / img.height;
+          const imgAspectRatio = tempImg.width / tempImg.height;
           const pageAspectRatio = imageWidth / imageHeight;
           
           let finalWidth = imageWidth;
@@ -133,16 +221,25 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
           }
           
           pdf.addImage(imageBase64, 'JPEG', offsetX, offsetY, finalWidth, finalHeight);
+          console.log(`Successfully added image ${i + 1}`);
           
         } catch (imageError) {
-          console.error('Error loading activity image:', activity.imagemUrl, imageError);
+          console.error('Error processing activity image:', activity.imagemUrl, imageError);
           
-          // Add error page if image fails to load
-          pdf.setFontSize(16);
-          pdf.setFont("helvetica", "normal");
-          pdf.text('Erro ao carregar atividade', pageWidth / 2, pageHeight / 2 - 10, { align: 'center' });
+          // Add informative error page with activity details
+          pdf.setFontSize(18);
+          pdf.setFont("helvetica", "bold");
+          pdf.text(`Atividade ${i + 1}`, pageWidth / 2, 60, { align: 'center' });
+          
           pdf.setFontSize(12);
-          pdf.text(`Atividade ${i + 1}`, pageWidth / 2, pageHeight / 2 + 5, { align: 'center' });
+          pdf.setFont("helvetica", "normal");
+          pdf.text('Imagem não pôde ser carregada', pageWidth / 2, 90, { align: 'center' });
+          pdf.text(`Categoria: ${activity.categoria}`, pageWidth / 2, 110, { align: 'center' });
+          pdf.text(`Arquivo: ${activity.arquivo}`, pageWidth / 2, 130, { align: 'center' });
+          
+          pdf.setFontSize(10);
+          pdf.text('Verifique sua conexão com a internet', pageWidth / 2, 160, { align: 'center' });
+          pdf.text('ou tente novamente mais tarde', pageWidth / 2, 175, { align: 'center' });
         }
       }
 
