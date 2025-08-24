@@ -205,8 +205,6 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                     <Edit2 className="h-4 w-4 mr-2" />
                     <span className="sm:inline">Editar</span>
                   </Button>
-                  <BookViewer ebook={selectedEbook} />
-                  <EBookExporter ebook={selectedEbook} />
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -227,6 +225,8 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                     <Trash2 className="h-4 w-4 mr-2" />
                     <span className="sm:inline">Excluir</span>
                   </Button>
+                  <BookViewer ebook={selectedEbook} />
+                  <EBookExporter ebook={selectedEbook} />
                 </div>
               )}
             </div>
