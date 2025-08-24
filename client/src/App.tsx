@@ -68,6 +68,13 @@ function MainAppContent() {
       setSelectedCategory(null);
       setSelectedVideoCategory(null);
       setActiveTab(tab);
+    } else if (tab === 'ebook-details') {
+      // Para página de detalhes do eBook, não limpar o selectedEbook
+      setSelectedCategory(null);
+      setSelectedVideoCategory(null);
+      setSelectedVideoDetalhe(null);
+      setSelectedVideoCategoryContext(null);
+      setActiveTab(tab);
     } else {
       // Para todas as outras páginas (home, ebooks, videos, partnerships, profile)
       // limpar todos os estados selecionados
