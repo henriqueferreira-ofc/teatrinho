@@ -146,3 +146,71 @@ export const updateEbookSchema = ebookSchema.partial().omit({
 export type Ebook = z.infer<typeof ebookSchema>;
 export type CreateEbook = z.infer<typeof createEbookSchema>;
 export type UpdateEbook = z.infer<typeof updateEbookSchema>;
+
+// Schemas para vídeos - sistema de catálogo
+export const materialRelacionadoSchema = z.object({
+  tipo: z.enum(['pdf', 'link', 'img']),
+  titulo: z.string().min(1, "Título do material é obrigatório"),
+  url: z.string().url("URL deve ser válida"),
+});
+
+export const videoCategoriaSchema = z.object({
+  id: z.string(),
+  nome: z.string().min(1, "Nome da categoria é obrigatório"),
+  descricao: z.string().optional(),
+  ordem: z.number().default(0),
+  coverUrl: z.string().url().optional(),
+  tags: z.array(z.string()).default([]),
+  qtdVideos: z.number().default(0),
+  ativo: z.boolean().default(true),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const videoAtividadeSchema = z.object({
+  id: z.string(),
+  categoriaId: z.string(),
+  titulo: z.string().min(1, "Título do vídeo é obrigatório"),
+  descricao: z.string().optional(),
+  videoUrl: z.string().url("URL do vídeo deve ser válida"),
+  plataforma: z.enum(['youtube', 'vimeo', 'mp4']),
+  duracaoSegundos: z.number().optional(),
+  thumbnailUrl: z.string().url().optional(),
+  tags: z.array(z.string()).default([]),
+  premium: z.boolean().default(false), // Exige assinatura para ver completo
+  trailerStart: z.number().default(0), // Início da prévia em segundos
+  trailerEnd: z.number().optional(), // Fim da prévia em segundos
+  materiaisRelacionados: z.array(materialRelacionadoSchema).default([]),
+  transcricaoUrl: z.string().url().optional(),
+  ativo: z.boolean().default(true),
+  createdAt: z.string().optional(),
+  updatedAt: z.string().optional(),
+});
+
+export const createVideoCategoriaSchema = videoCategoriaSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateVideoCategoriaSchema = videoCategoriaSchema.partial().omit({
+  id: true,
+});
+
+export const createVideoAtividadeSchema = videoAtividadeSchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const updateVideoAtividadeSchema = videoAtividadeSchema.partial().omit({
+  id: true,
+});
+
+export type MaterialRelacionado = z.infer<typeof materialRelacionadoSchema>;
+export type VideoCategoria = z.infer<typeof videoCategoriaSchema>;
+export type VideoAtividade = z.infer<typeof videoAtividadeSchema>;
+export type CreateVideoCategoria = z.infer<typeof createVideoCategoriaSchema>;
+export type UpdateVideoCategoria = z.infer<typeof updateVideoCategoriaSchema>;
+export type CreateVideoAtividade = z.infer<typeof createVideoAtividadeSchema>;
+export type UpdateVideoAtividade = z.infer<typeof updateVideoAtividadeSchema>;

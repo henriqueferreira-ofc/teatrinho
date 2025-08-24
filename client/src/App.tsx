@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { EBookProvider } from '@/contexts/EBookContext';
+import { VideosProvider } from '@/contexts/VideosContext';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
@@ -12,15 +13,17 @@ import Register from '@/pages/Register';
 import Home from '@/pages/Home';
 import CategoriasPage from '@/pages/CategoriasPage';
 import EBooks from '@/pages/EBooks';
-import Videos from '@/pages/Videos';
+import VideosPage from '@/pages/VideosPage';
+import AtividadesPorCategoriaVideo from '@/pages/AtividadesPorCategoriaVideo';
+import DetalheVideoPage from '@/pages/DetalheVideoPage';
 import Partnerships from '@/pages/Partnerships';
 import Profile from '@/pages/Profile';
 import AtividadesPorCategoriaPage from '@/pages/AtividadesPorCategoriaPage';
 import DetalheEBookPage from '@/pages/DetalheEBookPage';
-import { Categoria } from '@shared/schema';
+import { Categoria, VideoCategoria, VideoAtividade } from '@shared/schema';
 
 type AuthScreen = 'login' | 'register';
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details' | 'videos-categoria' | 'video-detalhe';
 
 function AuthFlow() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>('login');
@@ -43,13 +46,29 @@ function AuthFlow() {
 function MainApp() {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [selectedCategory, setSelectedCategory] = useState<Categoria | null>(null);
+  const [selectedVideoCategory, setSelectedVideoCategory] = useState<VideoCategoria | null>(null);
+  const [selectedVideoDetalhe, setSelectedVideoDetalhe] = useState<{ video: VideoAtividade; categoria: VideoCategoria } | null>(null);
 
   const handleNavigate = (tab: AppTab, data?: any) => {
     if (tab === 'atividades-categoria' && data) {
       setSelectedCategory(data);
+      setSelectedVideoCategory(null);
+      setSelectedVideoDetalhe(null);
+      setActiveTab(tab);
+    } else if (tab === 'videos-categoria' && data) {
+      setSelectedVideoCategory(data);
+      setSelectedCategory(null);
+      setSelectedVideoDetalhe(null);
+      setActiveTab(tab);
+    } else if (tab === 'video-detalhe' && data) {
+      setSelectedVideoDetalhe(data);
+      setSelectedCategory(null);
+      setSelectedVideoCategory(null);
       setActiveTab(tab);
     } else {
       setSelectedCategory(null);
+      setSelectedVideoCategory(null);
+      setSelectedVideoDetalhe(null);
       setActiveTab(tab);
     }
   };
@@ -79,7 +98,22 @@ function MainApp() {
           onNavigateToCategories={() => handleNavigate('categories')}
         />;
       case 'videos':
-        return <Videos />;
+        return <VideosPage onNavigate={handleNavigate} />;
+      case 'videos-categoria':
+        return selectedVideoCategory ? (
+          <AtividadesPorCategoriaVideo 
+            categoria={selectedVideoCategory} 
+            onNavigate={handleNavigate}
+          />
+        ) : <VideosPage onNavigate={handleNavigate} />;
+      case 'video-detalhe':
+        return selectedVideoDetalhe ? (
+          <DetalheVideoPage 
+            video={selectedVideoDetalhe.video}
+            categoria={selectedVideoDetalhe.categoria}
+            onNavigate={handleNavigate}
+          />
+        ) : <VideosPage onNavigate={handleNavigate} />;
       case 'partnerships':
         return <Partnerships />;
       case 'profile':
@@ -92,7 +126,7 @@ function MainApp() {
   return (
     <ProtectedRoute>
       <Layout 
-        activeTab={activeTab === 'atividades-categoria' || activeTab === 'ebook-details' || activeTab === 'categories' ? 'home' : activeTab} 
+        activeTab={activeTab === 'atividades-categoria' || activeTab === 'ebook-details' || activeTab === 'categories' || activeTab === 'videos-categoria' || activeTab === 'video-detalhe' ? (activeTab.startsWith('videos') ? 'videos' : 'home') : activeTab} 
         onTabChange={handleNavigate}
         onEBookDetailsClick={handleEBookDetailsClick}
       >
@@ -118,8 +152,10 @@ function App() {
       <TooltipProvider>
         <AuthProvider>
           <EBookProvider>
-            <AppContent />
-            <Toaster />
+            <VideosProvider>
+              <AppContent />
+              <Toaster />
+            </VideosProvider>
           </EBookProvider>
         </AuthProvider>
       </TooltipProvider>
