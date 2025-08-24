@@ -7,7 +7,7 @@ import { Categoria, Atividade } from '@shared/schema';
 import atividadesData from '@/data/atividades.json';
 
 // Tipo para navegação entre telas
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details' | 'detalhe-ebook';
 
 interface AtividadesPorCategoriaPageProps {
   categoria: Categoria;

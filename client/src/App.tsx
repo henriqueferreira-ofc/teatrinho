@@ -10,7 +10,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import Home from '@/pages/Home';
-import Categories from '@/pages/Categories';
+import CategoriasPage from '@/pages/CategoriasPage';
 import EBooks from '@/pages/EBooks';
 import Videos from '@/pages/Videos';
 import Partnerships from '@/pages/Partnerships';
@@ -20,7 +20,7 @@ import DetalheEBookPage from '@/pages/DetalheEBookPage';
 import { Categoria } from '@shared/schema';
 
 type AuthScreen = 'login' | 'register';
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details' | 'detalhe-ebook';
 
 function AuthFlow() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>('login');
@@ -70,11 +70,14 @@ function MainApp() {
           />
         ) : <Home onNavigate={handleNavigate} />;
       case 'categories':
-        return <Categories />;
+        return <CategoriasPage onNavigate={handleNavigate} />;
       case 'ebooks':
         return <EBooks onNavigateToDetails={() => handleNavigate('ebook-details')} />;
       case 'ebook-details':
-        return <DetalheEBookPage onBack={() => handleNavigate('ebooks')} />;
+        return <DetalheEBookPage 
+          onBack={() => handleNavigate('ebooks')} 
+          onNavigateToCategories={() => handleNavigate('categories')}
+        />;
       case 'videos':
         return <Videos />;
       case 'partnerships':

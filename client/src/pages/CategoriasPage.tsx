@@ -6,7 +6,7 @@ import { Categoria } from '@shared/schema';
 import categoriesData from '@/data/categorias.json';
 
 // Tipo para navegação entre telas
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'detalhe-ebook';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details' | 'detalhe-ebook';
 
 interface CategoriasPageProps {
   onNavigate?: (tab: AppTab, data?: any) => void;
