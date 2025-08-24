@@ -1,0 +1,192 @@
+#### 🧩 **Descrição da Funcionalidade**
+
+Implementar a **página de Vídeos** com a mesma lógica de organização usada em eBooks: **Categorias → Atividades (itens de vídeo)**.  
+Nesta primeira etapa, o foco é disponibilizar o **catálogo de vídeos organizado por categorias**, com tela de **listagem por categoria** e **detalhe do vídeo** (player + metadados). Recursos de progresso, favoritos e playlists pessoais podem vir depois.
+
+A experiência deve funcionar para **usuários logados** (com e sem assinatura). Quem **não tiver assinatura ativa** enxerga todo o catálogo, mas com **reprodução limitada** (trecho de prévia) e **ações bloqueadas** (ex.: baixar transcrição/arquivo, marcar como concluído).
+
+---
+
+#### ✅ **Requisitos Funcionais**
+
+##### 📚 Catálogo (Read)
+
+- **Página /videos** exibindo **todas as categorias** (grade responsiva).
+- Ao clicar em uma categoria, abrir **/videos/categoria/:id** com a **lista de atividades de vídeo** pertencentes à categoria.
+- **Busca e filtros** (texto, tags, duração aproximada) opcionais, mas prepare os hooks para filtrar localmente.
+- Itens mostram: **thumbnail**, **título**, **duração**, **selo “premium”** (se exigir assinatura).
+
+##### ▶️ Detalhe do Vídeo
+
+- **/videos/:videoId** com:
+    - Player (YouTube/Vimeo/MP4).
+    - Título, descrição, duração, tags, materiais relacionados (links/arquivos).
+    - Botão **“Assistir agora”**.
+    - Para quem **não tem assinatura**:
+        - Tocar **apenas prévia** (config `trailerStart`/`trailerEnd`) ou exibir overlay bloqueando o player após X segundos.
+        - Mostrar **mensagem clara** e **CTA** “Ativar Assinatura para Assistir Completo” (link temporário `https://google.com`).
+
+##### 🔐 Assinatura e Acesso
+
+- Usuário **deve estar logado** para carregar a página.
+- Sem assinatura ativa:
+    - **Catálogo visível**, porém **reprodução completa bloqueada**.
+    - Download de anexos/transcrições **bloqueado**.
+    - Exibir **CTA** para ativar assinatura.
+- Com assinatura ativa:
+    - Reprodução completa liberada.
+    - Acesso a anexos/transcrições.
+
+> Observação: **Não há CRUD de vídeos/categorias para o usuário final** nesta etapa. O catálogo é global (administrado por staff). Em etapas futuras, podemos adicionar **“Minhas Playlists”** (CRUD do usuário), progresso e favoritos.
+
+---
+
+#### 🗃️ **Modelos de Dados (Firestore)**
+
+**Coleções globais (catálogo):**
+
+- `/videos_categorias/{categoriaId}`
+    
+    `{   "id": "cat-cores-formas",   "nome": "Cores e Formas",   "descricao": "Vídeos para reconhecer cores e formas",   "ordem": 10,   "coverUrl": "https://.../thumb.jpg",   "tags": ["cores","formas","2-6"],   "qtdVideos": 18,   "createdAt": "2025-08-24T19:00:00Z",   "updatedAt": "2025-08-24T19:00:00Z",   "ativo": true }`
+    
+- `/videos_atividades/{videoId}`
+    
+    `{   "id": "vid-abc-001",   "categoriaId": "cat-cores-formas",   "titulo": "Cores primárias brincando",   "descricao": "Aprenda cores com atividades práticas.",   "videoUrl": "https://youtu.be/XXXXXXXX",   "plataforma": "youtube",                    // youtube | vimeo | mp4   "duracaoSegundos": 540,   "thumbnailUrl": "https://.../thumb.jpg",   "tags": ["cores","lúdico","motricidade"],   "premium": true,                            // exige assinatura para ver completo   "trailerStart": 0,                          // início da prévia (segundos)   "trailerEnd": 60,                           // fim da prévia (segundos)   "materiaisRelacionados": [     {"tipo": "pdf", "titulo": "Guia de atividades", "url": "https://.../guia.pdf"}   ],   "transcricaoUrl": "https://.../transcricao.txt",   "createdAt": "2025-08-24T19:05:00Z",   "updatedAt": "2025-08-24T19:05:00Z",   "ativo": true }`
+    
+
+**Coleções do usuário (preparadas para próximas fases, usadas aqui só para leitura condicional de UI):**
+- `/usuarios/{userId}/assinatura` (status já usado na aplicação).
+- Futuro: `/usuarios/{userId}/videos_progresso/{videoId}`, `/usuarios/{userId}/playlists/{playlistId}`.
+#### 🧭 **Rotas e Telas**
+
+- `/videos` → **VideosPage.tsx** (grade de categorias).
+- `/videos/categoria/:categoriaId` → **AtividadesPorCategoriaVideo.tsx** (lista de vídeos da categoria).
+- `/videos/:videoId` → **DetalheVideoPage.tsx** (player e metadados).
+---
+#### 🧱 **Pastas e Arquivos Permitidos**
+
+`client/src/components/videos              (NOVO: componentes de UI de vídeos)   - CategoriaCardVideo.tsx   - CategoriaGridVideo.tsx   - VideoCard.tsx   - VideoList.tsx   - VideoPlayer.tsx   // wrapper que respeita trailerStart/trailerEnd  client/src/pages/VideosPage.tsx           (CRIAR/ALTERAR) client/src/pages/AtividadesPorCategoriaVideo.tsx (CRIAR) client/src/pages/DetalheVideoPage.tsx     (CRIAR)  client/src/contexts/VideosContext.tsx     (CRIAR - carregar catálogo e estado de assinatura) client/src/hooks/useVideos.ts             (CRIAR) client/src/hooks/useSubscription.ts       (REUTILIZAR/CRIAR se necessário)`
+> **Não** modifique arquivos fora dos listados acima.
+---
+#### 🧪 **Comportamentos de UI obrigatórios**
+
+- **Sem assinatura ativa**:
+    - Nos cards e no detalhe, exibir **badge “PREMIUM”** quando `premium = true`.
+    - Player corta em `trailerEnd` ou exibe overlay de bloqueio com CTA.
+    - Download de `transcricaoUrl` e `materiaisRelacionados` **desativado**.
+- **Com assinatura ativa**:
+    - Player **completo**.
+    - Ações habilitadas (baixar transcrição e materiais).
+---
+
+#### 🔐 **Boas Práticas e Segurança**
+
+- Nunca expor chaves sensíveis no frontend (players privados → usar URLs públicas ou proxy controlado).
+- Validar parâmetros de rota (`categoriaId`, `videoId`) e **tratar 404**.
+- Centralizar lógica de assinatura no **VideosContext** para evitar repetição.
+- Não criar/modificar tabelas sem solicitação.
+- Evitar comandos destrutivos.
+- Comentários nos trechos de lógica (ex.: controle de trailer).
+---
+#### 🧭 **Orientações de Desenvolvimento**
+- Componentizar: cards, grids e player reutilizáveis.
+- Nomes semânticos, código limpo e testável.
+- Acessibilidade: foco visível, labels em botões, `aria-*` no player.
+- Responsividade: grid fluido (minmax) para categorias e vídeos.
+- Preparar `useVideos` com:
+    - `listCategorias()`, `listVideosByCategoria(categoriaId)`, `getVideo(videoId)`.
+    - Cache em memória (Context) e invalidação simples por `updatedAt`.
+---
+#### 🧩 **Exemplo de Props dos Componentes**
+
+`type Categoria = {   id: string; nome: string; descricao?: string;   coverUrl?: string; ordem?: number; tags?: string[];   qtdVideos?: number; ativo: boolean; };  type VideoAtividade = {   id: string; categoriaId: string; titulo: string; descricao?: string;   videoUrl: string; plataforma: 'youtube'|'vimeo'|'mp4';   duracaoSegundos?: number; thumbnailUrl?: string; tags?: string[];   premium?: boolean; trailerStart?: number; trailerEnd?: number;   materiaisRelacionados?: {tipo: 'pdf'|'link'|'img', titulo: string, url: string}[];   transcricaoUrl?: string; ativo: boolean; };`
+
+---
+#### 🔎 **Critérios de Aceite**
+
+- `/videos` lista categorias com **imagens, nome e contagem**.
+- Ao abrir uma categoria, lista-se **somente vídeos ativos** daquela categoria.
+- Página de detalhe:
+    - Player carrega, respeita **bloqueio/preview** conforme assinatura.
+    - Metadados e botões exibidos corretamente.
+- **Sem assinatura**: preview ou bloqueio + CTA.
+- **Com assinatura**: reprodução integral e downloads liberados.
+- Nenhuma dependência externa nova instalada (salvo aprovação prévia).
+---
+#### 🗺️ **Próximas Etapas (não incluídas agora, mas preparar estrutura)**
+- **Progresso** (assistido %, último tempo visto).
+- **Favoritos** e **Playlists do Usuário** (CRUD em `/usuarios/{userId}/playlists`).
+- **Relatórios** (tempo assistido, vídeos mais vistos).
+- **Moderação/Admin** (CRUD de catálogo com painel separado).
+
+### 🎥 Cadastro de Vídeos Educativos - Parte 1
+
+#### 🧩 **Descrição da Funcionalidade**
+
+Essa funcionalidade tem como objetivo permitir que usuários autenticados e com assinatura válida possam **criar, gerenciar e organizar seus próprios catálogos de vídeos educativos**, agrupando-os por **categorias e atividades**, assim como no sistema de eBooks.
+
+Cada vídeo pode ser associado a uma ou mais **atividades sugeridas**, **frases impactantes**, **tópicos abordados**, **estrutura de roteiro** e **objetivos pedagógicos**. As interações com o conteúdo (como salvar, editar, excluir ou clonar catálogos de vídeos) são feitas com salvamento automático.
+
+---
+
+### ✅ **Requisitos Funcionais**
+
+#### 🔐 Autenticação e Acesso
+- A funcionalidade estará disponível apenas para usuários **logados**.
+- Usuários sem assinatura ativa:
+    - Verão os vídeos, mas não poderão salvar, organizar ou interagir com as listas.
+    - Interface bloqueia ações e exibe mensagem: “Assine para organizar seus vídeos e salvar atividades personalizadas.”
+    - Botão CTA: **“Ativar Assinatura para Salvar Vídeos”** → `https://google.com` (atualizável depois).
+---
+### 🎞️ Cadastro e Organização de Vídeos
+#### 📁 Criar Novo Catálogo de Vídeo (Create)
+- Usuário pode criar um **catálogo personalizado** de vídeos com nome único.
+- Cada catálogo pode conter:
+    - Lista de vídeos (YouTube ou link externo).
+    - Categorias (como: Comunicação, Coordenação Motora, Crises, Estímulos Sociais).
+    - Atividades sugeridas.
+    - Resumo (transcrição opcional).
+    - Frases impactantes do vídeo.
+    - Tópicos abordados (para facilitar busca).
+    - Estrutura do vídeo (roteiro ou tópicos em ordem).
+    - Data de cadastro.
+---
+### 📚 Leitura e Navegação (Read)
+- Exibir **todos os catálogos** criados pelo usuário:
+    - Em ordem alfabética ou por data.
+    - Com miniaturas do vídeo principal (se disponível via API).
+    - Com badge de quantidade de vídeos e atividades associadas.
+- Cada vídeo listado apresenta:
+    - Botões de **assistir, editar ou excluir**.
+    - Botão de **ver atividades relacionadas**.
+---
+### ✏️ Edição e Atualização (Update)
+
+- Alterações são salvas automaticamente:
+    - Nome do catálogo.
+    - Lista de vídeos.
+    - Atividades associadas.
+    - Frases e estrutura do vídeo.
+---
+### ❌ Exclusão (Delete)
+
+- Excluir um catálogo com confirmação.
+- Exclusão permanente e irreversível.
+---
+### 📑 Clonagem
+
+- Usuário pode **duplicar um catálogo de vídeos**.
+- Ao clonar:
+    - Modal com campo preenchido: “Nome original - Cópia”.
+    - Novo catálogo é criado imediatamente.
+---
+### 🎯 Destaque de Vídeo Selecionado
+- O cabeçalho da aplicação (barra superior) exibe:
+    - **Nome do Catálogo de Vídeo Selecionado**.
+    - **Ícone circular com número de vídeos incluídos**.
+    - Clicável: redireciona para detalhes do catálogo.
+    - Substitui o nome da aplicação para responsividade.
+---
+### 🗃️ Estrutura e Pastas
+
+`client/src/components/videos/ client/src/pages/VideosPage.tsx client/src/pages/DetalheVideoPage.tsx client/src/contexts/VideosContext.tsx client/src/hooks/useVideos.tsx`
