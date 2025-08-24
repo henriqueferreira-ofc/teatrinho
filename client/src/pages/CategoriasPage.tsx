@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
 import { CategoryGrid } from '@/components/categorias/CategoryGrid';
 import { Categoria } from '@shared/schema';
 import categoriesData from '@/data/categorias.json';
@@ -7,12 +6,11 @@ import categoriesData from '@/data/categorias.json';
 // Tipo para navegação entre telas
 type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details';
 
-interface HomeProps {
+interface CategoriasPageProps {
   onNavigate?: (tab: AppTab, data?: any) => void;
 }
 
-export default function Home({ onNavigate }: HomeProps = {}) {
-  const { userProfile } = useAuth();
+export default function CategoriasPage({ onNavigate }: CategoriasPageProps) {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
   useEffect(() => {
@@ -33,20 +31,18 @@ export default function Home({ onNavigate }: HomeProps = {}) {
   return (
     <div className="p-4">
       <div className="max-w-7xl mx-auto">
-        {/* Welcome Section */}
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 text-white mb-6">
-          <h2 className="text-2xl font-bold mb-2 text-black" data-testid="text-welcome">
-            Bem-vindo de volta, {userProfile?.name?.split(' ')[0] || 'Usuário'}!
-          </h2>
-          <p className="text-black">Explore nossas atividades organizadas por categorias.</p>
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2" data-testid="text-categorias-titulo">
+            Categorias de Atividades
+          </h1>
+          <p className="text-gray-600" data-testid="text-categorias-descricao">
+            Explore nossas atividades organizadas por categorias temáticas.
+          </p>
         </div>
 
-        {/* Categories Section */}
+        {/* Categories Grid */}
         <div className="mb-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4" data-testid="text-categorias-titulo">
-            Categorias de Atividades
-          </h3>
-          
           {categorias.length > 0 ? (
             <CategoryGrid 
               categorias={categorias} 

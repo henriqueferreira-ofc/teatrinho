@@ -1,0 +1,129 @@
+### 📄 Cadastro de eBooks - Parte 2
+
+#### 🧩 **Descrição da Funcionalidade**
+
+ A segunda parte do cadastro de eBooks consiste na funcionalidade de **adicionar, remover, reordenar e excluir atividades** dentro de um eBook personalizado. Cada eBook conterá um **array de IDs de atividades**, e a ordem desses IDs é **essencial**, pois define a sequência exata com que as atividades aparecerão no documento final. A implementação permitirá ao usuário interagir com esse array de forma intuitiva, garantindo flexibilidade e controle total sobre a montagem do conteúdo do eBook.
+#### ✅ **Requisitos Funcionais**
+
+1. Criar uma a tela client/src/pages/CategoriasPage.tsx
+	- Listar todas as categorias cadastradas
+	- Usar o componente existente client/src/components/categorias/CategoriaCard.tsx
+	- Ao selecionar a categoria deve navegar para tela existente client/src/pages/AtividadesPorCategoriaPage.tsx
+	
+2. Criar componente client/src/components/ebooks/AtividadeEbookCard.tsx
+	- Representa uma atividade dentro de um ebook.
+	- Componente mostra a imagem da atividade no formato A4.
+	- Na lateral direita da imagem estão as ações aplicáveis: mover para cima, mover para baixo e excluir.
+	
+3. **Adicionar Atividade ao eBook**
+    - Permitir selecionar uma atividade disponível no catálogo.
+    - Adicionar o ID da atividade ao final do array `atividades` do eBook selecionado.
+    - Na tela client/src/pages/DetalheEBookPage.tsx ao clicar no botão "Adicionar Atividades" deve navegar para nova tela client/src/pages/CategoriasPage.tsx
+    - O componente client/src/components/atividades/AtividadeCard.tsx deve exibir visualmente quando a atividade pertence ou não ao ebook selecionado. Usar bordar verdes ao redor do componente e colocar um ícone de check branco dentro um círculo verde na parte superior direita.
+    - O componente client/src/components/atividades/AtividadeCard.tsx funciona como um toggle. Caso a atividade não esteja no eBook, ao clicar no componente, a atividade será adicionada.
+    - Quando uma atividade for adicionada deve alterar a quantidade de atividades no componente de ebook selecionado no cabeçalho da aplicação
+        
+4. **Remover Atividade do eBook**
+    - Permitir a exclusão de qualquer atividade do array de IDs.
+    - Atualizar a lista imediatamente após a remoção.
+    - O componente client/src/components/atividades/AtividadeCard.tsx funciona como um toggle. Caso a atividade esteja no eBook, ao clicar no componente, a atividade será removida.
+    - O componente client/src/components/ebooks/AtividadeEbookCard.tsx também possui a opção de excluir a atividade.
+    - Quando uma atividade for removida deve alterar a quantidade de atividades no componente de ebook selecionado no cabeçalho da aplicação
+        
+5. **Reordenar Atividades**
+    - Persistir a nova ordem após alteração.
+    - O componente client/src/components/ebooks/AtividadeEbookCard.tsx possui as ações de mover para cima e mover para baixo alterando a posição dos IDs no array.
+    - A primeira atividade não pode ser movida para cima
+    - A última atividade não pode ser movida para baixo
+        
+6. **Visualização da Ordem Atual**
+    - Na tela client/src/pages/DetalheEBookPage.tsx mostrar visualmente as atividades (componente client/src/components/ebooks/AtividadeEbookCard.tsx) vinculadas na ordem atual.
+        
+7. **Persistência de Dados**
+    - Qualquer alteração (adição, remoção ou reordenação) deve ser imediatamente persistida no banco (Firestore).
+        
+8. **Validação de Dados**
+    - Evitar IDs duplicados dentro do mesmo eBook.
+    - Garantir que apenas atividades válidas (existentes no catálogo) possam ser adicionadas.
+    
+#### 📁 **Pastas e Arquivos Permitidos**
+
+```
+client/src/components/ebooks (pasta para os componentes)
+
+client/src/components/ebooks/AtividadeEbookCard.tsx (criar)
+client/src/pages/CategoriasPage.tsx (criar)
+
+client/src/components/atividades/AtividadeCard.tsx (alterar)
+client/src/pages/DetalheEBookPage.tsx (alterar)
+
+client/src/contexts (criar contexto se necessário)
+client/src/hooks (criar hooks se necessário)
+```
+
+Observação: as informações de ebooks devem ser acessíveis e compartilhadas em todas as telas da aplicação
+
+#### 🔒 **Restrições de Segurança e Boas Práticas**
+
+- Não modifique arquivos fora dos listados acima.
+- Não crie nem modifique tabelas de banco de dados sem solicitação explícita.
+- Não apague ou sobrescreva dados sem instrução clara.
+- Toda variável sensível (como chaves de API, tokens ou URLs protegidas) deve ser armazenada em arquivos `.env` ou equivalente.
+- Sempre perguntar antes de instalar bibliotecas externas ou adicionar dependências.
+- Todas as operações que envolvam escrita ou leitura em banco de dados devem ser explicitamente solicitadas no prompt principal.
+- Evitar comandos destrutivos ou irreversíveis, como `DELETE`, exceto sob instrução explícita.
+- Assegure-se de não expor dados sensíveis no frontend.
+
+#### 📌 **Orientações de Desenvolvimento Padrão**
+
+- Usar nomes claros e semânticos para variáveis e funções.
+- Dividir responsabilidades entre componentes (ex: lógica de autenticação separada da UI).
+- Comentar trechos de lógica complexa.
+- Priorizar código limpo, reutilizável e organizado.
+- Validar entradas do usuário sempre que aplicável.
+- Preferir funções puras e evitar efeitos colaterais não controlados.
+- Priorizar acessibilidade e compatibilidade responsiva na interface.
+
+#### Informações sobre o Banco de dados
+
+Os dados de eBooks são armazenados na coleção `/usuarios/{userId}/ebooks/{ebookId}`
+
+- Regras atuais do Firestore
+
+```
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /usuarios/{userId} {      
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    
+    	match /ebooks/{ebookId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+		match /assinaturas/{email} {
+      allow read: if request.auth != null && request.auth.token.email == email;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+```
+
+
+#### Modelo para eBook
+
+```json
+{
+	"id": "3956fdee-4ef7-403a-bd35-d1d155dca974",
+	"nome": "Atividades de Férias do João",
+	"data": "2025-12-23T22:30:00",
+	"atividades": [
+		"f0eed885-7112-4b4d-b124-054821a54e44"
+	]
+}
+```
