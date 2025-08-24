@@ -19,7 +19,12 @@ import {
   setDoc, 
   getDoc, 
   updateDoc,
-  serverTimestamp 
+  serverTimestamp,
+  collection,
+  getDocs,
+  deleteDoc,
+  query,
+  orderBy
 } from "firebase/firestore";
 import { 
   getStorage, 
@@ -28,7 +33,7 @@ import {
   getDownloadURL, 
   deleteObject 
 } from "firebase/storage";
-import type { FirestoreUser, CreateUser, UpdateUser, Subscription } from "@shared/schema";
+import type { FirestoreUser, CreateUser, UpdateUser, Subscription, Ebook, CreateEbook, UpdateEbook } from "@shared/schema";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
@@ -208,4 +213,90 @@ export const isSubscriptionActive = async (email: string): Promise<boolean> => {
 // Auth state observer
 export const onAuthStateChange = (callback: (user: User | null) => void) => {
   return onAuthStateChanged(auth, callback);
+};
+
+// eBook functions
+export const createEbook = async (ebookData: CreateEbook): Promise<Ebook> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  const ebookId = crypto.randomUUID();
+  const ebookRef = doc(db, "usuarios", user.uid, "ebooks", ebookId);
+  
+  const newEbook: Omit<Ebook, "id"> = {
+    ...ebookData,
+    data: new Date().toISOString(),
+    atividades: ebookData.atividades || [],
+  };
+  
+  await setDoc(ebookRef, newEbook);
+  return { id: ebookId, ...newEbook };
+};
+
+export const getUserEbooks = async (): Promise<Ebook[]> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  const ebooksCollectionRef = collection(db, "usuarios", user.uid, "ebooks");
+  const ebooksQuery = query(ebooksCollectionRef, orderBy("nome"));
+  const querySnapshot = await getDocs(ebooksQuery);
+  
+  const ebooks: Ebook[] = [];
+  querySnapshot.forEach((doc) => {
+    ebooks.push({ id: doc.id, ...doc.data() } as Ebook);
+  });
+  
+  return ebooks;
+};
+
+export const getEbook = async (ebookId: string): Promise<Ebook | null> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  const ebookRef = doc(db, "usuarios", user.uid, "ebooks", ebookId);
+  const ebookSnap = await getDoc(ebookRef);
+  
+  if (ebookSnap.exists()) {
+    return { id: ebookId, ...ebookSnap.data() } as Ebook;
+  }
+  
+  return null;
+};
+
+export const updateEbook = async (ebookId: string, ebookData: UpdateEbook): Promise<Ebook> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  const ebookRef = doc(db, "usuarios", user.uid, "ebooks", ebookId);
+  await updateDoc(ebookRef, ebookData);
+  
+  const updatedEbook = await getEbook(ebookId);
+  if (!updatedEbook) throw new Error("Erro ao atualizar eBook");
+  
+  return updatedEbook;
+};
+
+export const deleteEbook = async (ebookId: string): Promise<void> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  const ebookRef = doc(db, "usuarios", user.uid, "ebooks", ebookId);
+  await deleteDoc(ebookRef);
+};
+
+export const cloneEbook = async (originalEbookId: string, newName: string): Promise<Ebook> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  // Get the original eBook
+  const originalEbook = await getEbook(originalEbookId);
+  if (!originalEbook) throw new Error("eBook não encontrado");
+  
+  // Create a new eBook with the same data but new name and ID
+  const clonedEbookData: CreateEbook = {
+    nome: newName,
+    atividades: [...originalEbook.atividades], // Copy activities array
+  };
+  
+  return await createEbook(clonedEbookData);
 };

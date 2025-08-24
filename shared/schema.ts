@@ -102,3 +102,26 @@ export type AtividadesPaginadas = {
   carregadas: number;
   temMais: boolean;
 };
+
+// Schema para eBooks
+export const ebookSchema = z.object({
+  id: z.string(),
+  nome: z.string().min(1, "Nome do eBook é obrigatório"),
+  data: z.string(), // Data de criação em formato ISO string
+  atividades: z.array(z.string()).default([]), // Array de IDs das atividades
+});
+
+export const createEbookSchema = ebookSchema.omit({
+  id: true,
+  data: true, // Data is auto-generated during creation
+}).extend({
+  nome: z.string().min(1, "Nome do eBook é obrigatório").max(100, "Nome deve ter no máximo 100 caracteres"),
+});
+
+export const updateEbookSchema = ebookSchema.partial().omit({
+  id: true,
+});
+
+export type Ebook = z.infer<typeof ebookSchema>;
+export type CreateEbook = z.infer<typeof createEbookSchema>;
+export type UpdateEbook = z.infer<typeof updateEbookSchema>;

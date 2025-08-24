@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useEBooks } from '@/contexts/EBookContext';
 import { logout } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
-import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play, Handshake } from 'lucide-react';
+import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play, Handshake, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface LayoutProps {
   children: React.ReactNode;
   activeTab: 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile';
   onTabChange: (tab: 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile') => void;
+  onEBookDetailsClick?: () => void;
 }
 
-export default function Layout({ children, activeTab, onTabChange }: LayoutProps) {
+export default function Layout({ children, activeTab, onTabChange, onEBookDetailsClick }: LayoutProps) {
   const { userProfile } = useAuth();
+  const { selectedEbook } = useEBooks();
   const { toast } = useToast();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -184,8 +188,43 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
             </SheetContent>
           </Sheet>
 
-          {/* App Title */}
-          <h1 className="text-xl font-bold text-gray-900" data-testid="text-app-title">Teatrinho</h1>
+          {/* Selected eBook Indicator or App Title */}
+          {selectedEbook ? (
+            <Button
+              variant="ghost"
+              className="flex items-center gap-3 max-w-xs"
+              onClick={onEBookDetailsClick}
+              data-testid="button-selected-ebook"
+            >
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                  <Book className="h-4 w-4 text-blue-600 dark:text-blue-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p 
+                    className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
+                    data-testid="text-selected-ebook-name"
+                  >
+                    {selectedEbook.nome}
+                  </p>
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full h-6 w-6 p-0 flex items-center justify-center text-xs font-semibold"
+                  data-testid="badge-ebook-activities-count"
+                >
+                  {selectedEbook.atividades.length}
+                </Badge>
+              </div>
+            </Button>
+          ) : (
+            <h1 
+              className="text-xl font-bold text-gray-900 dark:text-gray-100 hidden sm:block" 
+              data-testid="text-app-title"
+            >
+              Teatrinho
+            </h1>
+          )}
 
           {/* User Avatar */}
           <div className="flex items-center space-x-3">

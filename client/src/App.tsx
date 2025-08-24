@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { EBookProvider } from '@/contexts/EBookContext';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
@@ -15,10 +16,11 @@ import Videos from '@/pages/Videos';
 import Partnerships from '@/pages/Partnerships';
 import Profile from '@/pages/Profile';
 import AtividadesPorCategoriaPage from '@/pages/AtividadesPorCategoriaPage';
+import DetalheEBookPage from '@/pages/DetalheEBookPage';
 import { Categoria } from '@shared/schema';
 
 type AuthScreen = 'login' | 'register';
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria';
+type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details';
 
 function AuthFlow() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>('login');
@@ -52,6 +54,10 @@ function MainApp() {
     }
   };
 
+  const handleEBookDetailsClick = () => {
+    setActiveTab('ebook-details');
+  };
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
@@ -67,6 +73,8 @@ function MainApp() {
         return <Categories />;
       case 'ebooks':
         return <EBooks />;
+      case 'ebook-details':
+        return <DetalheEBookPage onBack={() => handleNavigate('ebooks')} />;
       case 'videos':
         return <Videos />;
       case 'partnerships':
@@ -80,7 +88,11 @@ function MainApp() {
 
   return (
     <ProtectedRoute>
-      <Layout activeTab={activeTab === 'atividades-categoria' ? 'home' : activeTab} onTabChange={handleNavigate}>
+      <Layout 
+        activeTab={activeTab === 'atividades-categoria' || activeTab === 'ebook-details' ? 'home' : activeTab} 
+        onTabChange={handleNavigate}
+        onEBookDetailsClick={handleEBookDetailsClick}
+      >
         {renderTabContent()}
       </Layout>
     </ProtectedRoute>
@@ -102,8 +114,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <AppContent />
-          <Toaster />
+          <EBookProvider>
+            <AppContent />
+            <Toaster />
+          </EBookProvider>
         </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
