@@ -11,8 +11,11 @@ import {
   Edit2,
   Copy,
   Trash2,
-  Plus
+  Plus,
+  Check,
+  X
 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { useEBooks } from '@/contexts/EBookContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CloneEBookDialog } from '@/components/ebooks/CloneEBookDialog';
@@ -27,11 +30,13 @@ interface DetalheEBookPageProps {
 }
 
 export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
-  const { selectedEbook, removeActivityFromEbook } = useEBooks();
+  const { selectedEbook, removeActivityFromEbook, updateEbookData } = useEBooks();
   const { isSubscriber } = useAuth();
   const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showAddActivityDialog, setShowAddActivityDialog] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState('');
 
   const handleCloneSuccess = () => {
     setShowCloneDialog(false);
@@ -41,6 +46,39 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
   const handleDeleteSuccess = () => {
     setShowDeleteDialog(false);
     onBack(); // Navigate back since the eBook was deleted
+  };
+
+  const handleEditName = () => {
+    if (selectedEbook) {
+      setEditedName(selectedEbook.nome);
+      setIsEditingName(true);
+    }
+  };
+
+  const handleSaveEditName = async () => {
+    if (!selectedEbook || !editedName.trim()) return;
+    
+    if (editedName.trim() !== selectedEbook.nome) {
+      const updated = await updateEbookData(selectedEbook.id, { nome: editedName.trim() });
+      if (updated) {
+        setIsEditingName(false);
+      }
+    } else {
+      setIsEditingName(false);
+    }
+  };
+
+  const handleCancelEditName = () => {
+    setIsEditingName(false);
+    setEditedName(selectedEbook?.nome || '');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSaveEditName();
+    } else if (e.key === 'Escape') {
+      handleCancelEditName();
+    }
   };
 
   if (!selectedEbook) {
@@ -98,13 +136,57 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                 <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
                   <Book className="h-6 w-6 text-blue-600 dark:text-blue-300" />
                 </div>
-                <div>
-                  <CardTitle 
-                    className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2"
-                    data-testid="text-ebook-title"
-                  >
-                    {selectedEbook.nome}
-                  </CardTitle>
+                <div className="flex-1">
+                  {isEditingName ? (
+                    <div className="flex items-center gap-2 mb-2">
+                      <Input
+                        value={editedName}
+                        onChange={(e) => setEditedName(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="text-2xl font-bold h-12"
+                        autoFocus
+                        data-testid="input-edit-ebook-name"
+                      />
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="p-2 text-green-600 hover:text-green-700"
+                        onClick={handleSaveEditName}
+                        data-testid="button-save-edit-name"
+                      >
+                        <Check className="h-5 w-5" />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="p-2 text-red-600 hover:text-red-700"
+                        onClick={handleCancelEditName}
+                        data-testid="button-cancel-edit-name"
+                      >
+                        <X className="h-5 w-5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3 mb-2">
+                      <CardTitle 
+                        className="text-2xl font-bold text-gray-900 dark:text-gray-100"
+                        data-testid="text-ebook-title"
+                      >
+                        {selectedEbook.nome}
+                      </CardTitle>
+                      {isSubscriber && (
+                        <Button 
+                          size="sm" 
+                          variant="ghost" 
+                          onClick={handleEditName}
+                          className="p-2 text-gray-600 hover:text-gray-700"
+                          data-testid="button-edit-ebook-name"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
                   <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-400">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-4 w-4" />
