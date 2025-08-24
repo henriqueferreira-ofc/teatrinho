@@ -20,7 +20,7 @@ import DetalheEBookPage from '@/pages/DetalheEBookPage';
 import { Categoria } from '@shared/schema';
 
 type AuthScreen = 'login' | 'register';
-type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details';
+type AppTab = 'home' | 'ebooks' | 'videos' | 'partnerships' | 'profile' | 'atividades-categoria' | 'ebook-details';
 
 function AuthFlow() {
   const [currentScreen, setCurrentScreen] = useState<AuthScreen>('login');
@@ -69,14 +69,12 @@ function MainApp() {
             onNavigate={handleNavigate}
           />
         ) : <Home onNavigate={handleNavigate} />;
-      case 'categories':
-        return <CategoriasPage onNavigate={handleNavigate} />;
       case 'ebooks':
         return <EBooks onNavigateToDetails={() => handleNavigate('ebook-details')} />;
       case 'ebook-details':
         return <DetalheEBookPage 
           onBack={() => handleNavigate('ebooks')} 
-          onNavigateToCategories={() => handleNavigate('categories')}
+          onNavigateToCategories={() => handleNavigate('atividades-categoria', { id: 'todas-as-atividades', nome: 'Todas as Atividades' })}
         />;
       case 'videos':
         return <Videos />;

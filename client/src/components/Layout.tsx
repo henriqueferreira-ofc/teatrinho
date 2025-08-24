@@ -10,8 +10,8 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeTab: 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile';
-  onTabChange: (tab: 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'profile') => void;
+  activeTab: 'home' | 'ebooks' | 'videos' | 'partnerships' | 'profile';
+  onTabChange: (tab: 'home' | 'ebooks' | 'videos' | 'partnerships' | 'profile') => void;
   onEBookDetailsClick?: () => void;
 }
 
@@ -45,7 +45,6 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
 
   const navItems = [
     { id: 'home' as const, label: 'Início', icon: Home },
-    { id: 'categories' as const, label: 'Categorias', icon: Grid3X3 },
     { id: 'ebooks' as const, label: 'eBooks', icon: Book },
     { id: 'videos' as const, label: 'Vídeos', icon: Play },
     { id: 'partnerships' as const, label: 'Parceria', icon: Handshake },
@@ -109,18 +108,6 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
                   >
                     <Home className="h-5 w-5 text-gray-600" />
                     <span className="text-gray-700">Início</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start space-x-3 h-12"
-                    onClick={() => {
-                      onTabChange('categories');
-                      setIsDrawerOpen(false);
-                    }}
-                    data-testid="link-categories"
-                  >
-                    <Grid3X3 className="h-5 w-5 text-gray-600" />
-                    <span className="text-gray-700">Categorias</span>
                   </Button>
                   <Button
                     variant="ghost"
