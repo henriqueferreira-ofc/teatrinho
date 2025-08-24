@@ -20,6 +20,7 @@ import { useEBooks } from '@/contexts/EBookContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CloneEBookDialog } from '@/components/ebooks/CloneEBookDialog';
 import { DeleteEBookDialog } from '@/components/ebooks/DeleteEBookDialog';
+import { AddActivityDialog } from '@/components/ebooks/AddActivityDialog';
 import { AtividadeEbookCard } from '@/components/ebooks/AtividadeEbookCard';
 import { BookViewer } from '@/components/ebooks/BookViewer';
 import { EBookExporter } from '@/components/ebooks/EBookExporter';
@@ -38,17 +39,30 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
   const { isSubscriber } = useAuth();
   const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAddActivityDialog, setShowAddActivityDialog] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
 
-  // Load activity details from the catalog based on IDs
+  // Load activity details from catalog and custom activities based on IDs
   const ebookActivities = useMemo(() => {
     if (!selectedEbook) return [];
     
-    const allActivities = atividadesData as Atividade[];
+    const catalogActivities = atividadesData as Atividade[];
+    const customActivities = JSON.parse(localStorage.getItem('customActivities') || '{}');
+    
     return selectedEbook.atividades
-      .map(activityId => allActivities.find(activity => activity.id === activityId))
-      .filter((activity): activity is Atividade => activity !== undefined);
+      .map(activityId => {
+        // First check catalog activities
+        const catalogActivity = catalogActivities.find(activity => activity.id === activityId);
+        if (catalogActivity) return catalogActivity;
+        
+        // Then check custom activities
+        const customActivity = customActivities[activityId];
+        if (customActivity) return customActivity;
+        
+        return null;
+      })
+      .filter((activity): activity is Atividade => activity !== null);
   }, [selectedEbook?.atividades]);
 
   const handleCloneSuccess = () => {
@@ -278,15 +292,26 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                   Atividades do eBook
                 </h3>
                 {isSubscriber && (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={onNavigateToCategories}
-                    data-testid="button-add-activities"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Atividades
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => setShowAddActivityDialog(true)}
+                      data-testid="button-add-activity"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Criar Atividade
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={onNavigateToCategories}
+                      data-testid="button-browse-activities"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Explorar Catálogo
+                    </Button>
+                  </div>
                 )}
               </div>
 
@@ -328,14 +353,23 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                       }
                     </p>
                     {isSubscriber && (
-                      <Button 
-                        variant="outline" 
-                        onClick={onNavigateToCategories}
-                        data-testid="button-add-first-activity"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Adicionar primeira atividade
-                      </Button>
+                      <div className="flex flex-col gap-2">
+                        <Button 
+                          variant="outline" 
+                          onClick={() => setShowAddActivityDialog(true)}
+                          data-testid="button-create-first-activity"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Criar primeira atividade
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          onClick={onNavigateToCategories}
+                          data-testid="button-browse-catalog"
+                        >
+                          Ou explorar catálogo de atividades
+                        </Button>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -362,6 +396,12 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
             setShowDeleteDialog(open);
           }}
           ebook={selectedEbook}
+        />
+        
+        <AddActivityDialog 
+          open={showAddActivityDialog} 
+          onOpenChange={setShowAddActivityDialog}
+          ebookId={selectedEbook?.id || ''}
         />
         
       </div>

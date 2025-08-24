@@ -31,11 +31,11 @@ type AddActivityFormData = z.infer<typeof addActivitySchema>;
 interface AddActivityDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  ebook: Ebook | null;
+  ebookId: string;
 }
 
-export function AddActivityDialog({ open, onOpenChange, ebook }: AddActivityDialogProps) {
-  const { addActivityToEbook } = useEBooks();
+export function AddActivityDialog({ open, onOpenChange, ebookId }: AddActivityDialogProps) {
+  const { addCustomActivityToEbook } = useEBooks();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<AddActivityFormData>({
@@ -49,12 +49,21 @@ export function AddActivityDialog({ open, onOpenChange, ebook }: AddActivityDial
   });
 
   const onSubmit = async (data: AddActivityFormData) => {
-    if (!ebook) return;
+    if (!ebookId) return;
 
     setIsSubmitting(true);
     
     try {
-      await addActivityToEbook(ebook.id, data);
+      // Create activity data
+      const activityData = {
+        titulo: data.titulo,
+        descricao: data.descricao || '',
+        tipo: data.tipo,
+        conteudo: data.conteudo || ''
+      };
+
+      // Add custom activity to eBook
+      await addCustomActivityToEbook(ebookId, activityData);
       
       // Reset form and close dialog
       form.reset();
@@ -71,7 +80,7 @@ export function AddActivityDialog({ open, onOpenChange, ebook }: AddActivityDial
     onOpenChange(false);
   };
 
-  if (!ebook) return null;
+  if (!ebookId) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -81,7 +90,7 @@ export function AddActivityDialog({ open, onOpenChange, ebook }: AddActivityDial
             Adicionar Atividade
           </DialogTitle>
           <DialogDescription data-testid="text-add-activity-description">
-            Adicione uma nova atividade ao eBook "{ebook.nome}".
+            Crie uma nova atividade personalizada para seu eBook.
           </DialogDescription>
         </DialogHeader>
 

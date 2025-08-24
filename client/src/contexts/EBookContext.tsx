@@ -16,6 +16,7 @@ interface EBookContextType {
   refreshEbooks: () => Promise<void>;
   checkEbookNameExists: (name: string, excludeId?: string) => boolean;
   addActivityToEbook: (ebookId: string, activityId: string) => Promise<boolean>;
+  addCustomActivityToEbook: (ebookId: string, activityData: any) => Promise<boolean>;
   removeActivityFromEbook: (ebookId: string, activityId: string) => Promise<boolean>;
   reorderActivities: (ebookId: string, reorderedActivityIds: string[]) => Promise<boolean>;
   toggleActivityInEbook: (ebookId: string, activityId: string) => Promise<boolean>;
@@ -172,6 +173,35 @@ export function EBookProvider({ children }: EBookProviderProps) {
     }
   };
 
+  const addCustomActivityToEbook = async (ebookId: string, activityData: any): Promise<boolean> => {
+    try {
+      setError(null);
+      
+      // Generate a unique ID for the new activity
+      const newActivityId = `custom_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Create the activity with the generated ID
+      const customActivity = {
+        id: newActivityId,
+        ...activityData,
+        categoria: 'custom',
+        ordem: Date.now()
+      };
+
+      // Store custom activity in localStorage for now
+      const customActivities = JSON.parse(localStorage.getItem('customActivities') || '{}');
+      customActivities[newActivityId] = customActivity;
+      localStorage.setItem('customActivities', JSON.stringify(customActivities));
+
+      // Add the activity ID to the eBook
+      return await addActivityToEbook(ebookId, newActivityId);
+    } catch (err) {
+      console.error('Error adding custom activity to eBook:', err);
+      setError('Erro ao adicionar atividade personalizada');
+      return false;
+    }
+  };
+
   const isActivityInEbook = (ebookId: string, activityId: string): boolean => {
     const ebook = ebooks.find(e => e.id === ebookId);
     return ebook ? ebook.atividades.includes(activityId) : false;
@@ -288,6 +318,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
     refreshEbooks,
     checkEbookNameExists,
     addActivityToEbook,
+    addCustomActivityToEbook,
     removeActivityFromEbook,
     reorderActivities,
     toggleActivityInEbook,
