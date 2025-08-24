@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEBooks } from '@/contexts/EBookContext';
+import { useVideos } from '@/contexts/VideosContext';
 import { logout } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play, Handshake, FileText } from 'lucide-react';
@@ -18,6 +19,7 @@ interface LayoutProps {
 export default function Layout({ children, activeTab, onTabChange, onEBookDetailsClick }: LayoutProps) {
   const { userProfile } = useAuth();
   const { selectedEbook } = useEBooks();
+  const { selectedVideoCategory } = useVideos();
   const { toast } = useToast();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -175,7 +177,7 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
             </SheetContent>
           </Sheet>
 
-          {/* Selected eBook Indicator or App Title */}
+          {/* Selected eBook or Video Category Indicator or App Title */}
           {selectedEbook ? (
             <Button
               variant="ghost"
@@ -201,6 +203,34 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
                   data-testid="badge-ebook-activities-count"
                 >
                   {selectedEbook.atividades.length}
+                </Badge>
+              </div>
+            </Button>
+          ) : selectedVideoCategory ? (
+            <Button
+              variant="ghost"
+              className="flex items-center gap-3 max-w-xs"
+              onClick={() => onTabChange('videos')}
+              data-testid="button-selected-video-category"
+            >
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                  <Play className="h-4 w-4 text-purple-600 dark:text-purple-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p 
+                    className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate"
+                    data-testid="text-selected-video-category-name"
+                  >
+                    {selectedVideoCategory.nome}
+                  </p>
+                </div>
+                <Badge 
+                  variant="secondary" 
+                  className="bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200 rounded-full h-6 w-6 p-0 flex items-center justify-center text-xs font-semibold"
+                  data-testid="badge-video-category-count"
+                >
+                  {selectedVideoCategory.qtdVideos || 0}
                 </Badge>
               </div>
             </Button>

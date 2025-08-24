@@ -8,12 +8,14 @@ interface CategoriaGridVideoProps {
   categorias: VideoCategoria[];
   loading?: boolean;
   onCategoriaClick: (categoria: VideoCategoria) => void;
+  onCategoriaSelect?: (categoria: VideoCategoria) => void;
 }
 
 export function CategoriaGridVideo({ 
   categorias, 
   loading = false, 
-  onCategoriaClick 
+  onCategoriaClick,
+  onCategoriaSelect 
 }: CategoriaGridVideoProps) {
   if (loading) {
     return (
@@ -69,6 +71,7 @@ export function CategoriaGridVideo({
           key={categoria.id}
           categoria={categoria}
           onClick={onCategoriaClick}
+          onSelect={onCategoriaSelect}
         />
       ))}
     </div>

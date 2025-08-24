@@ -6,6 +6,7 @@ interface VideosContextType {
   // Estado das categorias
   categorias: VideoCategoria[];
   loadingCategorias: boolean;
+  selectedVideoCategory: VideoCategoria | null;
   
   // Estado dos vídeos por categoria
   videosByCategoria: Record<string, VideoAtividade[]>;
@@ -25,6 +26,9 @@ interface VideosContextType {
   listCategorias: () => Promise<VideoCategoria[]>;
   listVideosByCategoria: (categoriaId: string) => Promise<VideoAtividade[]>;
   getVideo: (videoId: string) => Promise<VideoAtividade | null>;
+  
+  // Funções de seleção
+  setSelectedVideoCategory: (categoria: VideoCategoria | null) => void;
   
   // Utilitários
   clearError: () => void;
@@ -49,6 +53,7 @@ export function VideosProvider({ children }: VideosProviderProps) {
   // Estados das categorias
   const [categorias, setCategorias] = useState<VideoCategoria[]>([]);
   const [loadingCategorias, setLoadingCategorias] = useState(false);
+  const [selectedVideoCategory, setSelectedVideoCategory] = useState<VideoCategoria | null>(null);
   
   // Estados dos vídeos por categoria
   const [videosByCategoria, setVideosByCategoria] = useState<Record<string, VideoAtividade[]>>({});
@@ -197,6 +202,7 @@ export function VideosProvider({ children }: VideosProviderProps) {
     setCategorias([]);
     setVideosByCategoria({});
     setCurrentVideo(null);
+    setSelectedVideoCategory(null);
     setLastUpdated(Date.now());
   };
 
@@ -303,6 +309,7 @@ export function VideosProvider({ children }: VideosProviderProps) {
       setCategorias([]);
       setVideosByCategoria({});
       setCurrentVideo(null);
+      setSelectedVideoCategory(null);
     }
   }, [user]);
 
@@ -310,6 +317,7 @@ export function VideosProvider({ children }: VideosProviderProps) {
     // Estado das categorias
     categorias,
     loadingCategorias,
+    selectedVideoCategory,
     
     // Estado dos vídeos por categoria
     videosByCategoria,
@@ -329,6 +337,7 @@ export function VideosProvider({ children }: VideosProviderProps) {
     listCategorias,
     listVideosByCategoria,
     getVideo,
+    setSelectedVideoCategory,
     clearError,
     refreshCache,
   };

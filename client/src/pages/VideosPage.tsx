@@ -18,7 +18,8 @@ export default function VideosPage({ onNavigate }: VideosPageProps) {
     loadingCategorias, 
     error, 
     listCategorias, 
-    clearError 
+    clearError,
+    setSelectedVideoCategory 
   } = useVideos();
   
   const { isSubscriber } = useAuth();
@@ -32,6 +33,11 @@ export default function VideosPage({ onNavigate }: VideosPageProps) {
     if (onNavigate) {
       onNavigate('videos-categoria', categoria);
     }
+  };
+
+  const handleCategoriaSelect = (categoria: VideoCategoria) => {
+    // Selecionar categoria no contexto para exibir no header
+    setSelectedVideoCategory(categoria);
   };
 
   const handleSubscriptionClick = () => {
@@ -152,6 +158,7 @@ export default function VideosPage({ onNavigate }: VideosPageProps) {
             categorias={categorias}
             loading={loadingCategorias}
             onCategoriaClick={handleCategoriaClick}
+            onCategoriaSelect={handleCategoriaSelect}
           />
         </div>
 

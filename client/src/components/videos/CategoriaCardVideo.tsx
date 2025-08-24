@@ -7,15 +7,25 @@ import type { VideoCategoria } from '@shared/schema';
 interface CategoriaCardVideoProps {
   categoria: VideoCategoria;
   onClick: (categoria: VideoCategoria) => void;
+  onSelect?: (categoria: VideoCategoria) => void;
 }
 
-export function CategoriaCardVideo({ categoria, onClick }: CategoriaCardVideoProps) {
+export function CategoriaCardVideo({ categoria, onClick, onSelect }: CategoriaCardVideoProps) {
   const { nome, descricao, coverUrl, qtdVideos, tags } = categoria;
+
+  const handleClick = () => {
+    // Selecionar categoria no contexto se a função for fornecida
+    if (onSelect) {
+      onSelect(categoria);
+    }
+    // Navegar para a categoria
+    onClick(categoria);
+  };
 
   return (
     <Card 
       className="cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02] bg-white"
-      onClick={() => onClick(categoria)}
+      onClick={handleClick}
       data-testid={`card-categoria-${categoria.id}`}
     >
       <CardContent className="p-0">
