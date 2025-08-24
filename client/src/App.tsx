@@ -4,8 +4,8 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { EBookProvider } from '@/contexts/EBookContext';
-import { VideosProvider } from '@/contexts/VideosContext';
+import { EBookProvider, useEBooks } from '@/contexts/EBookContext';
+import { VideosProvider, useVideos } from '@/contexts/VideosContext';
 import Layout from '@/components/Layout';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Login from '@/pages/Login';
@@ -43,11 +43,14 @@ function AuthFlow() {
   );
 }
 
-function MainApp() {
+function MainAppContent() {
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [selectedCategory, setSelectedCategory] = useState<Categoria | null>(null);
   const [selectedVideoCategory, setSelectedVideoCategory] = useState<VideoCategoria | null>(null);
   const [selectedVideoDetalhe, setSelectedVideoDetalhe] = useState<{ video: VideoAtividade; categoria: VideoCategoria } | null>(null);
+  
+  const { setSelectedEbook } = useEBooks();
+  const { setSelectedVideoCategory: setSelectedVideoCategoryContext } = useVideos();
 
   const handleNavigate = (tab: AppTab, data?: any) => {
     if (tab === 'atividades-categoria' && data) {
@@ -66,9 +69,16 @@ function MainApp() {
       setSelectedVideoCategory(null);
       setActiveTab(tab);
     } else {
+      // Para todas as outras páginas (home, ebooks, videos, partnerships, profile)
+      // limpar todos os estados selecionados
       setSelectedCategory(null);
       setSelectedVideoCategory(null);
       setSelectedVideoDetalhe(null);
+      
+      // Limpar também os contextos
+      setSelectedEbook(null);
+      setSelectedVideoCategoryContext(null);
+      
       setActiveTab(tab);
     }
   };
@@ -143,7 +153,7 @@ function AppContent() {
     return null; // Loading state is handled in ProtectedRoute
   }
 
-  return user ? <MainApp /> : <AuthFlow />;
+  return user ? <MainAppContent /> : <AuthFlow />;
 }
 
 function App() {
