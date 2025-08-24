@@ -7,6 +7,7 @@ export const firestoreUserSchema = z.object({
   email: z.string().email("Endereço de email inválido"),
   provider: z.enum(["email", "google"]),
   photoURL: z.string().url().optional(),
+  ativo: z.boolean().default(true), // Status ativo/inativo do usuário
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
 });

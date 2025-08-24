@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { logout } from '@/lib/firebase';
+import { logout, updateUserStatus } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { User, Lock, Crown, LogOut, ChevronRight, Menu } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { User, Lock, Crown, LogOut, ChevronRight, Menu, Power } from 'lucide-react';
 
 export default function Profile() {
-  const { userProfile, isSubscriber } = useAuth();
+  const { userProfile, isSubscriber, refreshUserProfile } = useAuth();
   const { toast } = useToast();
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -40,6 +42,31 @@ export default function Profile() {
       title: "Em desenvolvimento", 
       description: "Funcionalidade será implementada em breve.",
     });
+  };
+
+  const handleToggleStatus = async () => {
+    if (!userProfile) return;
+    
+    setUpdatingStatus(true);
+    try {
+      const newStatus = !userProfile.ativo;
+      await updateUserStatus(newStatus);
+      await refreshUserProfile();
+      
+      toast({
+        title: "Status atualizado",
+        description: `Sua conta foi ${newStatus ? 'ativada' : 'desativada'}.`,
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Tente novamente mais tarde.",
+        variant: "destructive",
+      });
+    } finally {
+      setUpdatingStatus(false);
+    }
   };
 
   const getInitials = (name?: string) => {
@@ -76,8 +103,10 @@ export default function Profile() {
                   {userProfile?.email}
                 </p>
                 <div className="flex items-center space-x-2 mt-2">
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    ● Ativo
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                    userProfile?.ativo !== false ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    ● {userProfile?.ativo !== false ? 'Ativo' : 'Inativo'}
                   </span>
                   <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                     isSubscriber ? 'bg-green-100 text-green-800' : 'bg-orange-100 text-orange-800'
@@ -128,6 +157,32 @@ export default function Profile() {
                 <ChevronRight className="h-5 w-5 text-gray-400" />
               </Button>
             )}
+
+            {/* Controle de Status da Conta */}
+            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+              <div className="flex items-center space-x-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                  userProfile?.ativo !== false ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                  <Power className={`h-5 w-5 ${
+                    userProfile?.ativo !== false ? 'text-green-600' : 'text-red-600'
+                  }`} />
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">Status da Conta</p>
+                  <p className="text-sm text-gray-500">
+                    {userProfile?.ativo !== false ? 'Sua conta está ativa' : 'Sua conta está inativa'}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={userProfile?.ativo !== false}
+                onCheckedChange={handleToggleStatus}
+                disabled={updatingStatus}
+                data-testid="switch-account-status"
+                aria-label="Ativar/Desativar conta"
+              />
+            </div>
 
             {/* Seção de Assinatura */}
             {!isSubscriber && (

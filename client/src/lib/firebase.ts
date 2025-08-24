@@ -64,7 +64,7 @@ export const registerWithEmail = async (email: string, password: string, name: s
   await updateProfile(user, { displayName: name });
   
   // Create user document in Firestore
-  await createUserDocument(user, { name, email, provider: "email" });
+  await createUserDocument(user, { name, email, provider: "email", ativo: true });
   
   return user;
 };
@@ -79,7 +79,8 @@ export const loginWithGoogle = async () => {
     await createUserDocument(user, {
       name: user.displayName || user.email?.split('@')[0] || "User",
       email: user.email!,
-      provider: "google"
+      provider: "google",
+      ativo: true
     });
   }
   
@@ -107,6 +108,7 @@ export const createUserDocument = async (user: User, userData: CreateUser) => {
   const userRef = doc(db, "usuarios", user.uid);
   const docData: Omit<FirestoreUser, "id"> = {
     ...userData,
+    ativo: userData.ativo ?? true, // Por padrão, usuário é criado como ativo
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -167,6 +169,7 @@ export const updateUserProfile = async (userData: {
   currentPassword?: string; 
   newPassword?: string; 
   photoURL?: string;
+  ativo?: boolean;
 }) => {
   const user = auth.currentUser;
   if (!user) throw new Error("Usuário não autenticado");
@@ -184,11 +187,23 @@ export const updateUserProfile = async (userData: {
   
   // Update user document in Firestore (garante que apenas o próprio usuário possa atualizar)
   const updateData: any = { name: userData.name };
-  if (userData.photoURL) {
+  if (userData.photoURL !== undefined) {
     updateData.photoURL = userData.photoURL;
+  }
+  if (userData.ativo !== undefined) {
+    updateData.ativo = userData.ativo;
   }
   await updateUserDocument(user.uid, updateData);
   
+  return await getUserDocument(user.uid);
+};
+
+// Função para atualizar apenas o status ativo/inativo
+export const updateUserStatus = async (ativo: boolean) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  await updateUserDocument(user.uid, { ativo });
   return await getUserDocument(user.uid);
 };
 
