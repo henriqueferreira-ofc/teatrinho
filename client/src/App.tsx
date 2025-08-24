@@ -72,7 +72,7 @@ function MainApp() {
       case 'categories':
         return <Categories />;
       case 'ebooks':
-        return <EBooks />;
+        return <EBooks onNavigateToDetails={() => handleNavigate('ebook-details')} />;
       case 'ebook-details':
         return <DetalheEBookPage onBack={() => handleNavigate('ebooks')} />;
       case 'videos':

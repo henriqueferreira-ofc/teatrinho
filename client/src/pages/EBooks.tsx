@@ -11,7 +11,11 @@ import { CloneEBookDialog } from '@/components/ebooks/CloneEBookDialog';
 import { DeleteEBookDialog } from '@/components/ebooks/DeleteEBookDialog';
 import type { Ebook } from '@shared/schema';
 
-export default function EBooksPage() {
+interface EBooksPageProps {
+  onNavigateToDetails?: () => void;
+}
+
+export default function EBooksPage({ onNavigateToDetails }: EBooksPageProps = {}) {
   const { user, isSubscriber } = useAuth();
   const { ebooks, loading } = useEBooks();
   
@@ -29,6 +33,11 @@ export default function EBooksPage() {
   const handleDeleteEbook = (ebook: Ebook) => {
     setSelectedEbookForAction(ebook);
     setShowDeleteDialog(true);
+  };
+
+  const handleSelectEbook = (ebook: Ebook) => {
+    // Navigate to details page when eBook is selected
+    onNavigateToDetails?.();
   };
 
   const handleCloseCloneDialog = () => {
@@ -140,6 +149,7 @@ export default function EBooksPage() {
         {/* eBooks Content */}
         {ebooks.length > 0 ? (
           <EBookGrid
+            onSelect={handleSelectEbook}
             onClone={handleCloneEbook}
             onDelete={handleDeleteEbook}
             canEdit={isSubscriber}

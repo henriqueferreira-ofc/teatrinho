@@ -4,17 +4,21 @@ import { useEBooks } from '@/contexts/EBookContext';
 import type { Ebook } from '@shared/schema';
 
 interface EBookGridProps {
+  onSelect?: (ebook: Ebook) => void;
   onClone?: (ebook: Ebook) => void;
   onDelete?: (ebook: Ebook) => void;
   canEdit?: boolean;
 }
 
-export function EBookGrid({ onClone, onDelete, canEdit = true }: EBookGridProps) {
+export function EBookGrid({ onSelect, onClone, onDelete, canEdit = true }: EBookGridProps) {
   const { ebooks, selectedEbook, setSelectedEbook } = useEBooks();
 
   const handleSelectEbook = (ebook: Ebook) => {
-    // Toggle selection - if same eBook is selected, deselect it
-    setSelectedEbook(selectedEbook?.id === ebook.id ? null : ebook);
+    // Set the selected eBook in context
+    setSelectedEbook(ebook);
+    
+    // Call the parent's onSelect handler if provided
+    onSelect?.(ebook);
   };
 
   if (ebooks.length === 0) {
