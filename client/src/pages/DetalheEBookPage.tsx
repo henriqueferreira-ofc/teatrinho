@@ -306,10 +306,10 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                       size="sm" 
                       variant="outline"
                       onClick={onNavigateToCategories}
-                      data-testid="button-browse-activities"
+                      data-testid="button-add-activities"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Explorar Catálogo
+                      Adicionar Atividades
                     </Button>
                   </div>
                 )}
@@ -367,7 +367,7 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                           onClick={onNavigateToCategories}
                           data-testid="button-browse-catalog"
                         >
-                          Ou explorar catálogo de atividades
+                          Ou adicionar atividades do catálogo
                         </Button>
                       </div>
                     )}
