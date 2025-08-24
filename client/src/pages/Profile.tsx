@@ -15,10 +15,6 @@ export default function Profile() {
   const handleLogout = async () => {
     try {
       await logout();
-      toast({
-        title: "Logout realizado com sucesso",
-        description: "Você foi desconectado da sua conta.",
-      });
     } catch (error) {
       toast({
         title: "Erro ao fazer logout",
