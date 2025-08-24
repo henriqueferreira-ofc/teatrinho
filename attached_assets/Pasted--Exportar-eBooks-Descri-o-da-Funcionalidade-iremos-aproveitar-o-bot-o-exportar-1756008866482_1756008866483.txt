@@ -1,0 +1,106 @@
+### 📄 Exportar eBooks
+
+#### 🧩 **Descrição da Funcionalidade**
+
+ iremos aproveitar o botão exportar na tela de detalhe do eBook que permitirá ao usuário exportar o conteúdo do eBook — composto por imagens de atividades organizadas em sequência — para um arquivo PDF. Esse botão terá destaque visual (cor azul) e, ao ser clicado, iniciará a geração do PDF com as imagens no formato A4. Durante o processo, será exibido um modal com um loader indicando que o eBook está sendo gerado. Após a conclusão, o arquivo será disponibilizado para download (no desktop) ou compartilhamento com outras aplicações (em dispositivos móveis).
+#### ✅ **Requisitos Funcionais**
+
+1. **Botão "Exportar para PDF"**
+    - Na tela client/src/pages/DetalheEBookPage.tsx exibir botão destacado (azul) na tela de detalhe do eBook.
+    - Posicionado antes dos botões de "Editar" e "Clonar" (no início da tela).
+    - Retire o botão, visualizar Livro.
+        
+2. **Geração do PDF**
+    - Recuperar as imagens das atividades com base na sequência do array de IDs do eBook.
+    - Cada imagem deve ser renderizada em uma página no formato A4 (orientação vertical).
+    - As imagens devem ser carregadas via URL previamente cadastrada.
+    - Caso necessário instalar biblioteca para geração do PDF.
+        
+3. **Processamento com Feedback**
+    - Exibir modal com loading animado e texto: “Gerando seu eBook...”
+    - Fechar o modal automaticamente após finalização do PDF.
+        
+4. **Download/Compartilhamento**
+    - Em **dispositivos móveis**: abrir menu nativo de compartilhamento (ex: WhatsApp, e-mail, drive).
+    - Em **desktop**: iniciar download automático do arquivo PDF gerado.
+        
+5. **Mensagens de Erro**    
+    - Caso ocorra falha na geração ou carregamento das imagens, exibir mensagem: “Não foi possível gerar o eBook. Tente novamente mais tarde.”
+    
+#### 📁 **Pastas e Arquivos Permitidos**
+
+```
+client/src/components/ebooks (pasta para os componentes)
+
+client/src/pages/DetalheEBookPage.tsx (alterar)
+
+client/src/contexts (criar contexto se necessário)
+client/src/hooks (criar hooks se necessário)
+```
+
+Observação: as informações de ebooks devem ser acessíveis e compartilhadas em todas as telas da aplicação
+
+#### 🔒 **Restrições de Segurança e Boas Práticas**
+
+- Não modifique arquivos fora dos listados acima.
+- Não crie nem modifique tabelas de banco de dados sem solicitação explícita.
+- Não apague ou sobrescreva dados sem instrução clara.
+- Toda variável sensível (como chaves de API, tokens ou URLs protegidas) deve ser armazenada em arquivos `.env` ou equivalente.
+- Sempre perguntar antes de instalar bibliotecas externas ou adicionar dependências.
+- Todas as operações que envolvam escrita ou leitura em banco de dados devem ser explicitamente solicitadas no prompt principal.
+- Evitar comandos destrutivos ou irreversíveis, como `DELETE`, exceto sob instrução explícita.
+- Assegure-se de não expor dados sensíveis no frontend.
+
+#### 📌 **Orientações de Desenvolvimento Padrão**
+
+- Usar nomes claros e semânticos para variáveis e funções.
+- Dividir responsabilidades entre componentes (ex: lógica de autenticação separada da UI).
+- Comentar trechos de lógica complexa.
+- Priorizar código limpo, reutilizável e organizado.
+- Validar entradas do usuário sempre que aplicável.
+- Preferir funções puras e evitar efeitos colaterais não controlados.
+- Priorizar acessibilidade e compatibilidade responsiva na interface.
+
+#### Informações sobre o Banco de dados
+
+Os dados de eBooks são armazenados na coleção `/usuarios/{userId}/ebooks/{ebookId}`
+
+- Regras atuais do Firestore
+
+```
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /usuarios/{userId} {      
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    
+    	match /ebooks/{ebookId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+		match /assinaturas/{email} {
+      allow read: if request.auth != null && request.auth.token.email == email;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+```
+
+
+#### Modelo para eBook
+
+```json
+{
+	"id": "3956fdee-4ef7-403a-bd35-d1d155dca974",
+	"nome": "Atividades de Férias do João",
+	"data": "2025-12-23T22:30:00",
+	"atividades": [
+		"f0eed885-7112-4b4d-b124-054821a54e44"
+	]
+}
+```
