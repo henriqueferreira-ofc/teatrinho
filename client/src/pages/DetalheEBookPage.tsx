@@ -284,7 +284,7 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
           <CardContent className="pt-6">
             {/* Activities section */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
+              <div className="space-y-4">
                 <h3 
                   className="text-lg font-semibold text-gray-900 dark:text-gray-100"
                   data-testid="text-activities-section-title"
@@ -292,24 +292,26 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                   Atividades do eBook
                 </h3>
                 {isSubscriber && (
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full">
                     <Button 
                       size="sm" 
                       variant="outline"
                       onClick={() => setShowAddActivityDialog(true)}
+                      className="w-full sm:w-auto flex-1"
                       data-testid="button-add-activity"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Criar Atividade
+                      <span className="truncate">Criar Atividade</span>
                     </Button>
                     <Button 
                       size="sm" 
                       variant="outline"
                       onClick={onNavigateToCategories}
+                      className="w-full sm:w-auto flex-1"
                       data-testid="button-add-activities"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Atividades
+                      <span className="truncate">Adicionar</span>
                     </Button>
                   </div>
                 )}
@@ -353,21 +355,24 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                       }
                     </p>
                     {isSubscriber && (
-                      <div className="flex flex-col gap-2">
+                      <div className="flex flex-col gap-3">
                         <Button 
                           variant="outline" 
                           onClick={() => setShowAddActivityDialog(true)}
+                          className="w-full"
                           data-testid="button-create-first-activity"
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Criar primeira atividade
                         </Button>
                         <Button 
-                          variant="ghost" 
+                          variant="default" 
                           onClick={onNavigateToCategories}
+                          className="w-full"
                           data-testid="button-browse-catalog"
                         >
-                          Ou adicionar atividades do catálogo
+                          <Plus className="h-4 w-4 mr-2" />
+                          Adicionar do catálogo
                         </Button>
                       </div>
                     )}
