@@ -17,6 +17,7 @@ import { useEBooks } from '@/contexts/EBookContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CloneEBookDialog } from '@/components/ebooks/CloneEBookDialog';
 import { DeleteEBookDialog } from '@/components/ebooks/DeleteEBookDialog';
+import { AddActivityDialog } from '@/components/ebooks/AddActivityDialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Ebook } from '@shared/schema';
@@ -26,10 +27,11 @@ interface DetalheEBookPageProps {
 }
 
 export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
-  const { selectedEbook } = useEBooks();
+  const { selectedEbook, removeActivityFromEbook } = useEBooks();
   const { isSubscriber } = useAuth();
   const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAddActivityDialog, setShowAddActivityDialog] = useState(false);
 
   const handleCloneSuccess = () => {
     setShowCloneDialog(false);
@@ -161,7 +163,7 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    disabled
+                    onClick={() => setShowAddActivityDialog(true)}
                     data-testid="button-add-activity"
                   >
                     <Plus className="h-4 w-4 mr-2" />
@@ -199,10 +201,11 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                             <Button 
                               variant="ghost" 
                               size="sm" 
-                              disabled
-                              data-testid={`button-edit-activity-${index}`}
+                              onClick={() => removeActivityFromEbook(selectedEbook.id, atividadeId)}
+                              className="text-red-600 hover:text-red-700"
+                              data-testid={`button-remove-activity-${index}`}
                             >
-                              <Edit2 className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
@@ -233,7 +236,7 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                     {isSubscriber && (
                       <Button 
                         variant="outline" 
-                        disabled
+                        onClick={() => setShowAddActivityDialog(true)}
                         data-testid="button-add-first-activity"
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -276,6 +279,12 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
             if (!open) handleDeleteSuccess();
             setShowDeleteDialog(open);
           }}
+          ebook={selectedEbook}
+        />
+        
+        <AddActivityDialog 
+          open={showAddActivityDialog} 
+          onOpenChange={setShowAddActivityDialog}
           ebook={selectedEbook}
         />
       </div>

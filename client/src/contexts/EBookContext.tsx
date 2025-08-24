@@ -15,6 +15,8 @@ interface EBookContextType {
   cloneEbookData: (id: string, newName: string) => Promise<Ebook | null>;
   refreshEbooks: () => Promise<void>;
   checkEbookNameExists: (name: string, excludeId?: string) => boolean;
+  addActivityToEbook: (ebookId: string, activityId: string) => Promise<boolean>;
+  removeActivityFromEbook: (ebookId: string, activityId: string) => Promise<boolean>;
 }
 
 const EBookContext = createContext<EBookContextType | undefined>(undefined);
@@ -71,7 +73,66 @@ export function EBookProvider({ children }: EBookProviderProps) {
     );
   };
 
-  const createNewEbook = async (data: CreateEbook): Promise<Ebook | null> => {
+  const addActivityToEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
+    try {
+      setError(null);
+      
+      const ebook = ebooks.find(e => e.id === ebookId);
+      if (!ebook) return false;
+      
+      // Check if activity already exists
+      if (ebook.atividades.includes(activityId)) {
+        return false;
+      }
+      
+      const updatedActivities = [...ebook.atividades, activityId];
+      const updatedEbook = await updateEbook(ebookId, { atividades: updatedActivities });
+      
+      setEbooks(prev => prev.map(e => 
+        e.id === ebookId ? updatedEbook : e
+      ));
+      
+      // Update selected eBook if it was the one being updated
+      if (selectedEbook?.id === ebookId) {
+        setSelectedEbook(updatedEbook);
+      }
+      
+      return true;
+    } catch (err) {
+      console.error('Error adding activity to eBook:', err);
+      setError('Erro ao adicionar atividade');
+      return false;
+    }
+  };
+
+  const removeActivityFromEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
+    try {
+      setError(null);
+      
+      const ebook = ebooks.find(e => e.id === ebookId);
+      if (!ebook) return false;
+      
+      const updatedActivities = ebook.atividades.filter(id => id !== activityId);
+      const updatedEbook = await updateEbook(ebookId, { atividades: updatedActivities });
+      
+      setEbooks(prev => prev.map(e => 
+        e.id === ebookId ? updatedEbook : e
+      ));
+      
+      // Update selected eBook if it was the one being updated
+      if (selectedEbook?.id === ebookId) {
+        setSelectedEbook(updatedEbook);
+      }
+      
+      return true;
+    } catch (err) {
+      console.error('Error removing activity from eBook:', err);
+      setError('Erro ao remover atividade');
+      return false;
+    }
+  };
+
+  const createEbookData = async (data: CreateEbook): Promise<Ebook | null> => {
     try {
       setError(null);
       
@@ -175,12 +236,14 @@ export function EBookProvider({ children }: EBookProviderProps) {
     loading,
     error,
     setSelectedEbook,
-    createNewEbook,
+    createNewEbook: createEbookData,
     updateEbookData,
     deleteEbookData,
     cloneEbookData,
     refreshEbooks,
     checkEbookNameExists,
+    addActivityToEbook,
+    removeActivityFromEbook,
   };
 
   return (
