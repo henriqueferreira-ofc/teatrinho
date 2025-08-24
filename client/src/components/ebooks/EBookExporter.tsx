@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import type { Ebook } from '@shared/schema';
+import type { Ebook, Atividade } from '@shared/schema';
+import atividadesData from '@/data/atividades.json';
 
 interface EBookExporterProps {
   ebook: Ebook;
@@ -31,6 +32,26 @@ const activityLabels = {
 export function EBookExporter({ ebook, variant = "outline", size = "sm" }: EBookExporterProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportingFormat, setExportingFormat] = useState<string | null>(null);
+
+  // Load activity details from catalog and custom activities based on IDs
+  const ebookActivities = useMemo(() => {
+    const catalogActivities = atividadesData as Atividade[];
+    const customActivities = JSON.parse(localStorage.getItem('customActivities') || '{}');
+    
+    return ebook.atividades
+      .map(activityId => {
+        // First check catalog activities
+        const catalogActivity = catalogActivities.find(activity => activity.id === activityId);
+        if (catalogActivity) return catalogActivity;
+        
+        // Then check custom activities
+        const customActivity = customActivities[activityId];
+        if (customActivity) return customActivity;
+        
+        return null;
+      })
+      .filter((activity): activity is Atividade => activity !== null);
+  }, [ebook.atividades]);
 
   const exportToPDF = async () => {
     setIsExporting(true);
@@ -80,7 +101,7 @@ export function EBookExporter({ ebook, variant = "outline", size = "sm" }: EBook
       pdf.text(`Criado em: ${createdDate}`, pageWidth / 2, currentY, { align: 'center' });
       
       currentY += 10;
-      pdf.text(`${ebook.atividades.length} atividade${ebook.atividades.length !== 1 ? 's' : ''}`, pageWidth / 2, currentY, { align: 'center' });
+      pdf.text(`${ebookActivities.length} atividade${ebookActivities.length !== 1 ? 's' : ''}`, pageWidth / 2, currentY, { align: 'center' });
 
       // Table of Contents
       pdf.addPage();
@@ -92,53 +113,38 @@ export function EBookExporter({ ebook, variant = "outline", size = "sm" }: EBook
 
       pdf.setFontSize(12);
       pdf.setFont("helvetica", "normal");
-      ebook.atividades.forEach((activity, index) => {
+      ebookActivities.forEach((activity, index) => {
         checkPageSpace(8);
-        pdf.text(`${index + 1}. ${activity.titulo}`, margin + 5, currentY);
-        pdf.text(`${activityLabels[activity.tipo]}`, pageWidth - margin - 40, currentY, { align: 'right' });
+        pdf.text(`${index + 1}. Atividade ${index + 1}`, margin + 5, currentY);
+        pdf.text('Atividade do Catálogo', pageWidth - margin - 40, currentY, { align: 'right' });
         currentY += 8;
       });
 
       // Activities
-      ebook.atividades.forEach((activity, index) => {
+      ebookActivities.forEach((activity, index) => {
         pdf.addPage();
         currentY = margin;
 
         // Activity header
         pdf.setFontSize(16);
         pdf.setFont("helvetica", "bold");
-        pdf.text(`${index + 1}. ${activity.titulo}`, margin, currentY);
+        pdf.text(`${index + 1}. Atividade ${index + 1}`, margin, currentY);
         currentY += 10;
 
         pdf.setFontSize(10);
         pdf.setFont("helvetica", "normal");
-        pdf.text(`Tipo: ${activityLabels[activity.tipo]}`, margin, currentY);
+        pdf.text(`Categoria: ${activity.categoria}`, margin, currentY);
         currentY += 15;
 
-        // Activity description
-        if (activity.descricao) {
-          pdf.setFontSize(12);
-          pdf.setFont("helvetica", "bold");
-          pdf.text('Descrição:', margin, currentY);
-          currentY += 8;
+        // Activity image URL info
+        pdf.setFontSize(12);
+        pdf.setFont("helvetica", "bold");
+        pdf.text('Imagem da Atividade:', margin, currentY);
+        currentY += 8;
 
-          pdf.setFont("helvetica", "normal");
-          const descHeight = addWrappedText(activity.descricao, margin, currentY, contentWidth);
-          currentY += descHeight + 10;
-        }
-
-        // Activity content
-        if (activity.conteudo) {
-          checkPageSpace(20);
-          pdf.setFontSize(12);
-          pdf.setFont("helvetica", "bold");
-          pdf.text('Conteúdo:', margin, currentY);
-          currentY += 8;
-
-          pdf.setFont("helvetica", "normal");
-          const contentHeight = addWrappedText(activity.conteudo, margin, currentY, contentWidth);
-          currentY += contentHeight + 10;
-        }
+        pdf.setFont("helvetica", "normal");
+        const urlHeight = addWrappedText('Disponível no catálogo de atividades', margin, currentY, contentWidth);
+        currentY += urlHeight + 10;
 
         // Add some space between activities
         currentY += 10;
@@ -165,28 +171,22 @@ export function EBookExporter({ ebook, variant = "outline", size = "sm" }: EBook
       let content = `${ebook.nome}\n`;
       content += `${'='.repeat(ebook.nome.length)}\n\n`;
       content += `Criado em: ${new Date(ebook.data).toLocaleDateString('pt-BR')}\n`;
-      content += `Atividades: ${ebook.atividades.length}\n\n`;
+      content += `Atividades: ${ebookActivities.length}\n\n`;
       
       content += 'SUMÁRIO\n';
       content += '--------\n\n';
-      ebook.atividades.forEach((activity, index) => {
-        content += `${index + 1}. ${activity.titulo} (${activityLabels[activity.tipo]})\n`;
+      ebookActivities.forEach((activity, index) => {
+        content += `${index + 1}. Atividade ${index + 1} (${activity.categoria})\n`;
       });
       content += '\n\n';
       
-      ebook.atividades.forEach((activity, index) => {
-        content += `${index + 1}. ${activity.titulo}\n`;
-        content += `${'-'.repeat(activity.titulo.length + 3)}\n`;
-        content += `Tipo: ${activityLabels[activity.tipo]}\n\n`;
-        
-        if (activity.descricao) {
-          content += `Descrição:\n${activity.descricao}\n\n`;
-        }
-        
-        if (activity.conteudo) {
-          content += `Conteúdo:\n${activity.conteudo}\n\n`;
-        }
-        
+      ebookActivities.forEach((activity, index) => {
+        content += `${index + 1}. Atividade ${index + 1}\n`;
+        content += `${'-'.repeat(`Atividade ${index + 1}`.length + 3)}\n`;
+        content += `Categoria: ${activity.categoria}\n`;
+        content += `Pasta: ${activity.pasta}\n`;
+        content += `Arquivo: ${activity.arquivo}\n`;
+        content += `URL da Imagem: ${activity.imagemUrl}\n\n`;
         content += '\n';
       });
 

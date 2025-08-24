@@ -22,8 +22,7 @@ import { CloneEBookDialog } from '@/components/ebooks/CloneEBookDialog';
 import { DeleteEBookDialog } from '@/components/ebooks/DeleteEBookDialog';
 import { AddActivityDialog } from '@/components/ebooks/AddActivityDialog';
 import { AtividadeEbookCard } from '@/components/ebooks/AtividadeEbookCard';
-import { BookViewer } from '@/components/ebooks/BookViewer';
-import { EBookExporter } from '@/components/ebooks/EBookExporter';
+import { EBookPDFExporter } from '@/components/ebooks/EBookPDFExporter';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { Ebook, Atividade } from '@shared/schema';
@@ -242,6 +241,10 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
               {/* Action buttons */}
               {isSubscriber && !isEditingName && (
                 <div className="flex flex-col sm:flex-row gap-2 sm:flex-shrink-0">
+                  <EBookPDFExporter 
+                    ebook={selectedEbook} 
+                    className="w-full sm:w-auto" 
+                  />
                   <Button 
                     variant="outline" 
                     size="sm"
@@ -272,8 +275,6 @@ export default function DetalheEBookPage({ onBack, onNavigateToCategories }: Det
                     <Trash2 className="h-4 w-4 mr-2" />
                     <span className="sm:inline">Excluir</span>
                   </Button>
-                  <BookViewer ebook={selectedEbook} />
-                  <EBookExporter ebook={selectedEbook} />
                 </div>
               )}
             </div>
