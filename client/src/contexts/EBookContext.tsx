@@ -15,9 +15,11 @@ interface EBookContextType {
   cloneEbookData: (id: string, newName: string) => Promise<Ebook | null>;
   refreshEbooks: () => Promise<void>;
   checkEbookNameExists: (name: string, excludeId?: string) => boolean;
-  addActivityToEbook: (ebookId: string, activity: { titulo: string; descricao?: string; tipo: 'texto' | 'exercicio' | 'quiz' | 'video'; conteudo?: string }) => Promise<boolean>;
+  addActivityToEbook: (ebookId: string, activityId: string) => Promise<boolean>;
   removeActivityFromEbook: (ebookId: string, activityId: string) => Promise<boolean>;
-  reorderActivities: (ebookId: string, reorderedActivities: any[]) => Promise<boolean>;
+  reorderActivities: (ebookId: string, reorderedActivityIds: string[]) => Promise<boolean>;
+  toggleActivityInEbook: (ebookId: string, activityId: string) => Promise<boolean>;
+  isActivityInEbook: (ebookId: string, activityId: string) => boolean;
 }
 
 const EBookContext = createContext<EBookContextType | undefined>(undefined);
@@ -74,25 +76,19 @@ export function EBookProvider({ children }: EBookProviderProps) {
     );
   };
 
-  const addActivityToEbook = async (ebookId: string, activity: { titulo: string; descricao?: string; tipo: 'texto' | 'exercicio' | 'quiz' | 'video'; conteudo?: string }): Promise<boolean> => {
+  const addActivityToEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
     try {
       setError(null);
       
       const ebook = ebooks.find(e => e.id === ebookId);
       if (!ebook) return false;
       
-      // Create new activity with proper structure
-      const newActivity = {
-        id: `atividade_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        titulo: activity.titulo,
-        descricao: activity.descricao || '',
-        tipo: activity.tipo,
-        conteudo: activity.conteudo || '',
-        ordem: ebook.atividades.length,
-        dataCriacao: new Date().toISOString(),
-      };
+      // Check if activity is already in the eBook
+      if (ebook.atividades.includes(activityId)) {
+        return false; // Activity already exists
+      }
       
-      const updatedActivities = [...ebook.atividades, newActivity];
+      const updatedActivities = [...ebook.atividades, activityId];
       const updatedEbook = await updateEbook(ebookId, { atividades: updatedActivities });
       
       setEbooks(prev => prev.map(e => 
@@ -119,7 +115,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
       const ebook = ebooks.find(e => e.id === ebookId);
       if (!ebook) return false;
       
-      const updatedActivities = ebook.atividades.filter(activity => activity.id !== activityId);
+      const updatedActivities = ebook.atividades.filter(id => id !== activityId);
       const updatedEbook = await updateEbook(ebookId, { atividades: updatedActivities });
       
       setEbooks(prev => prev.map(e => 
@@ -139,14 +135,14 @@ export function EBookProvider({ children }: EBookProviderProps) {
     }
   };
 
-  const reorderActivities = async (ebookId: string, reorderedActivities: any[]): Promise<boolean> => {
+  const reorderActivities = async (ebookId: string, reorderedActivityIds: string[]): Promise<boolean> => {
     try {
       setError(null);
       
       const ebook = ebooks.find(e => e.id === ebookId);
       if (!ebook) return false;
       
-      const updatedEbook = await updateEbook(ebookId, { atividades: reorderedActivities });
+      const updatedEbook = await updateEbook(ebookId, { atividades: reorderedActivityIds });
       
       setEbooks(prev => prev.map(e => 
         e.id === ebookId ? updatedEbook : e
@@ -165,7 +161,23 @@ export function EBookProvider({ children }: EBookProviderProps) {
     }
   };
 
-  const createEbookData = async (data: CreateEbook): Promise<Ebook | null> => {
+  const toggleActivityInEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
+    const ebook = ebooks.find(e => e.id === ebookId);
+    if (!ebook) return false;
+    
+    if (ebook.atividades.includes(activityId)) {
+      return await removeActivityFromEbook(ebookId, activityId);
+    } else {
+      return await addActivityToEbook(ebookId, activityId);
+    }
+  };
+
+  const isActivityInEbook = (ebookId: string, activityId: string): boolean => {
+    const ebook = ebooks.find(e => e.id === ebookId);
+    return ebook ? ebook.atividades.includes(activityId) : false;
+  };
+
+  const createNewEbook = async (data: CreateEbook): Promise<Ebook | null> => {
     try {
       setError(null);
       
@@ -269,7 +281,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
     loading,
     error,
     setSelectedEbook,
-    createNewEbook: createEbookData,
+    createNewEbook,
     updateEbookData,
     deleteEbookData,
     cloneEbookData,
@@ -278,6 +290,8 @@ export function EBookProvider({ children }: EBookProviderProps) {
     addActivityToEbook,
     removeActivityFromEbook,
     reorderActivities,
+    toggleActivityInEbook,
+    isActivityInEbook,
   };
 
   return (

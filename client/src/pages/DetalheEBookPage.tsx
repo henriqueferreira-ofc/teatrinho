@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,26 +20,36 @@ import { useEBooks } from '@/contexts/EBookContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CloneEBookDialog } from '@/components/ebooks/CloneEBookDialog';
 import { DeleteEBookDialog } from '@/components/ebooks/DeleteEBookDialog';
-import { AddActivityDialog } from '@/components/ebooks/AddActivityDialog';
-import { format } from 'date-fns';
-import { ActivityList } from '@/components/ebooks/ActivityList';
+import { AtividadeEbookCard } from '@/components/ebooks/AtividadeEbookCard';
 import { BookViewer } from '@/components/ebooks/BookViewer';
 import { EBookExporter } from '@/components/ebooks/EBookExporter';
+import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import type { Ebook } from '@shared/schema';
+import type { Ebook, Atividade } from '@shared/schema';
+import atividadesData from '@/data/atividades.json';
 
 interface DetalheEBookPageProps {
   onBack: () => void;
+  onNavigateToCategories?: () => void;
 }
 
-export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
+export default function DetalheEBookPage({ onBack, onNavigateToCategories }: DetalheEBookPageProps) {
   const { selectedEbook, removeActivityFromEbook, updateEbookData, reorderActivities } = useEBooks();
   const { isSubscriber } = useAuth();
   const [showCloneDialog, setShowCloneDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showAddActivityDialog, setShowAddActivityDialog] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState('');
+
+  // Load activity details from the catalog based on IDs
+  const ebookActivities = useMemo(() => {
+    if (!selectedEbook) return [];
+    
+    const allActivities = atividadesData as Atividade[];
+    return selectedEbook.atividades
+      .map(activityId => allActivities.find(activity => activity.id === activityId))
+      .filter((activity): activity is Atividade => activity !== undefined);
+  }, [selectedEbook?.atividades]);
 
   const handleCloneSuccess = () => {
     setShowCloneDialog(false);
@@ -82,6 +92,29 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
     } else if (e.key === 'Escape') {
       handleCancelEditName();
     }
+  };
+
+  const handleMoveUp = async (index: number) => {
+    if (!selectedEbook || index === 0) return;
+    
+    const newOrder = [...selectedEbook.atividades];
+    [newOrder[index], newOrder[index - 1]] = [newOrder[index - 1], newOrder[index]];
+    
+    await reorderActivities(selectedEbook.id, newOrder);
+  };
+
+  const handleMoveDown = async (index: number) => {
+    if (!selectedEbook || index === selectedEbook.atividades.length - 1) return;
+    
+    const newOrder = [...selectedEbook.atividades];
+    [newOrder[index], newOrder[index + 1]] = [newOrder[index + 1], newOrder[index]];
+    
+    await reorderActivities(selectedEbook.id, newOrder);
+  };
+
+  const handleRemoveActivity = async (activityId: string) => {
+    if (!selectedEbook) return;
+    await removeActivityFromEbook(selectedEbook.id, activityId);
   };
 
   if (!selectedEbook) {
@@ -248,30 +281,31 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    onClick={() => setShowAddActivityDialog(true)}
-                    data-testid="button-add-activity"
+                    onClick={onNavigateToCategories}
+                    data-testid="button-add-activities"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Atividade
+                    Adicionar Atividades
                   </Button>
                 )}
               </div>
 
-              {selectedEbook.atividades.length > 0 ? (
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                    Arraste as atividades para reordenar
+              {ebookActivities.length > 0 ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Use os botões de seta para reordenar as atividades
                   </p>
-                  <ActivityList
-                    activities={selectedEbook.atividades}
-                    onReorder={async (newOrder) => {
-                      await reorderActivities(selectedEbook.id, newOrder);
-                    }}
-                    onDelete={async (activityId) => {
-                      await removeActivityFromEbook(selectedEbook.id, activityId);
-                    }}
-                    canEdit={isSubscriber}
-                  />
+                  {ebookActivities.map((atividade, index) => (
+                    <AtividadeEbookCard
+                      key={atividade.id}
+                      atividade={atividade}
+                      index={index}
+                      total={ebookActivities.length}
+                      onMoveUp={() => handleMoveUp(index)}
+                      onMoveDown={() => handleMoveDown(index)}
+                      onRemove={() => handleRemoveActivity(atividade.id)}
+                    />
+                  ))}
                 </div>
               ) : (
                 <Card className="border-dashed border-2 border-gray-300 dark:border-gray-700">
@@ -296,7 +330,7 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
                     {isSubscriber && (
                       <Button 
                         variant="outline" 
-                        onClick={() => setShowAddActivityDialog(true)}
+                        onClick={onNavigateToCategories}
                         data-testid="button-add-first-activity"
                       >
                         <Plus className="h-4 w-4 mr-2" />
@@ -308,18 +342,6 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
               )}
             </div>
 
-            {/* Future features note */}
-            <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
-                Funcionalidades em desenvolvimento
-              </h4>
-              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <li>• Adicionar e remover atividades do eBook</li>
-                <li>• Reordenar atividades por arrastar e soltar</li>
-                <li>• Visualizar atividades em formato de livro</li>
-                <li>• Exportar eBook para diferentes formatos</li>
-              </ul>
-            </div>
           </CardContent>
         </Card>
 
@@ -342,11 +364,6 @@ export default function DetalheEBookPage({ onBack }: DetalheEBookPageProps) {
           ebook={selectedEbook}
         />
         
-        <AddActivityDialog 
-          open={showAddActivityDialog} 
-          onOpenChange={setShowAddActivityDialog}
-          ebook={selectedEbook}
-        />
       </div>
     </div>
   );

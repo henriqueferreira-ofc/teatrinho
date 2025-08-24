@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { ActivityGrid } from '@/components/atividades/ActivityGrid';
+import { ActivityCard } from '@/components/atividades/ActivityCard';
+import { useEBooks } from '@/contexts/EBookContext';
 import { Categoria, Atividade } from '@shared/schema';
 import atividadesData from '@/data/atividades.json';
 
@@ -23,6 +24,7 @@ export default function AtividadesPorCategoriaPage({
   const [todasAtividades, setTodasAtividades] = useState<Atividade[]>([]);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [carregando, setCarregando] = useState(false);
+  const { selectedEbook, toggleActivityInEbook, isActivityInEbook } = useEBooks();
 
   useEffect(() => {
     // Carregar todas as atividades da categoria
@@ -71,6 +73,12 @@ export default function AtividadesPorCategoriaPage({
 
   const temMaisAtividades = atividades.length < todasAtividades.length;
 
+  const handleActivityClick = async (atividade: Atividade) => {
+    if (!selectedEbook) return;
+    
+    await toggleActivityInEbook(selectedEbook.id, atividade.id);
+  };
+
   return (
     <div className="p-4">
       <div className="max-w-4xl mx-auto">
@@ -106,23 +114,68 @@ export default function AtividadesPorCategoriaPage({
           </div>
         </div>
 
+        {/* eBook Selection Info */}
+        {selectedEbook && (
+          <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 mb-6 border border-blue-200 dark:border-blue-800">
+            <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
+              Selecionando atividades para: {selectedEbook.nome}
+            </h3>
+            <p className="text-sm text-blue-700 dark:text-blue-300">
+              Clique nas atividades para adicioná-las ou removê-las do seu eBook. 
+              Atividades já adicionadas são marcadas com uma borda verde e ícone de check.
+            </p>
+          </div>
+        )}
+
         {/* Lista de atividades */}
         {todasAtividades.length > 0 ? (
-          <ActivityGrid
-            atividades={atividades}
-            total={todasAtividades.length}
-            carregadas={atividades.length}
-            temMais={temMaisAtividades}
-            carregando={carregando}
-            onLoadMore={carregarMais}
-            onActivityClick={(atividade) => {
-              // Aqui poderia abrir uma modal ou navegar para visualizar a atividade
-              console.log('Atividade clicada:', atividade);
-            }}
-          />
+          <div className="space-y-6">
+            {/* Contador de atividades */}
+            <div className="text-center" data-testid="contador-atividades">
+              <p className="text-gray-600 dark:text-gray-400">
+                Exibindo <span className="font-semibold">{atividades.length}</span> de{' '}
+                <span className="font-semibold">{todasAtividades.length}</span> atividades
+              </p>
+            </div>
+
+            {/* Grid customizado para integração com eBook */}
+            <div 
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+              data-testid="grid-atividades"
+            >
+              {atividades.map((atividade) => (
+                <ActivityCard
+                  key={atividade.id}
+                  atividade={atividade}
+                  onClick={selectedEbook ? handleActivityClick : undefined}
+                  isInEbook={selectedEbook ? isActivityInEbook(selectedEbook.id, atividade.id) : false}
+                />
+              ))}
+            </div>
+
+            {/* Botão Carregar Mais */}
+            {temMaisAtividades && (
+              <div className="text-center">
+                <Button
+                  onClick={carregarMais}
+                  disabled={carregando}
+                  className="px-8 py-2"
+                  data-testid="button-carregar-mais"
+                >
+                  {carregando ? (
+                    <>
+                      Carregando...
+                    </>
+                  ) : (
+                    'Carregar Mais'
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
         ) : (
           <div className="text-center py-12" data-testid="empty-state">
-            <p className="text-gray-600 text-lg">
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
               Nenhuma atividade encontrada para esta categoria.
             </p>
           </div>

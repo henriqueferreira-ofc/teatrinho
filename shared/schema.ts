@@ -129,7 +129,7 @@ export const ebookSchema = z.object({
   id: z.string(),
   nome: z.string().min(1, "Nome do eBook é obrigatório"),
   data: z.string(), // Data de criação em formato ISO string
-  atividades: z.array(ebookAtividadeSchema).default([]), // Array de atividades completas
+  atividades: z.array(z.string()).default([]), // Array de IDs de atividades do catálogo
 });
 
 export const createEbookSchema = ebookSchema.omit({
