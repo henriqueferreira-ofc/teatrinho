@@ -165,11 +165,11 @@ export default function Profile() {
       return;
     }
 
-    // Validar tamanho (máximo 5MB)
-    if (file.size > 5 * 1024 * 1024) {
+    // Validar tamanho (máximo 1MB para base64)
+    if (file.size > 1 * 1024 * 1024) {
       toast({
         title: "Arquivo muito grande",
-        description: "A imagem deve ter no máximo 5MB.",
+        description: "A imagem deve ter no máximo 1MB.",
         variant: "destructive",
       });
       return;

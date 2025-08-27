@@ -177,22 +177,19 @@ export const getVideoActivityImageUrl = async (activityId: string): Promise<stri
   }
 };
 
-// Função para upload de imagem de perfil
+// Função para upload de imagem de perfil usando base64 no Firestore
 export const uploadProfileImage = async (file: File): Promise<string> => {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Usuário não autenticado");
-  
-  const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-  const fileName = `profile-${user.uid}.${fileExtension}`;
-  const imageRef = ref(storage, `profile-photos/${fileName}`);
-  
-  // Upload do arquivo
-  const snapshot = await uploadBytes(imageRef, file);
-  
-  // Obter URL de download
-  const downloadURL = await getDownloadURL(snapshot.ref);
-  
-  return downloadURL;
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      resolve(base64String);
+    };
+    reader.onerror = () => {
+      reject(new Error("Erro ao processar imagem"));
+    };
+    reader.readAsDataURL(file);
+  });
 };
 
 // Função específica para upload de foto de perfil
@@ -200,7 +197,7 @@ export const updateProfilePhoto = async (file: File): Promise<string> => {
   const user = auth.currentUser;
   if (!user) throw new Error("Usuário não autenticado");
   
-  // Upload da imagem para o Firebase Storage
+  // Converter imagem para base64
   const photoURL = await uploadProfileImage(file);
   
   // Atualizar o perfil no Firebase Auth
