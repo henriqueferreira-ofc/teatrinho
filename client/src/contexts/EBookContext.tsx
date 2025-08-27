@@ -77,7 +77,25 @@ export function EBookProvider({ children }: EBookProviderProps) {
       
       // If selected eBook was deleted, clear selection
       if (selectedEbook && !userEbooks.find(ebook => ebook.id === selectedEbook.id)) {
-        setSelectedEbook(null);
+        setSelectedEbookWithPersistence(null);
+      } else if (!selectedEbook) {
+        // Check if there's a selected eBook in localStorage
+        const savedEbook = localStorage.getItem('selectedEbook');
+        if (savedEbook) {
+          try {
+            const parsedEbook = JSON.parse(savedEbook);
+            const foundEbook = userEbooks.find(ebook => ebook.id === parsedEbook.id);
+            if (foundEbook) {
+              setSelectedEbook(foundEbook);
+              console.log('eBook carregado do localStorage:', foundEbook.nome);
+            } else {
+              localStorage.removeItem('selectedEbook');
+            }
+          } catch (error) {
+            console.error('Erro ao carregar eBook do localStorage:', error);
+            localStorage.removeItem('selectedEbook');
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching eBooks:', err);

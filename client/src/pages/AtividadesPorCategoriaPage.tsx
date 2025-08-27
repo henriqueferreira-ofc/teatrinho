@@ -26,7 +26,17 @@ export default function AtividadesPorCategoriaPage({
   const [carregando, setCarregando] = useState(false);
   const { selectedEbook, toggleActivityInEbook, isActivityInEbook } = useEBooks();
 
-  console.log('AtividadesPorCategoriaPage - selectedEbook:', selectedEbook?.nome || 'NENHUM');
+  // Debug do selectedEbook
+  React.useEffect(() => {
+    console.log('AtividadesPorCategoriaPage - selectedEbook:', selectedEbook?.nome || 'NENHUM');
+    
+    if (!selectedEbook) {
+      const savedEbook = localStorage.getItem('selectedEbook');
+      if (savedEbook) {
+        console.log('eBook encontrado no localStorage, mas não carregado no contexto');
+      }
+    }
+  }, [selectedEbook]);
 
   useEffect(() => {
     // Carregar todas as atividades da categoria
