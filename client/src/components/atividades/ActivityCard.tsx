@@ -10,16 +10,16 @@ interface ActivityCardProps {
 }
 
 export function ActivityCard({ atividade, onClick, isInEbook = false }: ActivityCardProps) {
-  const handleClick = () => {
+  const handleClick = React.useCallback(() => {
     console.log('ActivityCard clicado:', atividade.id, 'onClick disponível:', !!onClick, 'isInEbook:', isInEbook);
     if (onClick) {
       onClick(atividade);
     }
-  };
+  }, [atividade, onClick, isInEbook]);
 
   return (
     <Card 
-      className={`${onClick ? 'cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105' : ''} bg-white/90 backdrop-blur-sm ${
+      className={`${onClick ? 'cursor-pointer hover:shadow-lg transition-all duration-150 hover:scale-[1.02]' : ''} bg-white/90 backdrop-blur-sm ${
         isInEbook 
           ? 'border-2 border-green-500 ring-2 ring-green-200 dark:ring-green-800' 
           : 'border border-white/50'
@@ -32,8 +32,15 @@ export function ActivityCard({ atividade, onClick, isInEbook = false }: Activity
           <img
             src={atividade.imagemUrl}
             alt={`Atividade ${atividade.ordem}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-opacity duration-200"
             data-testid={`img-atividade-${atividade.id}`}
+            loading="lazy"
+            decoding="async"
+            onLoad={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.style.opacity = '1';
+            }}
+            style={{ opacity: '0', transition: 'opacity 0.2s' }}
           />
         </div>
         

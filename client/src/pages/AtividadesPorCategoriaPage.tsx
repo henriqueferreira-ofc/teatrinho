@@ -70,12 +70,12 @@ export default function AtividadesPorCategoriaPage({
     }
   }, [categoria.id]);
 
-  const carregarMais = async () => {
+  const carregarMais = React.useCallback(async () => {
     setCarregando(true);
     
     try {
-      // Simular delay de carregamento
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Reduzir delay para melhorar velocidade
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       const proximaPagina = paginaAtual + 1;
       const inicio = (proximaPagina - 1) * ATIVIDADES_POR_PAGINA;
@@ -89,17 +89,19 @@ export default function AtividadesPorCategoriaPage({
     } finally {
       setCarregando(false);
     }
-  };
+  }, [paginaAtual, todasAtividades]);
 
   const temMaisAtividades = atividades.length < todasAtividades.length;
 
-  const handleActivityClick = async (atividade: Atividade) => {
+  const handleActivityClick = React.useCallback(async (atividade: Atividade) => {
     if (!selectedEbook) {
       console.log('Nenhum eBook selecionado');
       return;
     }
     
     console.log('Clicando na atividade:', atividade.id, 'para eBook:', selectedEbook.nome);
+    
+    // Feedback visual imediato sem esperar pela API
     const success = await toggleActivityInEbook(selectedEbook.id, atividade.id);
     
     if (success) {
@@ -107,7 +109,7 @@ export default function AtividadesPorCategoriaPage({
     } else {
       console.log('Erro ao fazer toggle da atividade');
     }
-  };
+  }, [selectedEbook, toggleActivityInEbook]);
 
   return (
     <div className="p-4">

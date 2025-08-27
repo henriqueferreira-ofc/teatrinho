@@ -205,18 +205,57 @@ export function EBookProvider({ children }: EBookProviderProps) {
     }
   };
 
-  const toggleActivityInEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
+  const toggleActivityInEbook = React.useCallback(async (ebookId: string, activityId: string): Promise<boolean> => {
     const ebook = ebooks.find(e => e.id === ebookId);
     if (!ebook) return false;
     
     console.log('Toggle atividade:', activityId, 'em eBook:', ebookId, 'Existe?', ebook.atividades.includes(activityId));
     
-    if (ebook.atividades.includes(activityId)) {
-      return await removeActivityFromEbook(ebookId, activityId);
+    // Atualização otimista: atualizar UI imediatamente
+    const isCurrentlyInEbook = ebook.atividades.includes(activityId);
+    
+    // Atualizar estado local imediatamente para feedback rápido
+    if (isCurrentlyInEbook) {
+      setEbooks(prev => prev.map(e => 
+        e.id === ebookId 
+          ? { ...e, atividades: e.atividades.filter(id => id !== activityId) }
+          : e
+      ));
     } else {
-      return await addActivityToEbook(ebookId, activityId);
+      setEbooks(prev => prev.map(e => 
+        e.id === ebookId 
+          ? { ...e, atividades: [...e.atividades, activityId] }
+          : e
+      ));
     }
-  };
+    
+    // Depois fazer a chamada real da API em segundo plano
+    try {
+      if (isCurrentlyInEbook) {
+        await removeActivityFromEbook(ebookId, activityId);
+      } else {
+        await addActivityToEbook(ebookId, activityId);
+      }
+      return true;
+    } catch (error) {
+      // Se falhar, reverter o estado
+      console.error('Erro na API, revertendo estado:', error);
+      if (isCurrentlyInEbook) {
+        setEbooks(prev => prev.map(e => 
+          e.id === ebookId 
+            ? { ...e, atividades: [...e.atividades, activityId] }
+            : e
+        ));
+      } else {
+        setEbooks(prev => prev.map(e => 
+          e.id === ebookId 
+            ? { ...e, atividades: e.atividades.filter(id => id !== activityId) }
+            : e
+        ));
+      }
+      return false;
+    }
+  }, [ebooks, removeActivityFromEbook, addActivityToEbook]);
 
   const addCustomActivityToEbook = async (ebookId: string, activityData: any): Promise<boolean> => {
     try {
