@@ -6,6 +6,35 @@ This is a Firebase-integrated React application called "Teatrinho" - an eBook cr
 
 Preferred communication style: Simple, everyday language.
 
+# Recent Changes (August 27, 2025)
+
+## Authentication Enhancements
+- **Password Recovery**: Added "Esqueceu senha?" functionality to login page with email-based password reset
+- **Profile Management**: Implemented comprehensive profile editing with name updates and password changes
+- **Google Account Handling**: Smart password change restrictions for Google OAuth users
+- **Form Validation**: Added proper Zod schemas for password reset, profile updates, and password changes
+
+## New Features Added
+1. **Login Page Enhancements**:
+   - "Esqueceu sua senha?" link below password field
+   - Password reset dialog with email input
+   - Firebase sendPasswordResetEmail integration
+   - Toast notifications for success/error feedback
+
+2. **Profile Page Complete Overhaul**:
+   - "Editar Perfil" dialog for updating user name
+   - "Alterar Senha" dialog for email users (hidden for Google users)
+   - Real-time form validation with proper error handling
+   - Password visibility toggles for all password fields
+   - Proper authentication checks and re-authentication for password changes
+
+## Technical Implementation
+- **Firebase Integration**: Added sendPasswordResetEmail and enhanced updateUserPassword functions
+- **Schema Updates**: Created passwordResetSchema, updateProfileSchema, and changePasswordSchema
+- **UI Components**: Used shadcn/ui Dialog components with proper Form integration
+- **Error Handling**: Comprehensive error messages for various Firebase auth scenarios
+- **User Experience**: Immediate feedback with loading states and success messages
+
 # System Architecture
 
 ## Frontend Architecture

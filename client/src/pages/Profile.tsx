@@ -1,16 +1,29 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { logout, updateUserStatus } from '@/lib/firebase';
+import { logout, updateUserStatus, updateUserDocument, updateUserPassword } from '@/lib/firebase';
+import { updateProfileSchema, changePasswordSchema, type UpdateProfileForm, type ChangePasswordForm } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { User, Lock, Crown, LogOut, ChevronRight, Menu, Power } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { User, Lock, Crown, LogOut, ChevronRight, Menu, Power, Edit, Eye, EyeOff } from 'lucide-react';
 
 export default function Profile() {
-  const { userProfile, isSubscriber, refreshUserProfile } = useAuth();
+  const { user, userProfile, isSubscriber, refreshUserProfile } = useAuth();
   const { toast } = useToast();
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -24,20 +37,91 @@ export default function Profile() {
     }
   };
 
+  const profileForm = useForm<UpdateProfileForm>({
+    resolver: zodResolver(updateProfileSchema),
+    defaultValues: {
+      name: userProfile?.name || '',
+    },
+  });
+
+  const passwordForm = useForm<ChangePasswordForm>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
+
   const handleEditProfile = () => {
-    // TODO: Implementar navegação para tela de editar perfil
-    toast({
-      title: "Em desenvolvimento",
-      description: "Funcionalidade será implementada em breve.",
-    });
+    if (userProfile) {
+      profileForm.reset({ name: userProfile.name });
+      setShowEditDialog(true);
+    }
   };
 
   const handleChangePassword = () => {
-    // TODO: Implementar navegação para tela de alterar senha
-    toast({
-      title: "Em desenvolvimento", 
-      description: "Funcionalidade será implementada em breve.",
-    });
+    // Only allow password change for email users
+    if (userProfile?.provider === 'google') {
+      toast({
+        title: "Não disponível",
+        description: "Usuários do Google devem alterar a senha através da conta Google.",
+        variant: "destructive",
+      });
+      return;
+    }
+    passwordForm.reset();
+    setShowPasswordDialog(true);
+  };
+
+  const handleUpdateProfile = async (data: UpdateProfileForm) => {
+    if (!user || !userProfile) return;
+
+    setIsUpdatingProfile(true);
+    try {
+      await updateUserDocument(user.uid, { name: data.name });
+      await refreshUserProfile();
+      toast({
+        title: "Perfil atualizado",
+        description: "Suas informações foram atualizadas com sucesso.",
+      });
+      setShowEditDialog(false);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: error.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleUpdatePassword = async (data: ChangePasswordForm) => {
+    setIsChangingPassword(true);
+    try {
+      await updateUserPassword(data.currentPassword, data.newPassword);
+      toast({
+        title: "Senha alterada",
+        description: "Sua senha foi alterada com sucesso.",
+      });
+      setShowPasswordDialog(false);
+      passwordForm.reset();
+    } catch (error: any) {
+      let message = "Tente novamente.";
+      if (error.code === 'auth/wrong-password') {
+        message = "Senha atual incorreta.";
+      } else if (error.code === 'auth/weak-password') {
+        message = "A nova senha é muito fraca.";
+      }
+      toast({
+        title: "Erro ao alterar senha",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleToggleStatus = async () => {
@@ -230,6 +314,183 @@ export default function Profile() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Editar Perfil</DialogTitle>
+            <DialogDescription>
+              Atualize suas informações pessoais.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...profileForm}>
+            <form onSubmit={profileForm.handleSubmit(handleUpdateProfile)} className="space-y-4">
+              <FormField
+                control={profileForm.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Seu nome completo"
+                        className="h-12"
+                        data-testid="input-profile-name"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowEditDialog(false)}
+                  data-testid="button-cancel-edit"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  style={{backgroundColor: '#1800ad'}}
+                  disabled={isUpdatingProfile}
+                  data-testid="button-save-profile"
+                >
+                  {isUpdatingProfile ? 'Salvando...' : 'Salvar'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Alterar Senha</DialogTitle>
+            <DialogDescription>
+              Digite sua senha atual e a nova senha.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...passwordForm}>
+            <form onSubmit={passwordForm.handleSubmit(handleUpdatePassword)} className="space-y-4">
+              <FormField
+                control={passwordForm.control}
+                name="currentPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Senha Atual</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showCurrentPassword ? 'text' : 'password'}
+                          placeholder="Digite sua senha atual"
+                          className="h-12 pr-12"
+                          data-testid="input-current-password"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                          data-testid="button-toggle-current-password"
+                        >
+                          {showCurrentPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={passwordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nova Senha</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showNewPassword ? 'text' : 'password'}
+                          placeholder="Digite a nova senha"
+                          className="h-12 pr-12"
+                          data-testid="input-new-password"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          data-testid="button-toggle-new-password"
+                        >
+                          {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={passwordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirmar Nova Senha</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          placeholder="Confirme a nova senha"
+                          className="h-12 pr-12"
+                          data-testid="input-confirm-password"
+                          {...field}
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          data-testid="button-toggle-confirm-password"
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowPasswordDialog(false)}
+                  data-testid="button-cancel-password"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  style={{backgroundColor: '#1800ad'}}
+                  disabled={isChangingPassword}
+                  data-testid="button-save-password"
+                >
+                  {isChangingPassword ? 'Alterando...' : 'Alterar Senha'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

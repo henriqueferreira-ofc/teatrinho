@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { loginWithEmail, loginWithGoogle } from '@/lib/firebase';
-import { loginSchema, type LoginForm } from '@shared/schema';
+import { loginWithEmail, loginWithGoogle, sendPasswordReset } from '@/lib/firebase';
+import { loginSchema, passwordResetSchema, type LoginForm, type PasswordResetForm } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import logoUrl from '@assets/LOGO DE APLICATIVOSs_1755877873488.png';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -19,6 +20,8 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [isResetLoading, setIsResetLoading] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<LoginForm>({
@@ -26,6 +29,13 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
     defaultValues: {
       email: '',
       password: '',
+    },
+  });
+
+  const resetForm = useForm<PasswordResetForm>({
+    resolver: zodResolver(passwordResetSchema),
+    defaultValues: {
+      email: '',
     },
   });
 
@@ -56,6 +66,27 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
       });
     } finally {
       setIsGoogleLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (data: PasswordResetForm) => {
+    setIsResetLoading(true);
+    try {
+      await sendPasswordReset(data.email);
+      toast({
+        title: "Email enviado!",
+        description: "Verifique sua caixa de entrada para redefinir sua senha.",
+      });
+      setShowResetDialog(false);
+      resetForm.reset();
+    } catch (error: any) {
+      toast({
+        title: "Erro ao enviar email",
+        description: error.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsResetLoading(false);
     }
   };
 
@@ -164,6 +195,19 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
                       )}
                     />
 
+                    {/* Forgot Password Link */}
+                    <div className="text-center">
+                      <Button
+                        type="button"
+                        variant="link"
+                        className="text-sm text-gray-600 hover:text-gray-900 p-0"
+                        onClick={() => setShowResetDialog(true)}
+                        data-testid="button-forgot-password"
+                      >
+                        Esqueceu sua senha?
+                      </Button>
+                    </div>
+
                     {/* Login Button */}
                     <div className="pt-4">
                       <Button
@@ -207,6 +251,63 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
           </Card>
         </div>
       </div>
+
+      {/* Password Reset Dialog */}
+      <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Recuperar Senha</DialogTitle>
+            <DialogDescription>
+              Digite seu email para receber instruções de recuperação de senha.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...resetForm}>
+            <form onSubmit={resetForm.handleSubmit(handlePasswordReset)} className="space-y-4">
+              <FormField
+                control={resetForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <div className="relative">
+                        <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                        <Input
+                          type="email"
+                          placeholder="Seu email"
+                          className="pl-12 h-14 border border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0"
+                          data-testid="input-reset-email"
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setShowResetDialog(false)}
+                  data-testid="button-cancel-reset"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="submit"
+                  className="flex-1"
+                  style={{backgroundColor: '#1800ad'}}
+                  disabled={isResetLoading}
+                  data-testid="button-send-reset"
+                >
+                  {isResetLoading ? 'Enviando...' : 'Enviar'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

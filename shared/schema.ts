@@ -45,24 +45,31 @@ export const registerSchema = z.object({
   path: ["confirmPassword"],
 });
 
+// Schema para recuperação de senha
+export const passwordResetSchema = z.object({
+  email: z.string().email("Endereço de email inválido"),
+});
+
+// Schema para edição de perfil
 export const updateProfileSchema = z.object({
   name: z.string().min(1, "Nome é obrigatório"),
-  currentPassword: z.string().optional(),
-  newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres").optional(),
-}).refine(data => {
-  // Só valida senha se o usuário preencheu a nova senha
-  if (data.newPassword && data.newPassword.length > 0 && !data.currentPassword) {
-    return false;
-  }
-  return true;
-}, {
-  message: "A senha atual é obrigatória para alterar a senha",
-  path: ["currentPassword"],
+});
+
+// Schema para alteração de senha
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+  newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres"),
+  confirmPassword: z.string().min(1, "Confirmação da senha é obrigatória"),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "As senhas não coincidem",
+  path: ["confirmPassword"],
 });
 
 export type LoginForm = z.infer<typeof loginSchema>;
 export type RegisterForm = z.infer<typeof registerSchema>;
+export type PasswordResetForm = z.infer<typeof passwordResetSchema>;
 export type UpdateProfileForm = z.infer<typeof updateProfileSchema>;
+export type ChangePasswordForm = z.infer<typeof changePasswordSchema>;
 
 // Schema para assinaturas
 export const subscriptionSchema = z.object({

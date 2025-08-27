@@ -11,6 +11,7 @@ import {
   reauthenticateWithCredential,
   EmailAuthProvider,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   User
 } from "firebase/auth";
 import { 
@@ -89,6 +90,10 @@ export const loginWithGoogle = async () => {
 
 export const logout = async () => {
   await signOut(auth);
+};
+
+export const sendPasswordReset = async (email: string) => {
+  await sendPasswordResetEmail(auth, email);
 };
 
 export const updateUserPassword = async (currentPassword: string, newPassword: string) => {
