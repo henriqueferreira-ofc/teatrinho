@@ -144,22 +144,6 @@ export const updateUserDocument = async (uid: string, userData: UpdateUser) => {
   return updateData;
 };
 
-export const uploadProfileImage = async (file: File): Promise<string> => {
-  const user = auth.currentUser;
-  if (!user) throw new Error("Usuário não autenticado");
-  
-  // Create a reference to the image in Firebase Storage
-  const imageRef = ref(storage, `profile-images/${user.uid}/${Date.now()}-${file.name}`);
-  
-  // Upload the file
-  const snapshot = await uploadBytes(imageRef, file);
-  
-  // Get the download URL
-  const downloadURL = await getDownloadURL(snapshot.ref);
-  
-  return downloadURL;
-};
-
 export const deleteProfileImage = async (imageUrl: string) => {
   try {
     const imageRef = ref(storage, imageUrl);
@@ -191,6 +175,24 @@ export const getVideoActivityImageUrl = async (activityId: string): Promise<stri
     console.warn(`Imagem não encontrada para atividade ${activityId}:`, error);
     return null;
   }
+};
+
+// Função para upload de imagem de perfil
+export const uploadProfileImage = async (file: File): Promise<string> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const fileName = `profile-${user.uid}.${fileExtension}`;
+  const imageRef = ref(storage, `profile-photos/${fileName}`);
+  
+  // Upload do arquivo
+  const snapshot = await uploadBytes(imageRef, file);
+  
+  // Obter URL de download
+  const downloadURL = await getDownloadURL(snapshot.ref);
+  
+  return downloadURL;
 };
 
 // Função específica para upload de foto de perfil
