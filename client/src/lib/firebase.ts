@@ -200,10 +200,8 @@ export const updateProfilePhoto = async (file: File): Promise<string> => {
   // Converter imagem para base64
   const photoURL = await uploadProfileImage(file);
   
-  // Atualizar o perfil no Firebase Auth
-  await updateProfile(user, { photoURL });
-  
-  // Atualizar o documento do usuário no Firestore
+  // Atualizar apenas o documento do usuário no Firestore
+  // Não atualizamos o Firebase Auth pois base64 muito longo causa erro 400
   await updateUserDocument(user.uid, { photoURL });
   
   return photoURL;

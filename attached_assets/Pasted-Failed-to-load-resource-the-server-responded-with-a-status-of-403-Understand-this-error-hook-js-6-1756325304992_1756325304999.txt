@@ -1,0 +1,36 @@
+Failed to load resource: the server responded with a status of 403 ()Understand this error
+hook.js:608 Imagem não encontrada para categoria cat-coordenacao-motora: FirebaseError: Firebase Storage: User does not have permission to access 'video-categories/cat-coordenacao-motora.jpg'. (storage/unauthorized)
+overrideMethod @ hook.js:608Understand this warning
+firebasestorage.googleapis.com/v0/b/app-teatrinho.firebasestorage.app/o/video-categories%2Fcat-comunicacao.jpg:1  Failed to load resource: the server responded with a status of 403 ()Understand this error
+hook.js:608 Imagem não encontrada para categoria cat-comunicacao: FirebaseError: Firebase Storage: User does not have permission to access 'video-categories/cat-comunicacao.jpg'. (storage/unauthorized)
+overrideMethod @ hook.js:608Understand this warning
+firebasestorage.googleapis.com/v0/b/app-teatrinho.firebasestorage.app/o/video-categories%2Fcat-cores-formas.jpg:1  Failed to load resource: the server responded with a status of 403 ()Understand this error
+hook.js:608 Imagem não encontrada para categoria cat-cores-formas: FirebaseError: Firebase Storage: User does not have permission to access 'video-categories/cat-cores-formas.jpg'. (storage/unauthorized)
+overrideMethod @ hook.js:608Understand this warning
+identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyD-Kh9Tsv6vCawlTjSIcOomJMPyW_rZVWg:1  Failed to load resource: the server responded with a status of 400 ()Understand this error
+firebase.ts:204  POST https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyD-Kh9Tsv6vCawlTjSIcOomJMPyW_rZVWg 400 (Bad Request)
+(anonymous) @ firebase_auth.js?v=0869c17e:1106
+await in (anonymous)
+_performFetchWithErrorHandling @ firebase_auth.js?v=0869c17e:1115
+_performApiRequest @ firebase_auth.js?v=0869c17e:1068
+updateProfile$1 @ firebase_auth.js?v=0869c17e:4980
+updateProfile @ firebase_auth.js?v=0869c17e:4994
+await in updateProfile
+updateProfilePhoto @ firebase.ts:204
+await in updateProfilePhoto
+handlePhotoUpload @ Profile.tsx:180
+callCallback2 @ chunk-RPCDYKBN.js?v=0869c17e:3674
+invokeGuardedCallbackDev @ chunk-RPCDYKBN.js?v=0869c17e:3699
+invokeGuardedCallback @ chunk-RPCDYKBN.js?v=0869c17e:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-RPCDYKBN.js?v=0869c17e:3736
+executeDispatch @ chunk-RPCDYKBN.js?v=0869c17e:7014
+processDispatchQueueItemsInOrder @ chunk-RPCDYKBN.js?v=0869c17e:7034
+processDispatchQueue @ chunk-RPCDYKBN.js?v=0869c17e:7043
+dispatchEventsForPlugins @ chunk-RPCDYKBN.js?v=0869c17e:7051
+(anonymous) @ chunk-RPCDYKBN.js?v=0869c17e:7174
+batchedUpdates$1 @ chunk-RPCDYKBN.js?v=0869c17e:18913
+batchedUpdates @ chunk-RPCDYKBN.js?v=0869c17e:3579
+dispatchEventForPluginEventSystem @ chunk-RPCDYKBN.js?v=0869c17e:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-RPCDYKBN.js?v=0869c17e:5478
+dispatchEvent @ chunk-RPCDYKBN.js?v=0869c17e:5472
+dispatchDiscreteEvent @ chunk-RPCDYKBN.js?v=0869c17e:5449Understand this error
