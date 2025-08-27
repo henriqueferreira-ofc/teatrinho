@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,9 +6,10 @@ import { Search, Play, Zap, ChevronRight } from 'lucide-react';
 import { CategoriaGridVideo } from '@/components/videos/CategoriaGridVideo';
 import { useVideos } from '@/hooks/useVideos';
 import { useAuth } from '@/contexts/AuthContext';
+import { getVideoCategoryImageUrl } from '@/lib/firebase';
 import type { VideoCategoria } from '@shared/schema';
 
-// Importando as imagens das categorias
+// Importando as imagens das categorias como fallback
 import comunicacaoImg from '@assets/1_1756319870173.jpg';
 import comportamentoImg from '@assets/2_1756319870182.jpg';
 import compreendendoImg from '@assets/3_1756319870182.jpg';
@@ -30,8 +31,8 @@ export default function VideosPage({ onNavigate }: VideosPageProps) {
   
   const { isSubscriber } = useAuth();
 
-  // Categorias específicas de autismo para mães
-  const categoriasAutismo = [
+  // Estado para as categorias especializadas com imagens do Firebase Storage
+  const [categoriasAutismo, setCategoriasAutismo] = useState([
     {
       id: 'compreendendo',
       nome: 'Compreendendo o Autismo',
@@ -64,11 +65,37 @@ export default function VideosPage({ onNavigate }: VideosPageProps) {
       cor: 'from-orange-400 to-orange-600',
       ordem: 4
     }
-  ];
+  ]);
 
   // Carregar categorias ao montar o componente
   useEffect(() => {
     listCategorias();
+    
+    // Carregar imagens do Firebase Storage para as categorias de autismo
+    const loadStorageImages = async () => {
+      try {
+        const categoriasComStorage = await Promise.all(
+          categoriasAutismo.map(async (categoria) => {
+            try {
+              const storageImageUrl = await getVideoCategoryImageUrl(categoria.id);
+              return {
+                ...categoria,
+                imagemUrl: storageImageUrl || categoria.imagemUrl // Usar storage ou fallback
+              };
+            } catch (error) {
+              console.warn(`Imagem não encontrada no storage para ${categoria.id}:`, error);
+              return categoria; // Manter imagem original
+            }
+          })
+        );
+        
+        setCategoriasAutismo(categoriasComStorage);
+      } catch (error) {
+        console.error('Erro ao carregar imagens do storage:', error);
+      }
+    };
+
+    loadStorageImages();
   }, []);
 
   const handleCategoriaClick = (categoria: VideoCategoria) => {

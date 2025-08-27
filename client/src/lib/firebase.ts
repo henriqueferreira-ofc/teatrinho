@@ -169,6 +169,30 @@ export const deleteProfileImage = async (imageUrl: string) => {
   }
 };
 
+// Função para carregar imagem de categoria de vídeo do Firebase Storage
+export const getVideoCategoryImageUrl = async (categoryId: string): Promise<string | null> => {
+  try {
+    const imageRef = ref(storage, `video-categories/${categoryId}.jpg`);
+    const downloadURL = await getDownloadURL(imageRef);
+    return downloadURL;
+  } catch (error) {
+    console.warn(`Imagem não encontrada para categoria ${categoryId}:`, error);
+    return null;
+  }
+};
+
+// Função para carregar imagem de atividade de vídeo do Firebase Storage  
+export const getVideoActivityImageUrl = async (activityId: string): Promise<string | null> => {
+  try {
+    const imageRef = ref(storage, `video-activities/${activityId}.jpg`);
+    const downloadURL = await getDownloadURL(imageRef);
+    return downloadURL;
+  } catch (error) {
+    console.warn(`Imagem não encontrada para atividade ${activityId}:`, error);
+    return null;
+  }
+};
+
 export const updateUserProfile = async (userData: { 
   name: string; 
   currentPassword?: string; 

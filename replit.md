@@ -45,6 +45,7 @@ Preferred communication style: Simple, everyday language.
   4. **Comportamento & Emoções** - Support for handling daily challenges
 - **Visual Integration**: Used provided category images with hover effects and gradient overlays
 - **Navigation**: Integrated with wouter routing for seamless category exploration
+- **Firebase Storage Integration**: Implemented automatic loading of category and activity images from Firebase Storage with fallback to local assets
 
 # System Architecture
 

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { getVideoCategoryImageUrl, getVideoActivityImageUrl } from '@/lib/firebase';
 import type { VideoCategoria, VideoAtividade } from '@shared/schema';
 
 interface VideosContextType {
@@ -223,10 +224,26 @@ export function VideosProvider({ children }: VideosProviderProps) {
         .filter(cat => cat.ativo)
         .sort((a, b) => a.ordem - b.ordem);
 
-      setCategorias(categoriasAtivas);
+      // Carregar imagens do Firebase Storage para cada categoria
+      const categoriasComImagens = await Promise.all(
+        categoriasAtivas.map(async (categoria) => {
+          try {
+            const imageUrl = await getVideoCategoryImageUrl(categoria.id);
+            return {
+              ...categoria,
+              coverUrl: imageUrl || categoria.coverUrl // Manter imagem original se não encontrar no storage
+            };
+          } catch (error) {
+            console.warn(`Erro ao carregar imagem para categoria ${categoria.id}:`, error);
+            return categoria; // Retornar categoria original em caso de erro
+          }
+        })
+      );
+
+      setCategorias(categoriasComImagens);
       setLastUpdated(Date.now());
       
-      return categoriasAtivas;
+      return categoriasComImagens;
     } catch (err) {
       console.error('Error loading video categories:', err);
       setError('Erro ao carregar categorias de vídeos');
@@ -251,12 +268,28 @@ export function VideosProvider({ children }: VideosProviderProps) {
       const videos = mockVideos[categoriaId] || [];
       const videosAtivos = videos.filter(video => video.ativo);
 
+      // Carregar imagens do Firebase Storage para cada atividade
+      const videosComImagens = await Promise.all(
+        videosAtivos.map(async (video) => {
+          try {
+            const imageUrl = await getVideoActivityImageUrl(video.id);
+            return {
+              ...video,
+              thumbnailUrl: imageUrl || video.thumbnailUrl // Manter thumbnail original se não encontrar no storage
+            };
+          } catch (error) {
+            console.warn(`Erro ao carregar imagem para vídeo ${video.id}:`, error);
+            return video; // Retornar vídeo original em caso de erro
+          }
+        })
+      );
+
       setVideosByCategoria(prev => ({
         ...prev,
-        [categoriaId]: videosAtivos
+        [categoriaId]: videosComImagens
       }));
       
-      return videosAtivos;
+      return videosComImagens;
     } catch (err) {
       console.error('Error loading videos for category:', err);
       setError('Erro ao carregar vídeos da categoria');
