@@ -106,7 +106,7 @@ function MainAppContent() {
           />
         ) : <Home onNavigate={handleNavigate} />;
       case 'categories':
-        return <CategoriasPage onNavigate={handleNavigate} />;
+        return <Home onNavigate={handleNavigate} />;
       case 'ebooks':
         return <EBooks onNavigateToDetails={() => handleNavigate('ebook-details')} />;
       case 'ebook-details':
