@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '@/contexts/AuthContext';
-import { logout, updateUserStatus, updateUserDocument, updateUserPassword } from '@/lib/firebase';
+import { logout, updateUserStatus, updateUserDocument, updateUserPassword, updateProfilePhoto } from '@/lib/firebase';
 import { updateProfileSchema, changePasswordSchema, type UpdateProfileForm, type ChangePasswordForm } from '@shared/schema';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { User, Lock, Crown, LogOut, ChevronRight, Menu, Power, Edit, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Crown, LogOut, ChevronRight, Menu, Power, Edit, Eye, EyeOff, Camera, Upload } from 'lucide-react';
 
 export default function Profile() {
   const { user, userProfile, isSubscriber, refreshUserProfile } = useAuth();
@@ -24,6 +24,8 @@ export default function Profile() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleLogout = async () => {
     try {
@@ -149,6 +151,56 @@ export default function Profile() {
     }
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Arquivo inválido",
+        description: "Por favor, selecione uma imagem.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validar tamanho (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Arquivo muito grande",
+        description: "A imagem deve ter no máximo 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    try {
+      await updateProfilePhoto(file);
+      await refreshUserProfile();
+      toast({
+        title: "Foto atualizada",
+        description: "Sua foto de perfil foi atualizada com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao atualizar foto",
+        description: error.message || "Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
   const getInitials = (name?: string) => {
     if (!name) return 'U';
     return name.charAt(0).toUpperCase();
@@ -161,20 +213,45 @@ export default function Profile() {
         <Card className="shadow-lg bg-white border border-gray-200 mb-4">
           <CardContent className="p-6">
             <div className="flex items-center space-x-4 mb-4">
-              {userProfile?.photoURL ? (
-                <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
-                  <img 
-                    src={userProfile.photoURL} 
-                    alt="Foto do usuário"
-                    className="w-full h-full object-cover"
-                    data-testid="img-profile-photo"
-                  />
-                </div>
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold flex-shrink-0">
-                  {getInitials(userProfile?.name)}
-                </div>
-              )}
+              <div className="relative">
+                {userProfile?.photoURL || user?.photoURL ? (
+                  <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+                    <img 
+                      src={userProfile?.photoURL || user?.photoURL || ''}
+                      alt="Foto do usuário"
+                      className="w-full h-full object-cover"
+                      data-testid="img-profile-photo"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center text-white text-xl font-semibold flex-shrink-0">
+                    {getInitials(userProfile?.name)}
+                  </div>
+                )}
+                
+                {/* Botão para alterar foto */}
+                <button
+                  onClick={handlePhotoClick}
+                  disabled={isUploadingPhoto}
+                  className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center hover:bg-blue-700 transition-colors disabled:bg-gray-400"
+                  data-testid="button-change-photo"
+                >
+                  {isUploadingPhoto ? (
+                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera className="w-3 h-3 text-white" />
+                  )}
+                </button>
+                
+                {/* Input oculto para upload */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+              </div>
               <div className="flex-1">
                 <h2 className="text-xl font-semibold text-gray-900" data-testid="text-profile-name">
                   {userProfile?.name || 'Usuário'}

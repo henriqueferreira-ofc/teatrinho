@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from 'firebase/auth';
-import { onAuthStateChange, getUserDocument, isSubscriptionActive } from '@/lib/firebase';
+import { onAuthStateChange, getUserDocument, isSubscriptionActive, syncGooglePhotoOnFirstLogin } from '@/lib/firebase';
 import type { FirestoreUser } from '@shared/schema';
 
 interface AuthContextType {
@@ -62,6 +62,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       if (firebaseUser) {
         try {
+          // Sincronizar foto do Google se necessário
+          await syncGooglePhotoOnFirstLogin();
+          
           const profile = await getUserDocument(firebaseUser.uid);
           setUserProfile(profile);
           

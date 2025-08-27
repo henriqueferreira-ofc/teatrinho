@@ -17,7 +17,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, activeTab, onTabChange, onEBookDetailsClick }: LayoutProps) {
-  const { userProfile } = useAuth();
+  const { userProfile, user } = useAuth();
   const { selectedEbook } = useEBooks();
   const { selectedVideoCategory } = useVideos();
   const { toast } = useToast();
@@ -70,10 +70,10 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
                 {/* Drawer Header */}
                 <div className="p-6 border-b border-gray-100">
                   <div className="flex items-center space-x-4">
-                    {userProfile?.photoURL ? (
+                    {userProfile?.photoURL || user?.photoURL ? (
                       <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
                         <img 
-                          src={userProfile.photoURL} 
+                          src={userProfile?.photoURL || user?.photoURL || ''}
                           alt="Foto do usuário"
                           className="w-full h-full object-cover"
                           data-testid="img-user-photo"
@@ -240,11 +240,22 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
 
           {/* User Avatar */}
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-semibold" data-testid="text-header-initials">
-                {getInitials(userProfile?.name)}
-              </span>
-            </div>
+            {userProfile?.photoURL || user?.photoURL ? (
+              <div className="w-8 h-8 rounded-full overflow-hidden">
+                <img 
+                  src={userProfile?.photoURL || user?.photoURL || ''}
+                  alt="Foto do usuário"
+                  className="w-full h-full object-cover"
+                  data-testid="img-header-profile-photo"
+                />
+              </div>
+            ) : (
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm font-semibold" data-testid="text-header-initials">
+                  {getInitials(userProfile?.name)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </header>

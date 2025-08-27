@@ -193,6 +193,37 @@ export const getVideoActivityImageUrl = async (activityId: string): Promise<stri
   }
 };
 
+// Função específica para upload de foto de perfil
+export const updateProfilePhoto = async (file: File): Promise<string> => {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Usuário não autenticado");
+  
+  // Upload da imagem para o Firebase Storage
+  const photoURL = await uploadProfileImage(file);
+  
+  // Atualizar o perfil no Firebase Auth
+  await updateProfile(user, { photoURL });
+  
+  // Atualizar o documento do usuário no Firestore
+  await updateUserDocument(user.uid, { photoURL });
+  
+  return photoURL;
+};
+
+// Função para sincronizar foto do Google no primeiro login
+export const syncGooglePhotoOnFirstLogin = async (): Promise<void> => {
+  const user = auth.currentUser;
+  if (!user) return;
+  
+  // Se usuário tem photoURL do Google mas não no Firestore, sincronizar
+  if (user.photoURL) {
+    const userDoc = await getUserDocument(user.uid);
+    if (userDoc && !userDoc.photoURL) {
+      await updateUserDocument(user.uid, { photoURL: user.photoURL });
+    }
+  }
+};
+
 export const updateUserProfile = async (userData: { 
   name: string; 
   currentPassword?: string; 

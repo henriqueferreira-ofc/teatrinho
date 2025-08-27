@@ -35,6 +35,13 @@ Preferred communication style: Simple, everyday language.
 - **Error Handling**: Comprehensive error messages for various Firebase auth scenarios
 - **User Experience**: Immediate feedback with loading states and success messages
 
+## Google Profile Photo Integration
+- **Automatic Sync**: Google profile photos are automatically loaded on first login
+- **Photo Management**: Users can upload and change their profile photos at any time
+- **Universal Display**: Profile photos appear in header, drawer, and profile page
+- **Smart Fallback**: Shows user initials when no photo is available
+- **File Validation**: Upload validation for image type and 5MB size limit
+
 ## Video Categories System Implementation
 - **Specialized Content**: Created 4 autism-focused video categories for mothers
 - **Responsive Design**: 2x2 grid on mobile, 4x1 grid on desktop layout
