@@ -26,30 +26,23 @@ export default function AtividadesPorCategoriaPage({
   const [carregando, setCarregando] = useState(false);
   const { selectedEbook, toggleActivityInEbook, isActivityInEbook, setSelectedEbookWithPersistence, ebooks } = useEBooks();
 
-  // Carregar eBook do localStorage uma única vez
-  const [hasTriedSync, setHasTriedSync] = React.useState(false);
-  
+  // Forçar carregamento do eBook do localStorage ao montar o componente
   React.useEffect(() => {
-    console.log('AtividadesPorCategoriaPage - selectedEbook:', selectedEbook?.nome || 'NENHUM');
+    const savedEbook = localStorage.getItem('selectedEbook');
+    console.log('AtividadesPorCategoriaPage - selectedEbook atual:', selectedEbook?.nome || 'NENHUM');
+    console.log('localStorage tem eBook:', savedEbook ? 'SIM' : 'NÃO');
     
-    if (!selectedEbook && ebooks.length > 0 && !hasTriedSync) {
-      const savedEbook = localStorage.getItem('selectedEbook');
-      if (savedEbook) {
-        try {
-          const parsedEbook = JSON.parse(savedEbook);
-          console.log('Tentando sincronizar eBook do localStorage:', parsedEbook.nome);
-          const foundEbook = ebooks.find(ebook => ebook.id === parsedEbook.id);
-          if (foundEbook) {
-            setSelectedEbookWithPersistence(foundEbook);
-            console.log('eBook sincronizado com sucesso:', foundEbook.nome);
-          }
-        } catch (error) {
-          console.error('Erro ao sincronizar eBook:', error);
-        }
+    if (!selectedEbook && savedEbook) {
+      try {
+        const parsedEbook = JSON.parse(savedEbook);
+        console.log('Tentando carregar eBook do localStorage:', parsedEbook.nome);
+        setSelectedEbookWithPersistence(parsedEbook);
+      } catch (error) {
+        console.error('Erro ao carregar eBook do localStorage:', error);
+        localStorage.removeItem('selectedEbook');
       }
-      setHasTriedSync(true);
     }
-  }, [selectedEbook, ebooks, setSelectedEbookWithPersistence, hasTriedSync]);
+  }, []); // Executar apenas uma vez ao montar
 
   useEffect(() => {
     // Carregar todas as atividades da categoria

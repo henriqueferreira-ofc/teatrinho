@@ -40,11 +40,7 @@ interface EBookProviderProps {
 
 export function EBookProvider({ children }: EBookProviderProps) {
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
-  const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(() => {
-    // Carregar eBook selecionado do localStorage na inicialização
-    const saved = localStorage.getItem('selectedEbook');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
