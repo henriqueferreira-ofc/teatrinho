@@ -9,6 +9,7 @@ interface EBookContextType {
   loading: boolean;
   error: string | null;
   setSelectedEbook: (ebook: Ebook | null) => void;
+  setSelectedEbookWithPersistence: (ebook: Ebook | null) => void;
   createNewEbook: (data: CreateEbook) => Promise<Ebook | null>;
   updateEbookData: (id: string, data: UpdateEbook) => Promise<Ebook | null>;
   deleteEbookData: (id: string) => Promise<boolean>;
@@ -39,10 +40,26 @@ interface EBookProviderProps {
 
 export function EBookProvider({ children }: EBookProviderProps) {
   const [ebooks, setEbooks] = useState<Ebook[]>([]);
-  const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(null);
+  const [selectedEbook, setSelectedEbook] = useState<Ebook | null>(() => {
+    // Carregar eBook selecionado do localStorage na inicialização
+    const saved = localStorage.getItem('selectedEbook');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+
+  // Função para definir e persistir o eBook selecionado
+  const setSelectedEbookWithPersistence = (ebook: Ebook | null) => {
+    setSelectedEbook(ebook);
+    if (ebook) {
+      localStorage.setItem('selectedEbook', JSON.stringify(ebook));
+      console.log('eBook selecionado salvo no localStorage:', ebook.nome);
+    } else {
+      localStorage.removeItem('selectedEbook');
+      console.log('eBook selecionado removido do localStorage');
+    }
+  };
 
   const refreshEbooks = async () => {
     if (!user) {
@@ -325,6 +342,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
     loading,
     error,
     setSelectedEbook,
+    setSelectedEbookWithPersistence,
     createNewEbook,
     updateEbookData,
     deleteEbookData,

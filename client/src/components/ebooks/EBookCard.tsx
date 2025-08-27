@@ -43,7 +43,7 @@ export function EBookCard({
 }: EBookCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(ebook.nome);
-  const { updateEbookData } = useEBooks();
+  const { updateEbookData, setSelectedEbookWithPersistence } = useEBooks();
 
   const handleSaveEdit = async () => {
     if (editName.trim() && editName.trim() !== ebook.nome) {

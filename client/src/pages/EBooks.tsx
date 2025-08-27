@@ -17,7 +17,7 @@ interface EBooksPageProps {
 
 export default function EBooksPage({ onNavigateToDetails }: EBooksPageProps = {}) {
   const { user, isSubscriber } = useAuth();
-  const { ebooks, loading, setSelectedEbook } = useEBooks();
+  const { ebooks, loading, setSelectedEbookWithPersistence } = useEBooks();
   
   // Dialog states
   const [showCreateDialog, setShowCreateDialog] = useState(false);
@@ -36,8 +36,9 @@ export default function EBooksPage({ onNavigateToDetails }: EBooksPageProps = {}
   };
 
   const handleSelectEbook = (ebook: Ebook) => {
-    // First select the eBook in the context
-    setSelectedEbook(ebook);
+    // First select the eBook in the context with persistence
+    setSelectedEbookWithPersistence(ebook);
+    console.log('eBook selecionado:', ebook.nome);
     // Then navigate to details page when eBook is selected
     onNavigateToDetails?.();
   };
