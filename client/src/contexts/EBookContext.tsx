@@ -50,7 +50,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
   const { user } = useAuth();
 
   // Função para definir e persistir o eBook selecionado
-  const setSelectedEbookWithPersistence = (ebook: Ebook | null) => {
+  const setSelectedEbookWithPersistence = React.useCallback((ebook: Ebook | null) => {
     setSelectedEbook(ebook);
     if (ebook) {
       localStorage.setItem('selectedEbook', JSON.stringify(ebook));
@@ -59,7 +59,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
       localStorage.removeItem('selectedEbook');
       console.log('eBook selecionado removido do localStorage');
     }
-  };
+  }, []);
 
   const refreshEbooks = async () => {
     if (!user) {
@@ -350,6 +350,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
     } else {
       setEbooks([]);
       setSelectedEbook(null);
+      localStorage.removeItem('selectedEbook');
       setLoading(false);
     }
   }, [user]);

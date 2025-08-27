@@ -24,19 +24,32 @@ export default function AtividadesPorCategoriaPage({
   const [todasAtividades, setTodasAtividades] = useState<Atividade[]>([]);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [carregando, setCarregando] = useState(false);
-  const { selectedEbook, toggleActivityInEbook, isActivityInEbook } = useEBooks();
+  const { selectedEbook, toggleActivityInEbook, isActivityInEbook, setSelectedEbookWithPersistence, ebooks } = useEBooks();
 
-  // Debug do selectedEbook
+  // Carregar eBook do localStorage uma única vez
+  const [hasTriedSync, setHasTriedSync] = React.useState(false);
+  
   React.useEffect(() => {
     console.log('AtividadesPorCategoriaPage - selectedEbook:', selectedEbook?.nome || 'NENHUM');
     
-    if (!selectedEbook) {
+    if (!selectedEbook && ebooks.length > 0 && !hasTriedSync) {
       const savedEbook = localStorage.getItem('selectedEbook');
       if (savedEbook) {
-        console.log('eBook encontrado no localStorage, mas não carregado no contexto');
+        try {
+          const parsedEbook = JSON.parse(savedEbook);
+          console.log('Tentando sincronizar eBook do localStorage:', parsedEbook.nome);
+          const foundEbook = ebooks.find(ebook => ebook.id === parsedEbook.id);
+          if (foundEbook) {
+            setSelectedEbookWithPersistence(foundEbook);
+            console.log('eBook sincronizado com sucesso:', foundEbook.nome);
+          }
+        } catch (error) {
+          console.error('Erro ao sincronizar eBook:', error);
+        }
       }
+      setHasTriedSync(true);
     }
-  }, [selectedEbook]);
+  }, [selectedEbook, ebooks, setSelectedEbookWithPersistence, hasTriedSync]);
 
   useEffect(() => {
     // Carregar todas as atividades da categoria
