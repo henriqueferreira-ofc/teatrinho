@@ -10,6 +10,13 @@ interface ActivityCardProps {
 }
 
 export function ActivityCard({ atividade, onClick, isInEbook = false }: ActivityCardProps) {
+  const handleClick = () => {
+    console.log('ActivityCard clicado:', atividade.id, 'onClick disponível:', !!onClick, 'isInEbook:', isInEbook);
+    if (onClick) {
+      onClick(atividade);
+    }
+  };
+
   return (
     <Card 
       className={`${onClick ? 'cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105' : ''} bg-white/90 backdrop-blur-sm ${
@@ -17,7 +24,7 @@ export function ActivityCard({ atividade, onClick, isInEbook = false }: Activity
           ? 'border-2 border-green-500 ring-2 ring-green-200 dark:ring-green-800' 
           : 'border border-white/50'
       }`}
-      onClick={() => onClick?.(atividade)}
+      onClick={handleClick}
       data-testid={`card-atividade-${atividade.id}`}
     >
       <CardContent className="p-0 relative">

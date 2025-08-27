@@ -26,6 +26,8 @@ export default function AtividadesPorCategoriaPage({
   const [carregando, setCarregando] = useState(false);
   const { selectedEbook, toggleActivityInEbook, isActivityInEbook } = useEBooks();
 
+  console.log('AtividadesPorCategoriaPage - selectedEbook:', selectedEbook?.nome || 'NENHUM');
+
   useEffect(() => {
     // Carregar todas as atividades da categoria
     try {
