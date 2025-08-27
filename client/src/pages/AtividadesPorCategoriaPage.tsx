@@ -74,9 +74,19 @@ export default function AtividadesPorCategoriaPage({
   const temMaisAtividades = atividades.length < todasAtividades.length;
 
   const handleActivityClick = async (atividade: Atividade) => {
-    if (!selectedEbook) return;
+    if (!selectedEbook) {
+      console.log('Nenhum eBook selecionado');
+      return;
+    }
     
-    await toggleActivityInEbook(selectedEbook.id, atividade.id);
+    console.log('Clicando na atividade:', atividade.id, 'para eBook:', selectedEbook.nome);
+    const success = await toggleActivityInEbook(selectedEbook.id, atividade.id);
+    
+    if (success) {
+      console.log('Atividade toggle realizado com sucesso');
+    } else {
+      console.log('Erro ao fazer toggle da atividade');
+    }
   };
 
   return (

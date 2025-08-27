@@ -80,16 +80,23 @@ export function EBookProvider({ children }: EBookProviderProps) {
   const addActivityToEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
     try {
       setError(null);
+      console.log('Adicionando atividade:', activityId, 'ao eBook:', ebookId);
       
       const ebook = ebooks.find(e => e.id === ebookId);
-      if (!ebook) return false;
+      if (!ebook) {
+        console.log('eBook não encontrado');
+        return false;
+      }
       
       // Check if activity is already in the eBook
       if (ebook.atividades.includes(activityId)) {
+        console.log('Atividade já existe no eBook');
         return false; // Activity already exists
       }
       
       const updatedActivities = [...ebook.atividades, activityId];
+      console.log('Atualizando atividades:', updatedActivities);
+      
       const updatedEbook = await updateEbook(ebookId, { atividades: updatedActivities });
       
       setEbooks(prev => prev.map(e => 
@@ -98,7 +105,8 @@ export function EBookProvider({ children }: EBookProviderProps) {
       
       // Update selected eBook if it was the one being updated
       if (selectedEbook?.id === ebookId) {
-        setSelectedEbook(updatedEbook);
+        setSelectedEbookWithPersistence(updatedEbook);
+        console.log('eBook selecionado atualizado com sucesso');
       }
       
       return true;
@@ -112,11 +120,14 @@ export function EBookProvider({ children }: EBookProviderProps) {
   const removeActivityFromEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
     try {
       setError(null);
+      console.log('Removendo atividade:', activityId, 'do eBook:', ebookId);
       
       const ebook = ebooks.find(e => e.id === ebookId);
       if (!ebook) return false;
       
       const updatedActivities = ebook.atividades.filter(id => id !== activityId);
+      console.log('Atividades após remoção:', updatedActivities);
+      
       const updatedEbook = await updateEbook(ebookId, { atividades: updatedActivities });
       
       setEbooks(prev => prev.map(e => 
@@ -125,7 +136,8 @@ export function EBookProvider({ children }: EBookProviderProps) {
       
       // Update selected eBook if it was the one being updated
       if (selectedEbook?.id === ebookId) {
-        setSelectedEbook(updatedEbook);
+        setSelectedEbookWithPersistence(updatedEbook);
+        console.log('eBook selecionado atualizado após remoção');
       }
       
       return true;
@@ -151,7 +163,7 @@ export function EBookProvider({ children }: EBookProviderProps) {
       
       // Update selected eBook if it was the one being updated
       if (selectedEbook?.id === ebookId) {
-        setSelectedEbook(updatedEbook);
+        setSelectedEbookWithPersistence(updatedEbook);
       }
       
       return true;
@@ -165,6 +177,8 @@ export function EBookProvider({ children }: EBookProviderProps) {
   const toggleActivityInEbook = async (ebookId: string, activityId: string): Promise<boolean> => {
     const ebook = ebooks.find(e => e.id === ebookId);
     if (!ebook) return false;
+    
+    console.log('Toggle atividade:', activityId, 'em eBook:', ebookId, 'Existe?', ebook.atividades.includes(activityId));
     
     if (ebook.atividades.includes(activityId)) {
       return await removeActivityFromEbook(ebookId, activityId);
