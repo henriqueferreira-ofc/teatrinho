@@ -30,7 +30,7 @@ import atividadesData from '@/data/atividades.json';
 
 interface DetalheEBookPageProps {
   onBack: () => void;
-  onNavigateToCategories?: () => void;
+  onNavigateToCategories: () => void;
 }
 
 export default function DetalheEBookPage({ onBack, onNavigateToCategories }: DetalheEBookPageProps) {
