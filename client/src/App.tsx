@@ -48,15 +48,17 @@ function MainAppContent() {
   const [selectedCategory, setSelectedCategory] = useState<Categoria | null>(null);
   const [selectedVideoCategory, setSelectedVideoCategory] = useState<VideoCategoria | null>(null);
   const [selectedVideoDetalhe, setSelectedVideoDetalhe] = useState<{ video: VideoAtividade; categoria: VideoCategoria } | null>(null);
+  const [fromEbook, setFromEbook] = useState(false); // Rastreia se a navegação veio de um eBook
   
   const { setSelectedEbook } = useEBooks();
   const { setSelectedVideoCategory: setSelectedVideoCategoryContext } = useVideos();
 
-  const handleNavigate = (tab: AppTab, data?: any) => {
+  const handleNavigate = (tab: AppTab, data?: any, options?: { fromEbook?: boolean }) => {
     if (tab === 'atividades-categoria' && data) {
       setSelectedCategory(data);
       setSelectedVideoCategory(null);
       setSelectedVideoDetalhe(null);
+      setFromEbook(options?.fromEbook || false);
       setActiveTab(tab);
     } else if (tab === 'videos-categoria' && data) {
       setSelectedVideoCategory(data);
@@ -103,16 +105,21 @@ function MainAppContent() {
           <AtividadesPorCategoriaPage 
             categoria={selectedCategory} 
             onNavigate={handleNavigate}
+            fromEbook={fromEbook}
           />
         ) : <Home onNavigate={handleNavigate} />;
       case 'categories':
-        return <Home onNavigate={handleNavigate} />;
+        return <Home 
+          onNavigate={handleNavigate} 
+          onNavigateToActivity={(categoria) => handleNavigate('atividades-categoria', categoria, { fromEbook: true })}
+        />;
       case 'ebooks':
         return <EBooks onNavigateToDetails={() => handleNavigate('ebook-details')} />;
       case 'ebook-details':
         return <DetalheEBookPage 
           onBack={() => handleNavigate('ebooks')} 
           onNavigateToCategories={() => handleNavigate('categories')}
+          onNavigateToActivity={(categoria) => handleNavigate('atividades-categoria', categoria, { fromEbook: true })}
         />;
       case 'videos':
         return <VideosPage onNavigate={handleNavigate} />;

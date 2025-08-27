@@ -9,9 +9,10 @@ type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'pr
 
 interface HomeProps {
   onNavigate?: (tab: AppTab, data?: any) => void;
+  onNavigateToActivity?: (categoria: any) => void;
 }
 
-export default function Home({ onNavigate }: HomeProps = {}) {
+export default function Home({ onNavigate, onNavigateToActivity }: HomeProps = {}) {
   const { userProfile } = useAuth();
   const [categorias, setCategorias] = useState<Categoria[]>([]);
 
@@ -26,8 +27,12 @@ export default function Home({ onNavigate }: HomeProps = {}) {
   }, []);
 
   const handleCategoryClick = (categoria: Categoria) => {
-    // Navegar para a página de atividades da categoria
-    onNavigate?.('atividades-categoria', categoria);
+    // Se tem onNavigateToActivity (vem de eBook), usa essa função, senão usa a navegação normal
+    if (onNavigateToActivity) {
+      onNavigateToActivity(categoria);
+    } else {
+      onNavigate?.('atividades-categoria', categoria);
+    }
   };
 
   return (

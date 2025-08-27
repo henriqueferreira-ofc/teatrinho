@@ -12,13 +12,15 @@ type AppTab = 'home' | 'categories' | 'ebooks' | 'videos' | 'partnerships' | 'pr
 interface AtividadesPorCategoriaPageProps {
   categoria: Categoria;
   onNavigate?: (tab: AppTab) => void;
+  fromEbook?: boolean; // Indica se veio de um eBook específico
 }
 
 const ATIVIDADES_POR_PAGINA = 20;
 
 export default function AtividadesPorCategoriaPage({ 
   categoria, 
-  onNavigate 
+  onNavigate,
+  fromEbook = false 
 }: AtividadesPorCategoriaPageProps) {
   const [atividades, setAtividades] = useState<Atividade[]>([]);
   const [todasAtividades, setTodasAtividades] = useState<Atividade[]>([]);
@@ -142,8 +144,8 @@ export default function AtividadesPorCategoriaPage({
           </div>
         </div>
 
-        {/* eBook Selection Info */}
-        {selectedEbook && (
+        {/* eBook Selection Info - só mostrar quando vem de um eBook */}
+        {selectedEbook && fromEbook && (
           <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 mb-6 border border-blue-200 dark:border-blue-800">
             <h3 className="font-medium text-blue-800 dark:text-blue-200 mb-2">
               Selecionando atividades para: {selectedEbook.nome}
@@ -175,8 +177,8 @@ export default function AtividadesPorCategoriaPage({
                 <ActivityCard
                   key={atividade.id}
                   atividade={atividade}
-                  onClick={selectedEbook ? handleActivityClick : undefined}
-                  isInEbook={selectedEbook ? isActivityInEbook(selectedEbook.id, atividade.id) : false}
+                  onClick={selectedEbook && fromEbook ? handleActivityClick : undefined}
+                  isInEbook={selectedEbook && fromEbook ? isActivityInEbook(selectedEbook.id, atividade.id) : false}
                 />
               ))}
             </div>

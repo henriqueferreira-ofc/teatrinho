@@ -31,9 +31,10 @@ import atividadesData from '@/data/atividades.json';
 interface DetalheEBookPageProps {
   onBack: () => void;
   onNavigateToCategories: () => void;
+  onNavigateToActivity?: (categoria: any) => void;
 }
 
-export default function DetalheEBookPage({ onBack, onNavigateToCategories }: DetalheEBookPageProps) {
+export default function DetalheEBookPage({ onBack, onNavigateToCategories, onNavigateToActivity }: DetalheEBookPageProps) {
   const { selectedEbook, removeActivityFromEbook, updateEbookData, reorderActivities } = useEBooks();
   const { isSubscriber } = useAuth();
   const [showCloneDialog, setShowCloneDialog] = useState(false);
