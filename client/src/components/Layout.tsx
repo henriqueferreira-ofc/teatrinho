@@ -61,9 +61,16 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
           {/* Menu Button */}
           <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" data-testid="button-menu">
-                <Menu className="h-7 w-7 text-gray-700" />
-              </Button>
+              <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" data-testid="button-menu">
+                  <Menu className={`text-gray-700 ${activeTab === 'home' ? 'h-8 w-8' : 'h-7 w-7'}`} />
+                </Button>
+                {activeTab === 'home' && (
+                  <h1 className="text-xl font-bold text-gray-800" data-testid="text-teatrinho-title">
+                    Teatrinho
+                  </h1>
+                )}
+              </div>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 p-0">
               <div className="flex flex-col h-full">
