@@ -69,8 +69,9 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
                 <img 
                   src={teatrinhoLogo} 
                   alt="Teatrinho" 
-                  className="h-8 w-auto" 
+                  className="h-6 w-auto object-contain" 
                   data-testid="img-teatrinho-logo"
+                  style={{ marginTop: '2px' }}
                 />
               </div>
             </SheetTrigger>
