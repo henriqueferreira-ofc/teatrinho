@@ -8,7 +8,7 @@ import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play, Handshake, FileText }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import teatrinhoLogo from '@assets/TEATRINHO_1756992291571.png';
+import teatrinhoLogo from '@assets/TEA_1756994119069.png';
 
 interface LayoutProps {
   children: React.ReactNode;
