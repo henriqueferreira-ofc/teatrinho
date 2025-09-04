@@ -66,7 +66,7 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
                 <Button variant="ghost" size="icon" data-testid="button-menu">
                   <Menu className="text-gray-900 h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10" strokeWidth={2.5} />
                 </Button>
-                {activeTab === 'home' && (
+                {activeTab === 'home' && !selectedEbook && !selectedVideoCategory && (
                   <img 
                     src={teatrinhoLogo} 
                     alt="Teatrinho" 
