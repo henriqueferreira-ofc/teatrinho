@@ -8,6 +8,7 @@ import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play, Handshake, FileText }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import teatrinhoLogo from '@assets/TEATRINHO_1756992291571.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -63,13 +64,14 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
             <SheetTrigger asChild>
               <div className="flex items-center gap-3">
                 <Button variant="ghost" size="icon" data-testid="button-menu">
-                  <Menu className={`text-gray-700 ${activeTab === 'home' ? 'h-8 w-8' : 'h-7 w-7'}`} />
+                  <Menu className="text-gray-700 h-7 w-7" />
                 </Button>
-                {activeTab === 'home' && (
-                  <h1 className="text-xl font-bold text-gray-800" data-testid="text-teatrinho-title">
-                    Teatrinho
-                  </h1>
-                )}
+                <img 
+                  src={teatrinhoLogo} 
+                  alt="Teatrinho" 
+                  className="h-8 w-auto" 
+                  data-testid="img-teatrinho-logo"
+                />
               </div>
             </SheetTrigger>
             <SheetContent side="left" className="w-80 p-0">
