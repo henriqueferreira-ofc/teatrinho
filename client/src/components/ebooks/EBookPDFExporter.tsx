@@ -137,10 +137,34 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
             throw new Error('Dados de imagem inválidos');
           }
           
-          // Usar dimensões padrão para evitar criação de elementos DOM
-          const defaultWidth = 800;  // Largura padrão assumida
-          const defaultHeight = 600; // Altura padrão assumida
-          const imgAspectRatio = defaultWidth / defaultHeight;
+          // Calcular dimensões reais da imagem de forma segura
+          const imgDimensions = await new Promise<{width: number, height: number}>((resolve, reject) => {
+            const tempImg = new Image();
+            const timeout = setTimeout(() => {
+              reject(new Error('Timeout ao obter dimensões'));
+            }, 5000);
+            
+            tempImg.onload = () => {
+              clearTimeout(timeout);
+              resolve({
+                width: tempImg.naturalWidth || tempImg.width,
+                height: tempImg.naturalHeight || tempImg.height
+              });
+              // Limpar referência
+              tempImg.src = '';
+            };
+            
+            tempImg.onerror = () => {
+              clearTimeout(timeout);
+              // Usar dimensões padrão em caso de erro
+              resolve({ width: 800, height: 600 });
+            };
+            
+            // Carregar imagem base64 para obter dimensões
+            tempImg.src = imageBase64;
+          });
+          
+          const imgAspectRatio = imgDimensions.width / imgDimensions.height;
           const pageAspectRatio = imageWidth / imageHeight;
           
           let finalWidth = imageWidth;
@@ -186,8 +210,8 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
           pdf.text('ou tente novamente mais tarde', pageWidth / 2, 175, { align: 'center' });
         }
         
-        // Pequena pausa entre cada imagem
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Pausa entre cada imagem para estabilidade
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
 
       // Gerar nome do arquivo
