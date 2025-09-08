@@ -45,41 +45,47 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
   const loadImageAsBase64 = async (url: string): Promise<string> => {
     console.log('Carregando imagem via fetch:', url);
     
-    try {
-      // Tenta carregar diretamente via fetch primeiro
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Erro HTTP: ${response.status}`);
-      }
-      
-      const blob = await response.blob();
+    // Função auxiliar para converter blob em base64
+    const blobToBase64 = (blob: Blob): Promise<string> => {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
         reader.readAsDataURL(blob);
       });
-    } catch (error) {
-      console.log('Carregamento direto falhou, tentando via proxy:', url);
+    };
+    
+    // Primeiro tenta carregamento direto
+    try {
+      const response = await fetch(url, {
+        mode: 'cors',
+        cache: 'no-cache'
+      });
       
-      // Fallback: usar proxy do servidor
-      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
-      try {
-        const response = await fetch(proxyUrl);
-        if (!response.ok) {
-          throw new Error(`Erro no proxy: ${response.status}`);
-        }
-        
+      if (response.ok) {
         const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = () => reject(new Error('Erro ao ler arquivo via proxy'));
-          reader.readAsDataURL(blob);
-        });
-      } catch (proxyError) {
-        throw new Error('Todas as tentativas falharam ao carregar imagem');
+        return await blobToBase64(blob);
       }
+    } catch (directError) {
+      // Erro esperado devido a CORS, continua para proxy
+      console.log('Carregamento direto falhou (esperado), usando proxy:', url);
+    }
+    
+    // Fallback: usar proxy do servidor
+    try {
+      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) {
+        throw new Error(`Erro no proxy: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      return await blobToBase64(blob);
+      
+    } catch (proxyError) {
+      console.error('Erro ao carregar imagem via proxy:', proxyError);
+      throw new Error('Não foi possível carregar a imagem');
     }
   };
 
