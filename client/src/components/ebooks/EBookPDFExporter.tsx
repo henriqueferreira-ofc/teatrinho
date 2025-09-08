@@ -46,14 +46,22 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       console.log('Loading image directly:', url);
       
       const img = new Image();
+      let canvas: HTMLCanvasElement | null = null;
       
-      // Try without crossOrigin first (more permissive)
-      img.onload = () => {
+      const cleanup = () => {
+        if (canvas && canvas.parentNode) {
+          canvas.parentNode.removeChild(canvas);
+        }
+        canvas = null;
+      };
+      
+      const tryDirectLoad = () => {
         try {
-          const canvas = document.createElement('canvas');
+          canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           
           if (!ctx) {
+            cleanup();
             reject(new Error('Failed to get canvas context'));
             return;
           }
@@ -63,55 +71,27 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
           
           ctx.drawImage(img, 0, 0);
           const dataURL = canvas.toDataURL('image/jpeg', 0.9);
+          cleanup();
           console.log('Successfully loaded image directly:', url);
           resolve(dataURL);
         } catch (canvasError) {
+          cleanup();
           console.log('Canvas tainted, trying proxy method:', canvasError);
-          
-          // Use proxy when canvas is tainted
-          const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
-          const proxyImg = new Image();
-          
-          proxyImg.onload = () => {
-            try {
-              const proxyCanvas = document.createElement('canvas');
-              const proxyCtx = proxyCanvas.getContext('2d');
-              
-              if (!proxyCtx) {
-                reject(new Error('Failed to get canvas context'));
-                return;
-              }
-              
-              proxyCanvas.width = proxyImg.naturalWidth || proxyImg.width;
-              proxyCanvas.height = proxyImg.naturalHeight || proxyImg.height;
-              
-              proxyCtx.drawImage(proxyImg, 0, 0);
-              const proxyDataURL = proxyCanvas.toDataURL('image/jpeg', 0.9);
-              console.log('Successfully loaded image via proxy:', url);
-              resolve(proxyDataURL);
-            } catch (proxyError) {
-              reject(proxyError);
-            }
-          };
-          
-          proxyImg.onerror = () => reject(new Error('Failed to load image via proxy'));
-          proxyImg.src = proxyUrl;
+          tryProxyLoad();
         }
       };
       
-      img.onerror = () => {
-        console.log('Direct load failed, trying via proxy:', url);
-        
-        // Fallback: Use backend proxy
+      const tryProxyLoad = () => {
         const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
         const proxyImg = new Image();
         
         proxyImg.onload = () => {
           try {
-            const canvas = document.createElement('canvas');
+            canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
             if (!ctx) {
+              cleanup();
               reject(new Error('Failed to get canvas context'));
               return;
             }
@@ -121,15 +101,29 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
             
             ctx.drawImage(proxyImg, 0, 0);
             const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-            console.log('Successfully loaded image via proxy fallback:', url);
+            cleanup();
+            console.log('Successfully loaded image via proxy:', url);
             resolve(dataURL);
-          } catch (error) {
-            reject(error);
+          } catch (proxyError) {
+            cleanup();
+            reject(proxyError);
           }
         };
         
-        proxyImg.onerror = () => reject(new Error('All methods failed to load image'));
+        proxyImg.onerror = () => {
+          cleanup();
+          reject(new Error('Failed to load image via proxy'));
+        };
+        
         proxyImg.src = proxyUrl;
+      };
+      
+      // Try without crossOrigin first (more permissive)
+      img.onload = tryDirectLoad;
+      
+      img.onerror = () => {
+        console.log('Direct load failed, trying via proxy:', url);
+        tryProxyLoad();
       };
       
       img.src = url;
@@ -139,6 +133,9 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
   // Generate PDF with activity images
   const exportToPDF = async () => {
     setIsExporting(true);
+    
+    // Use requestAnimationFrame to avoid conflicts with React's rendering
+    await new Promise(resolve => requestAnimationFrame(resolve));
     
     try {
       if (ebookActivities.length === 0) {
@@ -186,8 +183,18 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
           const tempImg = new Image();
           
           await new Promise((resolve, reject) => {
-            tempImg.onload = resolve;
-            tempImg.onerror = reject;
+            const timeout = setTimeout(() => {
+              reject(new Error('Image load timeout'));
+            }, 10000);
+            
+            tempImg.onload = () => {
+              clearTimeout(timeout);
+              resolve(undefined);
+            };
+            tempImg.onerror = () => {
+              clearTimeout(timeout);
+              reject(new Error('Image load error'));
+            };
             tempImg.src = imageBase64;
           });
           
@@ -263,9 +270,22 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       
     } catch (error) {
       console.error('Error exporting eBook to PDF:', error);
-      alert('Não foi possível gerar o eBook. Tente novamente mais tarde.');
+      
+      // Handle specific DOM-related errors
+      if (error instanceof Error && (
+        error.message.includes('insertBefore') || 
+        error.message.includes('Node') || 
+        error.message.includes('DOM')
+      )) {
+        alert('Erro temporário na geração do PDF. Por favor, aguarde um momento e tente novamente.');
+      } else {
+        alert('Não foi possível gerar o eBook. Tente novamente mais tarde.');
+      }
     } finally {
-      setIsExporting(false);
+      // Use setTimeout to ensure state update happens after current execution
+      setTimeout(() => {
+        setIsExporting(false);
+      }, 100);
     }
   };
 
