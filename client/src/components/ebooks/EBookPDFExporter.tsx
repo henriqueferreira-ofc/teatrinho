@@ -41,9 +41,9 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
 
-  // Load image usando fetch para evitar conflitos DOM
+  // Carregar imagem via proxy para evitar erros CORS
   const loadImageAsBase64 = async (url: string): Promise<string> => {
-    console.log('Carregando imagem via fetch:', url);
+    console.log('Carregando imagem via proxy:', url);
     
     // Função auxiliar para converter blob em base64
     const blobToBase64 = (blob: Blob): Promise<string> => {
@@ -55,25 +55,10 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       });
     };
     
-    // Primeiro tenta carregamento direto
-    try {
-      const response = await fetch(url, {
-        mode: 'cors',
-        cache: 'no-cache'
-      });
-      
-      if (response.ok) {
-        const blob = await response.blob();
-        return await blobToBase64(blob);
-      }
-    } catch (directError) {
-      // Erro esperado devido a CORS, continua para proxy
-      console.log('Carregamento direto falhou (esperado), usando proxy:', url);
-    }
+    // Usar sempre o proxy para evitar erros CORS
+    const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
     
-    // Fallback: usar proxy do servidor
     try {
-      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
       const response = await fetch(proxyUrl);
       
       if (!response.ok) {
@@ -81,10 +66,13 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       }
       
       const blob = await response.blob();
-      return await blobToBase64(blob);
+      const base64 = await blobToBase64(blob);
       
-    } catch (proxyError) {
-      console.error('Erro ao carregar imagem via proxy:', proxyError);
+      console.log('Imagem carregada com sucesso via proxy');
+      return base64;
+      
+    } catch (error) {
+      console.error('Erro ao carregar imagem via proxy:', error);
       throw new Error('Não foi possível carregar a imagem');
     }
   };
@@ -134,8 +122,15 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         pdf.addPage();
         
         try {
-          // Carregar imagem usando método sem DOM conflicts
-          const imageBase64 = await loadImageAsBase64(activity.imagemUrl);
+          // Carregar imagem usando método seguro sem CORS
+          let imageBase64: string;
+          
+          try {
+            imageBase64 = await loadImageAsBase64(activity.imagemUrl);
+          } catch (loadError) {
+            console.error(`Erro ao carregar imagem ${i + 1}:`, loadError);
+            throw new Error('Falha ao carregar imagem');
+          }
           
           // Validar dados base64
           if (!imageBase64 || !imageBase64.startsWith('data:image')) {
@@ -164,8 +159,13 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
           }
           
           // Adicionar imagem ao PDF
-          pdf.addImage(imageBase64, 'JPEG', offsetX, offsetY, finalWidth, finalHeight);
-          console.log(`Imagem ${i + 1} adicionada com sucesso`);
+          try {
+            pdf.addImage(imageBase64, 'JPEG', offsetX, offsetY, finalWidth, finalHeight);
+            console.log(`Imagem ${i + 1} adicionada com sucesso`);
+          } catch (pdfError) {
+            console.error(`Erro ao adicionar imagem ${i + 1} ao PDF:`, pdfError);
+            throw new Error('Falha ao adicionar imagem ao PDF');
+          }
           
         } catch (imageError) {
           console.error('Erro ao processar imagem da atividade:', activity.imagemUrl, imageError);
