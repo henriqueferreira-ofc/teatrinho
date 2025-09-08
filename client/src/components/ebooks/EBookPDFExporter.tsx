@@ -170,44 +170,59 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       pdf.text(`Criado em: ${createdDate}`, pageWidth / 2, pageHeight / 2, { align: 'center' });
       pdf.text(`${ebookActivities.length} atividade${ebookActivities.length !== 1 ? 's' : ''}`, pageWidth / 2, pageHeight / 2 + 10, { align: 'center' });
 
-      // Process each activity image
+      // Process each activity image with isolated DOM operations
       for (let i = 0; i < ebookActivities.length; i++) {
         const activity = ebookActivities[i];
         
         // Add new page for each activity
         pdf.addPage();
         
+        // Wait between each image to prevent DOM conflicts
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
         try {
           console.log(`Loading image ${i + 1}/${ebookActivities.length}:`, activity.imagemUrl);
           
-          // Load and add image
-          const imageBase64 = await loadImageAsBase64(activity.imagemUrl);
+          // Load image in isolated context
+          const imageBase64 = await new Promise<string>((resolve, reject) => {
+            // Run in next tick to isolate from React
+            setTimeout(async () => {
+              try {
+                const result = await loadImageAsBase64(activity.imagemUrl);
+                resolve(result);
+              } catch (error) {
+                reject(error);
+              }
+            }, 10);
+          });
           
           // Validate that we got valid base64 data
           if (!imageBase64 || !imageBase64.startsWith('data:image')) {
             throw new Error('Invalid image data received');
           }
           
-          // Create temporary image element to get dimensions
-          const tempImg = new Image();
-          
-          await new Promise((resolve, reject) => {
+          // Get image dimensions without creating DOM elements
+          const imgDimensions = await new Promise<{width: number, height: number}>((resolve, reject) => {
+            const tempImg = new Image();
             const timeout = setTimeout(() => {
-              reject(new Error('Image load timeout'));
-            }, 10000);
+              reject(new Error('Image dimensions timeout'));
+            }, 5000);
             
             tempImg.onload = () => {
               clearTimeout(timeout);
-              resolve(undefined);
+              resolve({
+                width: tempImg.naturalWidth || tempImg.width,
+                height: tempImg.naturalHeight || tempImg.height
+              });
             };
             tempImg.onerror = () => {
               clearTimeout(timeout);
-              reject(new Error('Image load error'));
+              reject(new Error('Image dimensions error'));
             };
             tempImg.src = imageBase64;
           });
           
-          const imgAspectRatio = tempImg.width / tempImg.height;
+          const imgAspectRatio = imgDimensions.width / imgDimensions.height;
           const pageAspectRatio = imageWidth / imageHeight;
           
           let finalWidth = imageWidth;
@@ -225,8 +240,18 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
             offsetX = margin + (imageWidth - finalWidth) / 2;
           }
           
-          pdf.addImage(imageBase64, 'JPEG', offsetX, offsetY, finalWidth, finalHeight);
-          console.log(`Successfully added image ${i + 1}`);
+          // Add image to PDF in isolated context
+          await new Promise<void>((resolve, reject) => {
+            setTimeout(() => {
+              try {
+                pdf.addImage(imageBase64, 'JPEG', offsetX, offsetY, finalWidth, finalHeight);
+                console.log(`Successfully added image ${i + 1}`);
+                resolve();
+              } catch (error) {
+                reject(error);
+              }
+            }, 10);
+          });
           
         } catch (imageError) {
           console.error('Error processing activity image:', activity.imagemUrl, imageError);
