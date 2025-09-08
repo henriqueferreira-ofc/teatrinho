@@ -14,6 +14,7 @@ interface EBookPDFExporterProps {
 
 export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const isGeneratingRef = React.useRef(false);
 
   // Load activity details from catalog and custom activities based on IDs
   const ebookActivities = useMemo(() => {
@@ -132,9 +133,17 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
 
   // Generate PDF with activity images
   const exportToPDF = async () => {
+    // Prevent multiple simultaneous exports
+    if (isGeneratingRef.current || isExporting) {
+      console.log('PDF generation already in progress, skipping...');
+      return;
+    }
+    
+    isGeneratingRef.current = true;
     setIsExporting(true);
     
-    // Use requestAnimationFrame to avoid conflicts with React's rendering
+    // Use multiple animation frames to ensure React has finished rendering
+    await new Promise(resolve => requestAnimationFrame(resolve));
     await new Promise(resolve => requestAnimationFrame(resolve));
     
     try {
@@ -282,6 +291,9 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         alert('Não foi possível gerar o eBook. Tente novamente mais tarde.');
       }
     } finally {
+      // Reset mutex and state with proper cleanup
+      isGeneratingRef.current = false;
+      
       // Use setTimeout to ensure state update happens after current execution
       setTimeout(() => {
         setIsExporting(false);
