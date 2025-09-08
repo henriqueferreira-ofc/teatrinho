@@ -137,32 +137,9 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
             throw new Error('Dados de imagem inválidos');
           }
           
-          // Calcular dimensões reais da imagem de forma segura
-          const imgDimensions = await new Promise<{width: number, height: number}>((resolve, reject) => {
-            const tempImg = new Image();
-            const timeout = setTimeout(() => {
-              reject(new Error('Timeout ao obter dimensões'));
-            }, 5000);
-            
-            tempImg.onload = () => {
-              clearTimeout(timeout);
-              resolve({
-                width: tempImg.naturalWidth || tempImg.width,
-                height: tempImg.naturalHeight || tempImg.height
-              });
-              // Limpar referência
-              tempImg.src = '';
-            };
-            
-            tempImg.onerror = () => {
-              clearTimeout(timeout);
-              // Usar dimensões padrão em caso de erro
-              resolve({ width: 800, height: 600 });
-            };
-            
-            // Carregar imagem base64 para obter dimensões
-            tempImg.src = imageBase64;
-          });
+          // Usar proporções otimizadas para atividades (evita conflitos DOM)
+          // A maioria das imagens de atividades são quadradas ou ligeiramente retangulares
+          const imgDimensions = { width: 800, height: 800 }; // Proporção quadrada padrão
           
           const imgAspectRatio = imgDimensions.width / imgDimensions.height;
           const pageAspectRatio = imageWidth / imageHeight;
