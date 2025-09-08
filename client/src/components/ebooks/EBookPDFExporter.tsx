@@ -41,110 +41,58 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   };
 
-  // Load image as base64 using proxy fallback for CORS issues
-  const loadImageAsBase64 = (url: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      console.log('Loading image directly:', url);
+  // Load image usando fetch para evitar conflitos DOM
+  const loadImageAsBase64 = async (url: string): Promise<string> => {
+    console.log('Carregando imagem via fetch:', url);
+    
+    try {
+      // Tenta carregar diretamente via fetch primeiro
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
       
-      const img = new Image();
-      let canvas: HTMLCanvasElement | null = null;
+      const blob = await response.blob();
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+        reader.readAsDataURL(blob);
+      });
+    } catch (error) {
+      console.log('Carregamento direto falhou, tentando via proxy:', url);
       
-      const cleanup = () => {
-        if (canvas && canvas.parentNode) {
-          canvas.parentNode.removeChild(canvas);
+      // Fallback: usar proxy do servidor
+      const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
+      try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+          throw new Error(`Erro no proxy: ${response.status}`);
         }
-        canvas = null;
-      };
-      
-      const tryDirectLoad = () => {
-        try {
-          canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          
-          if (!ctx) {
-            cleanup();
-            reject(new Error('Failed to get canvas context'));
-            return;
-          }
-          
-          canvas.width = img.naturalWidth || img.width;
-          canvas.height = img.naturalHeight || img.height;
-          
-          ctx.drawImage(img, 0, 0);
-          const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-          cleanup();
-          console.log('Successfully loaded image directly:', url);
-          resolve(dataURL);
-        } catch (canvasError) {
-          cleanup();
-          console.log('Canvas tainted, trying proxy method:', canvasError);
-          tryProxyLoad();
-        }
-      };
-      
-      const tryProxyLoad = () => {
-        const proxyUrl = `/api/proxy-image?url=${encodeURIComponent(url)}`;
-        const proxyImg = new Image();
         
-        proxyImg.onload = () => {
-          try {
-            canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            if (!ctx) {
-              cleanup();
-              reject(new Error('Failed to get canvas context'));
-              return;
-            }
-            
-            canvas.width = proxyImg.naturalWidth || proxyImg.width;
-            canvas.height = proxyImg.naturalHeight || proxyImg.height;
-            
-            ctx.drawImage(proxyImg, 0, 0);
-            const dataURL = canvas.toDataURL('image/jpeg', 0.9);
-            cleanup();
-            console.log('Successfully loaded image via proxy:', url);
-            resolve(dataURL);
-          } catch (proxyError) {
-            cleanup();
-            reject(proxyError);
-          }
-        };
-        
-        proxyImg.onerror = () => {
-          cleanup();
-          reject(new Error('Failed to load image via proxy'));
-        };
-        
-        proxyImg.src = proxyUrl;
-      };
-      
-      // Try without crossOrigin first (more permissive)
-      img.onload = tryDirectLoad;
-      
-      img.onerror = () => {
-        console.log('Direct load failed, trying via proxy:', url);
-        tryProxyLoad();
-      };
-      
-      img.src = url;
-    });
+        const blob = await response.blob();
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = () => reject(new Error('Erro ao ler arquivo via proxy'));
+          reader.readAsDataURL(blob);
+        });
+      } catch (proxyError) {
+        throw new Error('Todas as tentativas falharam ao carregar imagem');
+      }
+    }
   };
 
-  // Generate PDF with activity images
+  // Gerar PDF com imagens das atividades - versão sem conflitos DOM
   const exportToPDF = async () => {
-    // Prevent multiple simultaneous exports
+    // Previne múltiplas exportações simultâneas
     if (isGeneratingRef.current || isExporting) {
-      console.log('PDF generation already in progress, skipping...');
+      console.log('Geração de PDF já em progresso, pulando...');
       return;
     }
     
     isGeneratingRef.current = true;
     setIsExporting(true);
-    
-    // Use multiple animation frames to ensure React has finished rendering
-    await new Promise(resolve => requestAnimationFrame(resolve));
-    await new Promise(resolve => requestAnimationFrame(resolve));
     
     try {
       if (ebookActivities.length === 0) {
@@ -152,6 +100,7 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         return;
       }
 
+      console.log('Iniciando geração do PDF...');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
@@ -159,7 +108,7 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       const imageWidth = pageWidth - (2 * margin);
       const imageHeight = pageHeight - (2 * margin);
 
-      // Title page
+      // Página de título
       pdf.setFontSize(24);
       pdf.setFont("helvetica", "bold");
       pdf.text(ebook.nome, pageWidth / 2, pageHeight / 2 - 20, { align: 'center' });
@@ -170,59 +119,27 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       pdf.text(`Criado em: ${createdDate}`, pageWidth / 2, pageHeight / 2, { align: 'center' });
       pdf.text(`${ebookActivities.length} atividade${ebookActivities.length !== 1 ? 's' : ''}`, pageWidth / 2, pageHeight / 2 + 10, { align: 'center' });
 
-      // Process each activity image with isolated DOM operations
+      // Processar cada imagem de atividade
       for (let i = 0; i < ebookActivities.length; i++) {
         const activity = ebookActivities[i];
+        console.log(`Processando atividade ${i + 1}/${ebookActivities.length}`);
         
-        // Add new page for each activity
+        // Adicionar nova página para cada atividade
         pdf.addPage();
         
-        // Wait between each image to prevent DOM conflicts
-        await new Promise(resolve => setTimeout(resolve, 50));
-        
         try {
-          console.log(`Loading image ${i + 1}/${ebookActivities.length}:`, activity.imagemUrl);
+          // Carregar imagem usando método sem DOM conflicts
+          const imageBase64 = await loadImageAsBase64(activity.imagemUrl);
           
-          // Load image in isolated context
-          const imageBase64 = await new Promise<string>((resolve, reject) => {
-            // Run in next tick to isolate from React
-            setTimeout(async () => {
-              try {
-                const result = await loadImageAsBase64(activity.imagemUrl);
-                resolve(result);
-              } catch (error) {
-                reject(error);
-              }
-            }, 10);
-          });
-          
-          // Validate that we got valid base64 data
+          // Validar dados base64
           if (!imageBase64 || !imageBase64.startsWith('data:image')) {
-            throw new Error('Invalid image data received');
+            throw new Error('Dados de imagem inválidos');
           }
           
-          // Get image dimensions without creating DOM elements
-          const imgDimensions = await new Promise<{width: number, height: number}>((resolve, reject) => {
-            const tempImg = new Image();
-            const timeout = setTimeout(() => {
-              reject(new Error('Image dimensions timeout'));
-            }, 5000);
-            
-            tempImg.onload = () => {
-              clearTimeout(timeout);
-              resolve({
-                width: tempImg.naturalWidth || tempImg.width,
-                height: tempImg.naturalHeight || tempImg.height
-              });
-            };
-            tempImg.onerror = () => {
-              clearTimeout(timeout);
-              reject(new Error('Image dimensions error'));
-            };
-            tempImg.src = imageBase64;
-          });
-          
-          const imgAspectRatio = imgDimensions.width / imgDimensions.height;
+          // Usar dimensões padrão para evitar criação de elementos DOM
+          const defaultWidth = 800;  // Largura padrão assumida
+          const defaultHeight = 600; // Altura padrão assumida
+          const imgAspectRatio = defaultWidth / defaultHeight;
           const pageAspectRatio = imageWidth / imageHeight;
           
           let finalWidth = imageWidth;
@@ -231,32 +148,23 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
           let offsetY = margin;
           
           if (imgAspectRatio > pageAspectRatio) {
-            // Image is wider than page ratio
+            // Imagem mais larga que proporção da página
             finalHeight = imageWidth / imgAspectRatio;
             offsetY = margin + (imageHeight - finalHeight) / 2;
           } else {
-            // Image is taller than page ratio
+            // Imagem mais alta que proporção da página
             finalWidth = imageHeight * imgAspectRatio;
             offsetX = margin + (imageWidth - finalWidth) / 2;
           }
           
-          // Add image to PDF in isolated context
-          await new Promise<void>((resolve, reject) => {
-            setTimeout(() => {
-              try {
-                pdf.addImage(imageBase64, 'JPEG', offsetX, offsetY, finalWidth, finalHeight);
-                console.log(`Successfully added image ${i + 1}`);
-                resolve();
-              } catch (error) {
-                reject(error);
-              }
-            }, 10);
-          });
+          // Adicionar imagem ao PDF
+          pdf.addImage(imageBase64, 'JPEG', offsetX, offsetY, finalWidth, finalHeight);
+          console.log(`Imagem ${i + 1} adicionada com sucesso`);
           
         } catch (imageError) {
-          console.error('Error processing activity image:', activity.imagemUrl, imageError);
+          console.error('Erro ao processar imagem da atividade:', activity.imagemUrl, imageError);
           
-          // Add informative error page with activity details
+          // Adicionar página de erro informativa
           pdf.setFontSize(18);
           pdf.setFont("helvetica", "bold");
           pdf.text(`Atividade ${i + 1}`, pageWidth / 2, 60, { align: 'center' });
@@ -271,14 +179,19 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
           pdf.text('Verifique sua conexão com a internet', pageWidth / 2, 160, { align: 'center' });
           pdf.text('ou tente novamente mais tarde', pageWidth / 2, 175, { align: 'center' });
         }
+        
+        // Pequena pausa entre cada imagem
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
-      // Generate filename
+      // Gerar nome do arquivo
       const fileName = `${ebook.nome.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
       
-      // Handle mobile vs desktop download
+      console.log('Finalizando PDF e iniciando download...');
+      
+      // Processar download para mobile vs desktop
       if (isMobile()) {
-        // Mobile: create blob and use native sharing
+        // Mobile: criar blob e usar compartilhamento nativo
         const pdfBlob = pdf.output('blob');
         
         if (navigator.share && navigator.canShare && navigator.canShare({ files: [new File([pdfBlob], fileName, { type: 'application/pdf' })] })) {
@@ -289,23 +202,27 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
               text: `eBook: ${ebook.nome}`,
               files: [file],
             });
+            console.log('PDF compartilhado com sucesso');
           } catch (shareError) {
-            // Fallback to download if sharing fails
+            // Fallback para download se compartilhamento falhar
             pdf.save(fileName);
+            console.log('Fallback: PDF baixado com sucesso');
           }
         } else {
-          // Fallback to download
+          // Fallback para download
           pdf.save(fileName);
+          console.log('PDF baixado com sucesso (mobile fallback)');
         }
       } else {
-        // Desktop: direct download
+        // Desktop: download direto
         pdf.save(fileName);
+        console.log('PDF baixado com sucesso (desktop)');
       }
       
     } catch (error) {
-      console.error('Error exporting eBook to PDF:', error);
+      console.error('Erro ao exportar eBook para PDF:', error);
       
-      // Handle specific DOM-related errors
+      // Tratar erros específicos de DOM
       if (error instanceof Error && (
         error.message.includes('insertBefore') || 
         error.message.includes('Node') || 
@@ -313,16 +230,16 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
       )) {
         alert('Erro temporário na geração do PDF. Por favor, aguarde um momento e tente novamente.');
       } else {
-        alert('Não foi possível gerar o eBook. Tente novamente mais tarde.');
+        alert('Não foi possível gerar o eBook. Verifique sua conexão e tente novamente.');
       }
     } finally {
-      // Reset mutex and state with proper cleanup
+      // Resetar mutex e estado com limpeza adequada
       isGeneratingRef.current = false;
       
-      // Use setTimeout to ensure state update happens after current execution
+      // Usar setTimeout para garantir que atualização de estado aconteça após execução atual
       setTimeout(() => {
         setIsExporting(false);
-      }, 100);
+      }, 200);
     }
   };
 
@@ -337,27 +254,27 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         {isExporting ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Exportando...
+            Gerando PDF...
           </>
         ) : (
           <>
             <Download className="h-4 w-4 mr-2" />
-            Exportar para PDF
+            Gerar PDF
           </>
         )}
       </Button>
 
-      {/* Loading Modal */}
+      {/* Modal de Carregamento */}
       <Dialog open={isExporting} onOpenChange={() => {}}>
         <DialogContent className="sm:max-w-md" aria-describedby="export-description">
           <VisuallyHidden>
-            <DialogTitle>Exportando eBook</DialogTitle>
+            <DialogTitle>Gerando PDF do eBook</DialogTitle>
           </VisuallyHidden>
           <div className="flex flex-col items-center justify-center p-6">
             <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Gerando seu eBook...</h3>
-            <p id="export-description" className="text-sm text-gray-600 dark:text-gray-400 text-center">
-              Isso pode levar alguns segundos dependendo do número de atividades.
+            <h3 className="text-lg font-semibold mb-2">Gerando seu PDF...</h3>
+            <p id="export-description" className="text-sm text-gray-600 text-center">
+              Processando as imagens das atividades. Isso pode levar alguns segundos.
             </p>
           </div>
         </DialogContent>
