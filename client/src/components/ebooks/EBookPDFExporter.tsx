@@ -1,7 +1,5 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Download, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import type { Ebook, Atividade } from '@shared/schema';
@@ -264,21 +262,6 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         )}
       </Button>
 
-      {/* Modal de Carregamento */}
-      <Dialog open={isExporting} onOpenChange={() => {}}>
-        <DialogContent className="sm:max-w-md" aria-describedby="export-description">
-          <VisuallyHidden>
-            <DialogTitle>Gerando PDF do eBook</DialogTitle>
-          </VisuallyHidden>
-          <div className="flex flex-col items-center justify-center p-6">
-            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Gerando seu PDF...</h3>
-            <p id="export-description" className="text-sm text-gray-600 text-center">
-              Processando as imagens das atividades. Isso pode levar alguns segundos.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

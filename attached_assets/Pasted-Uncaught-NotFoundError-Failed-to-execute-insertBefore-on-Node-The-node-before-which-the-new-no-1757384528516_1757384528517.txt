@@ -1,0 +1,47 @@
+Uncaught NotFoundError: Failed to execute 'insertBefore' on 'Node': The node before which the new node is to be inserted is not a child of this node.
+    at insertBefore (chunk-RPCDYKBN.js?v=0869c17e:8446:26)
+    at insertOrAppendPlacementNode (chunk-RPCDYKBN.js?v=0869c17e:17432:15)
+    at insertOrAppendPlacementNode (chunk-RPCDYKBN.js?v=0869c17e:17440:15)
+    at insertOrAppendPlacementNode (chunk-RPCDYKBN.js?v=0869c17e:17440:15)
+    at commitPlacement (chunk-RPCDYKBN.js?v=0869c17e:17389:15)
+    at commitReconciliationEffects (chunk-RPCDYKBN.js?v=0869c17e:17906:15)
+    at commitMutationEffectsOnFiber (chunk-RPCDYKBN.js?v=0869c17e:17700:15)
+    at recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js?v=0869c17e:17685:15)
+    at commitMutationEffectsOnFiber (chunk-RPCDYKBN.js?v=0869c17e:17737:15)
+    at recursivelyTraverseMutationEffects (chunk-RPCDYKBN.js?v=0869c17e:17685:15)Understand this error
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 1 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 2/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/pre-escrita-e-tracado/1.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 2 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 3/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/pre-escrita-e-tracado/4.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 3 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 4/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/pre-escrita-e-tracado/2.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 4 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 5/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/pre-escrita-e-tracado/8.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 5 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 6/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/pre-escrita-e-tracado/7.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 6 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 7/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/pre-escrita-e-tracado/9.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 7 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 8/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/pre-escrita-e-tracado/10.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 8 adicionada com sucesso
+EBookPDFExporter.tsx:117 Processando atividade 9/9
+EBookPDFExporter.tsx:45 Carregando imagem via proxy: https://storage.googleapis.com/app-teatrinho.firebasestorage.app/atividades/cores-e-formas/5.jpg
+EBookPDFExporter.tsx:70 Imagem carregada com sucesso via proxy
+EBookPDFExporter.tsx:163 Imagem 9 adicionada com sucesso
+EBookPDFExporter.tsx:195 Finalizando PDF e iniciando download...
+EBookPDFExporter.tsx:224 PDF baixado com sucesso (desktop)
