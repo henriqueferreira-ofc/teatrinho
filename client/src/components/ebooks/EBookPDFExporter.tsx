@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Download, Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import type { Ebook, Atividade } from '@shared/schema';
 import atividadesData from '@/data/atividades.json';
@@ -13,7 +14,6 @@ interface EBookPDFExporterProps {
 
 export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
   const [isExporting, setIsExporting] = useState(false);
-  const { toast } = useToast();
 
   // Load activity details from catalog and custom activities based on IDs
   const ebookActivities = useMemo(() => {
@@ -86,19 +86,9 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
     
     setIsExporting(true);
     
-    // Mostrar toast de início
-    toast({
-      title: "Gerando PDF...",
-      description: "Processando as imagens das atividades. Aguarde alguns segundos.",
-    });
-    
     try {
       if (ebookActivities.length === 0) {
-        toast({
-          title: "Erro",
-          description: "Este eBook não possui atividades para exportar.",
-          variant: "destructive",
-        });
+        alert('Este eBook não possui atividades para exportar.');
         return;
       }
 
@@ -145,9 +135,24 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
             throw new Error('Dados de imagem inválidos');
           }
           
-          // Usar proporções otimizadas para layout A4 perfeito (sem DOM)
-          // As atividades são majoritariamente retangulares em formato paisagem
-          const imgDimensions = { width: 1200, height: 900 }; // Proporção 4:3 otimizada
+          // Obter dimensões reais da imagem de forma segura
+          const imgDimensions = await new Promise<{width: number, height: number}>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              resolve({
+                width: img.naturalWidth || img.width,
+                height: img.naturalHeight || img.height
+              });
+              // Limpeza
+              img.src = '';
+            };
+            img.onerror = () => {
+              // Fallback para dimensões padrão
+              resolve({ width: 800, height: 600 });
+            };
+            // Carregar imagem base64 para obter dimensões
+            img.src = imageBase64;
+          });
           
           const imgAspectRatio = imgDimensions.width / imgDimensions.height;
           const pageAspectRatio = imageWidth / imageHeight;
@@ -196,7 +201,7 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         }
         
         // Pausa entre cada imagem para estabilidade
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       // Gerar nome do arquivo
@@ -234,21 +239,10 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         console.log('PDF baixado com sucesso (desktop)');
       }
       
-      // Toast de sucesso
-      toast({
-        title: "PDF gerado com sucesso!",
-        description: `O eBook "${ebook.nome}" foi baixado para seus arquivos.`,
-      });
       
     } catch (error) {
       console.error('Erro ao exportar eBook para PDF:', error);
-      
-      // Toast de erro
-      toast({
-        title: "Erro ao gerar PDF",
-        description: "Não foi possível gerar o eBook. Verifique sua conexão e tente novamente.",
-        variant: "destructive",
-      });
+      alert('Não foi possível gerar o eBook. Verifique sua conexão e tente novamente.');
     } finally {
       // Resetar estado de exportação
       setIsExporting(false);
@@ -276,6 +270,21 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         )}
       </Button>
 
+      {/* Modal de Carregamento */}
+      <Dialog open={isExporting} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md" aria-describedby="export-description">
+          <VisuallyHidden>
+            <DialogTitle>Gerando PDF do eBook</DialogTitle>
+          </VisuallyHidden>
+          <div className="flex flex-col items-center justify-center p-6">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600 mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Gerando seu PDF...</h3>
+            <p id="export-description" className="text-sm text-gray-600 text-center">
+              Processando as imagens das atividades. Isso pode levar alguns segundos.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
