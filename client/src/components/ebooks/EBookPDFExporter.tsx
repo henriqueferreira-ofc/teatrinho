@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Download, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import type { Ebook, Atividade } from '@shared/schema';
 import atividadesData from '@/data/atividades.json';
@@ -12,6 +13,7 @@ interface EBookPDFExporterProps {
 
 export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
   const [isExporting, setIsExporting] = useState(false);
+  const { toast } = useToast();
 
   // Load activity details from catalog and custom activities based on IDs
   const ebookActivities = useMemo(() => {
@@ -84,9 +86,19 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
     
     setIsExporting(true);
     
+    // Mostrar toast de início
+    toast({
+      title: "Gerando PDF...",
+      description: "Processando as imagens das atividades. Aguarde alguns segundos.",
+    });
+    
     try {
       if (ebookActivities.length === 0) {
-        alert('Este eBook não possui atividades para exportar.');
+        toast({
+          title: "Erro",
+          description: "Este eBook não possui atividades para exportar.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -222,19 +234,21 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         console.log('PDF baixado com sucesso (desktop)');
       }
       
+      // Toast de sucesso
+      toast({
+        title: "PDF gerado com sucesso!",
+        description: `O eBook "${ebook.nome}" foi baixado para seus arquivos.`,
+      });
+      
     } catch (error) {
       console.error('Erro ao exportar eBook para PDF:', error);
       
-      // Tratar erros específicos de DOM
-      if (error instanceof Error && (
-        error.message.includes('insertBefore') || 
-        error.message.includes('Node') || 
-        error.message.includes('DOM')
-      )) {
-        alert('Erro temporário na geração do PDF. Por favor, aguarde um momento e tente novamente.');
-      } else {
-        alert('Não foi possível gerar o eBook. Verifique sua conexão e tente novamente.');
-      }
+      // Toast de erro
+      toast({
+        title: "Erro ao gerar PDF",
+        description: "Não foi possível gerar o eBook. Verifique sua conexão e tente novamente.",
+        variant: "destructive",
+      });
     } finally {
       // Resetar estado de exportação
       setIsExporting(false);
