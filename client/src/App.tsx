@@ -59,11 +59,20 @@ function MainAppContent() {
       setSelectedVideoCategory(null);
       setSelectedVideoDetalhe(null);
       setFromEbook(options?.fromEbook || false);
+      
+      // Limpar selectedEbook para mostrar "TEATRINHO" no header
+      setSelectedEbook(null);
+      setSelectedVideoCategoryContext(null);
+      
       setActiveTab(tab);
     } else if (tab === 'videos-categoria' && data) {
       setSelectedVideoCategory(data);
       setSelectedCategory(null);
       setSelectedVideoDetalhe(null);
+      
+      // Limpar selectedEbook para manter consistência
+      setSelectedEbook(null);
+      
       setActiveTab(tab);
     } else if (tab === 'video-detalhe' && data) {
       setSelectedVideoDetalhe(data);
