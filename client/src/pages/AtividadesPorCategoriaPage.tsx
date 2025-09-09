@@ -28,23 +28,30 @@ export default function AtividadesPorCategoriaPage({
   const [carregando, setCarregando] = useState(false);
   const { selectedEbook, toggleActivityInEbook, isActivityInEbook, setSelectedEbookWithPersistence, ebooks } = useEBooks();
 
-  // Forçar carregamento do eBook do localStorage ao montar o componente
+  // Carregar eBook do localStorage apenas quando vem de um eBook (fromEbook = true)
   React.useEffect(() => {
-    const savedEbook = localStorage.getItem('selectedEbook');
     console.log('AtividadesPorCategoriaPage - selectedEbook atual:', selectedEbook?.nome || 'NENHUM');
-    console.log('localStorage tem eBook:', savedEbook ? 'SIM' : 'NÃO');
+    console.log('localStorage tem eBook:', localStorage.getItem('selectedEbook') ? 'SIM' : 'NÃO');
     
-    if (!selectedEbook && savedEbook) {
-      try {
-        const parsedEbook = JSON.parse(savedEbook);
-        console.log('Tentando carregar eBook do localStorage:', parsedEbook.nome);
-        setSelectedEbookWithPersistence(parsedEbook);
-      } catch (error) {
-        console.error('Erro ao carregar eBook do localStorage:', error);
-        localStorage.removeItem('selectedEbook');
+    if (fromEbook && !selectedEbook) {
+      // Vem de um eBook específico - carregar do localStorage
+      const savedEbook = localStorage.getItem('selectedEbook');
+      if (savedEbook) {
+        try {
+          const parsedEbook = JSON.parse(savedEbook);
+          console.log('Carregando eBook do localStorage (fromEbook=true):', parsedEbook.nome);
+          setSelectedEbookWithPersistence(parsedEbook);
+        } catch (error) {
+          console.error('Erro ao carregar eBook do localStorage:', error);
+          localStorage.removeItem('selectedEbook');
+        }
       }
+    } else if (!fromEbook) {
+      // Navegação normal - limpar localStorage para mostrar TEATRINHO
+      console.log('Navegação normal - limpando localStorage do eBook');
+      localStorage.removeItem('selectedEbook');
     }
-  }, []); // Executar apenas uma vez ao montar
+  }, [fromEbook, selectedEbook, setSelectedEbookWithPersistence]); // Dependências necessárias
 
   useEffect(() => {
     // Carregar todas as atividades da categoria
