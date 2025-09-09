@@ -14,7 +14,6 @@ interface EBookPDFExporterProps {
 
 export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
   const [isExporting, setIsExporting] = useState(false);
-  const isGeneratingRef = React.useRef(false);
 
   // Load activity details from catalog and custom activities based on IDs
   const ebookActivities = useMemo(() => {
@@ -80,12 +79,11 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
   // Gerar PDF com imagens das atividades - versão sem conflitos DOM
   const exportToPDF = async () => {
     // Previne múltiplas exportações simultâneas
-    if (isGeneratingRef.current || isExporting) {
+    if (isExporting) {
       console.log('Geração de PDF já em progresso, pulando...');
       return;
     }
     
-    isGeneratingRef.current = true;
     setIsExporting(true);
     
     try {
@@ -137,30 +135,9 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
             throw new Error('Dados de imagem inválidos');
           }
           
-          // Usar createImageBitmap (sem manipulação DOM) para obter dimensões
-          const imgDimensions = await new Promise<{width: number, height: number}>((resolve) => {
-            // Usar createImageBitmap para evitar qualquer manipulação DOM
-            if (typeof createImageBitmap !== 'undefined') {
-              fetch(imageBase64)
-                .then(response => response.blob())
-                .then(blob => createImageBitmap(blob))
-                .then(bitmap => {
-                  const dimensions = {
-                    width: bitmap.width,
-                    height: bitmap.height
-                  };
-                  bitmap.close(); // Liberar memória
-                  resolve(dimensions);
-                })
-                .catch(() => {
-                  // Fallback para proporções de atividades educacionais
-                  resolve({ width: 800, height: 600 });
-                });
-            } else {
-              // Navegador não suporta createImageBitmap - usar proporções padrão
-              resolve({ width: 800, height: 600 });
-            }
-          });
+          // Usar proporções otimizadas para layout A4 perfeito (sem DOM)
+          // As atividades são majoritariamente retangulares em formato paisagem
+          const imgDimensions = { width: 1200, height: 900 }; // Proporção 4:3 otimizada
           
           const imgAspectRatio = imgDimensions.width / imgDimensions.height;
           const pageAspectRatio = imageWidth / imageHeight;
@@ -261,13 +238,8 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
         alert('Não foi possível gerar o eBook. Verifique sua conexão e tente novamente.');
       }
     } finally {
-      // Resetar mutex e estado com limpeza adequada
-      isGeneratingRef.current = false;
-      
-      // Usar setTimeout para garantir que atualização de estado aconteça após execução atual
-      setTimeout(() => {
-        setIsExporting(false);
-      }, 200);
+      // Resetar estado de exportação
+      setIsExporting(false);
     }
   };
 
