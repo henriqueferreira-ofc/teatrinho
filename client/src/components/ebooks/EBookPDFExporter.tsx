@@ -137,24 +137,29 @@ export function EBookPDFExporter({ ebook, className }: EBookPDFExporterProps) {
             throw new Error('Dados de imagem inválidos');
           }
           
-          // Obter dimensões reais da imagem de forma segura
+          // Usar createImageBitmap (sem manipulação DOM) para obter dimensões
           const imgDimensions = await new Promise<{width: number, height: number}>((resolve) => {
-            // Criar uma image fora do DOM principal para evitar conflitos
-            const img = new Image();
-            img.onload = () => {
-              resolve({
-                width: img.naturalWidth || img.width,
-                height: img.naturalHeight || img.height
-              });
-              // Limpeza sem manipulação DOM
-              img.src = '';
-            };
-            img.onerror = () => {
-              // Fallback para dimensões A4 otimizadas
-              resolve({ width: 210, height: 297 }); // Proporção A4
-            };
-            // Carregar em background sem inserir no DOM
-            img.src = imageBase64;
+            // Usar createImageBitmap para evitar qualquer manipulação DOM
+            if (typeof createImageBitmap !== 'undefined') {
+              fetch(imageBase64)
+                .then(response => response.blob())
+                .then(blob => createImageBitmap(blob))
+                .then(bitmap => {
+                  const dimensions = {
+                    width: bitmap.width,
+                    height: bitmap.height
+                  };
+                  bitmap.close(); // Liberar memória
+                  resolve(dimensions);
+                })
+                .catch(() => {
+                  // Fallback para proporções de atividades educacionais
+                  resolve({ width: 800, height: 600 });
+                });
+            } else {
+              // Navegador não suporta createImageBitmap - usar proporções padrão
+              resolve({ width: 800, height: 600 });
+            }
           });
           
           const imgAspectRatio = imgDimensions.width / imgDimensions.height;
