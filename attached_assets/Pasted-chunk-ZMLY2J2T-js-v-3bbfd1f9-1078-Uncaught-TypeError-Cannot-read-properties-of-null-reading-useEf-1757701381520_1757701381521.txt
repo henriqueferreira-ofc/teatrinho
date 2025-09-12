@@ -1,0 +1,48 @@
+chunk-ZMLY2J2T.js?v=3bbfd1f9:1078 Uncaught TypeError: Cannot read properties of null (reading 'useEffect')
+    at Object.useEffect (chunk-ZMLY2J2T.js?v=3bbfd1f9:1078:29)
+    at QueryClientProvider (@tanstack_react-quer…s?v=3bbfd1f9:2797:9)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=35981f05:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=35981f05:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=35981f05:15914:22)
+    at HTMLUnknownElement.callCallback2 (chunk-W6L2VRDA.js?v=35981f05:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-W6L2VRDA.js?v=35981f05:3699:24)
+    at invokeGuardedCallback (chunk-W6L2VRDA.js?v=35981f05:3733:39)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=35981f05:19765:15)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=35981f05:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=35981f05:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=35981f05:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=35981f05:18736:28)
+    at performConcurrentWorkOnRoot (chunk-W6L2VRDA.js?v=35981f05:18684:30)
+    at workLoop (chunk-W6L2VRDA.js?v=35981f05:197:42)
+    at flushWork (chunk-W6L2VRDA.js?v=35981f05:176:22)
+    at MessagePort.performWorkUntilDeadline (chunk-W6L2VRDA.js?v=35981f05:384:29)
+VM12907:1 The above error occurred in the <QueryClientProvider> component:
+
+    at QueryClientProvider (http://localhost:8081/node_modules/.vite/deps/@tanstack_react-query.js?v=3bbfd1f9:2794:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-W6L2VRDA.js?v=35981f05:19413 Uncaught TypeError: Cannot read properties of null (reading 'useEffect')
+    at Object.useEffect (chunk-ZMLY2J2T.js?v=3bbfd1f9:1078:29)
+    at QueryClientProvider (@tanstack_react-quer…s?v=3bbfd1f9:2797:9)
+    at renderWithHooks (chunk-W6L2VRDA.js?v=35981f05:11548:26)
+    at mountIndeterminateComponent (chunk-W6L2VRDA.js?v=35981f05:14926:21)
+    at beginWork (chunk-W6L2VRDA.js?v=35981f05:15914:22)
+    at beginWork$1 (chunk-W6L2VRDA.js?v=35981f05:19753:22)
+    at performUnitOfWork (chunk-W6L2VRDA.js?v=35981f05:19198:20)
+    at workLoopSync (chunk-W6L2VRDA.js?v=35981f05:19137:13)
+    at renderRootSync (chunk-W6L2VRDA.js?v=35981f05:19116:15)
+    at recoverFromConcurrentError (chunk-W6L2VRDA.js?v=35981f05:18736:28)
+    at performConcurrentWorkOnRoot (chunk-W6L2VRDA.js?v=35981f05:18684:30)
+    at workLoop (chunk-W6L2VRDA.js?v=35981f05:197:42)
+    at flushWork (chunk-W6L2VRDA.js?v=35981f05:176:22)
+    at MessagePort.performWorkUntilDeadline (chunk-W6L2VRDA.js?v=35981f05:384:29)
+workbox-b9067070.js:44 workbox Router is responding to: /manifest.webmanifest
+workbox-b9067070.js:44 workbox Using NetworkFirst to respond to '/manifest.webmanifest'
+workbox-b9067070.js:44 View the final response here.
+tasks:1 <meta name="apple-mobile-web-app-capable" content="yes"> is deprecated. Please include <meta name="mobile-web-app-capable" content="yes">
+workbox-b9067070.js:44 workbox Router is responding to: /iconfavi.png
+workbox-b9067070.js:44 workbox Using StaleWhileRevalidate to respond to '/iconfavi.png'
+workbox-b9067070.js:44 View the final response here.
+﻿
