@@ -283,7 +283,7 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
           {navItems.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
-              className={`flex flex-col items-center space-y-1 py-2 px-2 transition-colors ${
+              className={`flex flex-col items-center space-y-1 py-2 px-2 transition-colors border-l border-r border-black ${
                 activeTab === id ? 'text-blue-500' : 'text-gray-400'
               }`}
               onClick={() => onTabChange(id)}
