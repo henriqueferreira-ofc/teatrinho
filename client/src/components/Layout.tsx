@@ -280,10 +280,12 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
       {/* Fixed Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
         <div className="flex items-center justify-around h-16 px-2">
-          {navItems.map(({ id, label, icon: Icon }) => (
+          {navItems.map(({ id, label, icon: Icon }, index) => (
             <button
               key={id}
-              className={`flex flex-col items-center space-y-1 py-2 px-2 transition-colors border-l border-r border-black ${
+              className={`flex flex-col items-center space-y-1 py-2 px-2 transition-colors ${
+                index > 0 ? 'border-l border-gray-300' : ''
+              } ${
                 activeTab === id ? 'text-blue-500' : 'text-gray-400'
               }`}
               onClick={() => onTabChange(id)}
