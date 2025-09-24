@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Eye, EyeOff, Mail } from 'lucide-react';
-import logoUrl from '@assets/LOGO DE APLICATIVO_1757189120875.png';
+import logoUrl from '@assets/512LOGO-T.png';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 
 interface LoginProps {
