@@ -8,7 +8,7 @@ import { Menu, Home, Book, User, LogOut, X, Grid3X3, Play, Handshake, FileText }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import teatrinhoLogo from '@assets/TEA_1756994119069.png';
+import teatrinhoLogo from '@assets/teatrinho.png';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -278,23 +278,28 @@ export default function Layout({ children, activeTab, onTabChange, onEBookDetail
       </main>
 
       {/* Fixed Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
-        <div className="flex items-center justify-around h-16 px-2">
-          {navItems.map(({ id, label, icon: Icon }, index) => (
-            <button
-              key={id}
-              className={`flex flex-col items-center space-y-1 py-2 px-2 transition-colors ${
-                index > 0 ? 'border-l border-gray-300' : ''
-              } ${
-                activeTab === id ? 'text-blue-500' : 'text-gray-400'
-              }`}
-              onClick={() => onTabChange(id)}
-              data-testid={`tab-${id}`}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="text-xs font-medium">{label}</span>
-            </button>
-          ))}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white z-30 shadow-[0_-8px_24px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-around h-16 px-6">
+          {navItems.map(({ id, label, icon: Icon }) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id}
+                className="relative flex items-center justify-center h-12 w-12 rounded-full transition-transform duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                onClick={() => onTabChange(id)}
+                data-testid={`tab-${id}`}
+                aria-label={label}
+              >
+                <Icon
+                  className={`h-6 w-6 transition-colors ${
+                    isActive ? 'text-gray-900' : 'text-gray-400'
+                  }`}
+                  strokeWidth={2.4}
+                />
+                <span className="sr-only">{label}</span>
+              </button>
+            );
+          })}
         </div>
       </nav>
     </div>
