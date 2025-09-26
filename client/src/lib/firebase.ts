@@ -36,13 +36,20 @@ import {
 } from "firebase/storage";
 import type { FirestoreUser, CreateUser, UpdateUser, Subscription, Ebook, CreateEbook, UpdateEbook } from "@shared/schema";
 
+const projectId = import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project";
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "demo-api-key",
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project",
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID || "demo-project"}.firebasestorage.app`,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || `${projectId}.firebaseapp.com`,
+  projectId,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || `${projectId}.appspot.com`,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "demo-app-id",
 };
+
+if (firebaseConfig.apiKey === "demo-api-key") {
+  console.warn("Firebase API key ausente. Verifique suas variáveis de ambiente.");
+}
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
@@ -53,19 +60,23 @@ const googleProvider = new GoogleAuthProvider();
 
 // Auth functions
 export const loginWithEmail = async (email: string, password: string) => {
-  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  const normalizedEmail = email.trim().toLowerCase();
+  const sanitizedPassword = password.trim();
+  const userCredential = await signInWithEmailAndPassword(auth, normalizedEmail, sanitizedPassword);
   return userCredential.user;
 };
 
 export const registerWithEmail = async (email: string, password: string, name: string) => {
-  const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  const normalizedEmail = email.trim().toLowerCase();
+  const sanitizedPassword = password.trim();
+  const userCredential = await createUserWithEmailAndPassword(auth, normalizedEmail, sanitizedPassword);
   const user = userCredential.user;
   
   // Update display name
   await updateProfile(user, { displayName: name });
   
   // Create user document in Firestore
-  await createUserDocument(user, { name, email, provider: "email", ativo: true });
+  await createUserDocument(user, { name, email: normalizedEmail, provider: "email", ativo: true });
   
   return user;
 };
@@ -93,7 +104,7 @@ export const logout = async () => {
 };
 
 export const sendPasswordReset = async (email: string) => {
-  await sendPasswordResetEmail(auth, email);
+  await sendPasswordResetEmail(auth, email.trim().toLowerCase());
 };
 
 export const updateUserPassword = async (currentPassword: string, newPassword: string) => {

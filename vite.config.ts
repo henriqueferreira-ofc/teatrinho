@@ -10,15 +10,11 @@ export default defineConfig({
   plugins: [
     react(),
     runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
+    ...(process.env.NODE_ENV !== "production" && process.env.REPL_ID !== undefined
+      ? [await import("@replit/vite-plugin-cartographer").then((m) => m.cartographer())]
       : []),
   ],
+  envDir: __dirname,
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "client", "src"),
@@ -32,6 +28,14 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    port: 5173,
+    proxy: {
+      // tudo que começar com /api vai para o Express
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],

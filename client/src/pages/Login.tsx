@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Eye, EyeOff, Mail } from 'lucide-react';
 import logoUrl from '@assets/512LOGO-T.png';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { FirebaseError } from 'firebase/app';
 
 interface LoginProps {
   onSwitchToRegister: () => void;
@@ -43,10 +44,34 @@ export default function Login({ onSwitchToRegister }: LoginProps) {
     setIsLoading(true);
     try {
       await loginWithEmail(data.email, data.password);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let description = "Verifique suas credenciais e tente novamente.";
+
+      if (error instanceof FirebaseError) {
+        switch (error.code) {
+          case 'auth/user-not-found':
+          case 'auth/invalid-credential':
+          case 'auth/wrong-password':
+            description = "Email ou senha inválidos.";
+            break;
+          case 'auth/too-many-requests':
+            description = "Muitas tentativas. Aguarde alguns minutos antes de tentar novamente.";
+            break;
+          case 'auth/operation-not-allowed':
+            description = "O login por email/senha não está habilitado no projeto Firebase.";
+            break;
+          default:
+            description = error.message;
+        }
+      } else if (error instanceof Error && error.message) {
+        description = error.message;
+      }
+
+      console.error('Erro no login por email/senha:', error);
+
       toast({
         title: "Falha no login",
-        description: error.message || "Verifique suas credenciais e tente novamente.",
+        description,
         variant: "destructive",
       });
     } finally {
